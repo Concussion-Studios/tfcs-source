@@ -53,7 +53,7 @@ extern const char *pszTeamBlueClasses[];
 extern const char *pszTeamRedClasses[];
 //extern const char *pszPlayerClasses[];
 
-#define SDK_PLAYER_MODEL "models/player/blue_player.mdl"
+#define SDK_PLAYER_MODEL "models/player/scout.mdl"
 
 //Tony; We need to precache all possible player models that we're going to use
 extern const char *pszPossiblePlayerModels[];

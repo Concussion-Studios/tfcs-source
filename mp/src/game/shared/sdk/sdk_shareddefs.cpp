@@ -62,9 +62,6 @@ const char *pszTeamNames[] =
 // Precache all possible player models that we're going to use
 const char *pszPossiblePlayerModels[] =
 {
-	SDK_PLAYER_MODEL,
-	"models/player/blue_player.mdl",
-	"models/player/red_player.mdl",
 	"models/player/scout.mdl",
 	"models/player/soldier.mdl",
 	"models/player/pyro.mdl",
