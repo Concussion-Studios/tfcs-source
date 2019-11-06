@@ -1,0 +1,30 @@
+//-----------------------------------------------------------------------------
+//	LOADADDRESS.VPC
+//
+//	Contains the DLL/EXE Load Addresses. Generates the $LOADADDRESS_??? Macro from
+//	an easily updated table. This feature is primarily to facilitate the mandatory
+//	fixed address specification of 360 DLLs and thus efficient 360 packing of DLLs
+//	into memory.
+//
+//	Format:
+//	$LoadAddressMacro	<MacroName>
+//	{
+//		<ProjectName>	<BaseAddress>
+//	}
+//
+//	$LoadAddressMacroAuto	<MacroName> <BaseAddress>
+//	{
+//		<ProjectName>	<Length>
+//	}
+//
+//	If "ProjectName" is not found, the "MacroName" will not be updated.
+//	"ProjectName" is the internal short project name reference and is usually the name of
+//	the project inside a group definition.
+//
+//	"Length" is either floating point MB or integer bytes, and is used to successively
+//	to determine the next base address.
+//-----------------------------------------------------------------------------
+
+// Explicitly defined "empty" only for WINDOWS only because they are not required for WINDOWS projects
+$Macro LOADADDRESS_DEVELOPMENT		" "		[$WINDOWS]
+$Macro LOADADDRESS_RETAIL			" "		[$WINDOWS]

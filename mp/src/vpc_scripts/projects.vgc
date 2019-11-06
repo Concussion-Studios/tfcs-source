@@ -1,0 +1,43 @@
+//-----------------------------------------------------------------------------
+//	PROJECTS.VGC
+//
+//	Project Configurations for all Source(TM) Projects
+//-----------------------------------------------------------------------------
+
+/////////////////////////
+// Project definitions //
+/////////////////////////
+$Project "client"
+{
+	"game\client\client_scratch.vpc"		[($WIN32||$POSIX) && $SDK]
+}
+
+$Project "game_shader_dx9"
+{
+	"materialsystem\stdshaders\game_shader_dx9_scratch.vpc" [$SDK]
+}
+
+$Project "server"
+{
+	"game\server\server_scratch.vpc"		[($WIN32||$POSIX) && $SDK]
+}
+
+$Project "mathlib"
+{
+	"mathlib\mathlib.vpc" [$WINDOWS||$POSIX]
+}
+
+$Project "raytrace"
+{
+	"raytrace\raytrace.vpc" [$WIN32||$POSIX]
+}
+
+$Project "tier1"
+{
+	"tier1\tier1.vpc" 	[$WINDOWS||$POSIX]
+}
+
+$Project "vgui_controls"
+{
+	"vgui2\vgui_controls\vgui_controls.vpc" [$WIN32||$POSIX]
+}
