@@ -247,6 +247,8 @@ C_SoundscapeSystem g_SoundscapeSystem;
 ConVar *C_SoundscapeSystem::m_pDSPVolumeVar = NULL;
 ConVar *C_SoundscapeSystem::m_pSoundMixerVar = NULL;
 
+extern ConVar developer;
+
 IGameSystem *ClientSoundscapeSystem()
 {
 	return &g_SoundscapeSystem;
@@ -462,7 +464,7 @@ CON_COMMAND_F_COMPLETION( playsoundscape, "Forces a soundscape to play", FCVAR_C
 }
 
 
-CON_COMMAND_F( stopsoundscape, "Stops all soundscape processing and fades current looping sounds", FCVAR_CHEAT )
+CON_COMMAND_F( stopsoundscape, "Stops all soundscape processing and fades current looping sounds", FCVAR_NONE )
 {
 	g_SoundscapeSystem.StartNewSoundscape( NULL );
 }
@@ -489,7 +491,9 @@ void C_SoundscapeSystem::DevReportSoundscapeName( int index )
 	{
 		pName = m_soundscapes[index]->GetName();
 	}
-	DevMsg( 1, "Soundscape: %s\n", pName  );
+	
+	if ( developer.GetInt() > 1 )
+		ConDColorMsg( Color( 255, 255, 175, 255 ), "Soundscape: %s\n", pName  );
 }
 
 

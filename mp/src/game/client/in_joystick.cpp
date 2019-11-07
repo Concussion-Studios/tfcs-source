@@ -484,7 +484,7 @@ void CInput::Joystick_Advanced(void)
 		if ( Q_stricmp( joy_name.GetString(), "joystick") != 0 )
 		{
 			// notify user of advanced controller
-			Msg( "Using joystick '%s' configuration\n", joy_name.GetString() );
+			ConColorMsg( Color( 100, 228, 100, 255 ), "Using joystick '%s' configuration\n", joy_name.GetString() );
 		}
 
 		// advanced initialization here
@@ -525,7 +525,7 @@ void CInput::Joystick_Advanced(void)
 
 		DescribeJoystickAxis( "JOY_AXIS_V", &m_rgAxes[JOY_AXIS_V] );
 
-		Msg( "Advanced Joystick settings initialized\n" );
+		ConColorMsg( Color( 30, 244, 54, 255 ), "Advanced Joystick settings initialized\n" );
 	}
 
 	// If we have an xcontroller, load the cfg file if it hasn't been loaded.
@@ -585,11 +585,11 @@ void CInput::DescribeJoystickAxis( char const *axis, joy_axis_t *mapping )
 {
 	if ( !mapping->AxisMap )
 	{
-		Msg( "%s:  unmapped\n", axis );
+		ConColorMsg( Color( 154, 205, 50, 255 ), "%s:  unmapped\n", axis );
 	}
 	else
 	{
-		Msg( "%s:  mapped to %s (%s)\n",
+		ConColorMsg( Color( 173, 255, 47, 255 ),  "%s:  mapped to %s (%s)\n",
 			axis, 
 			DescribeAxis( mapping->AxisMap ),
 			mapping->ControlMap != 0 ? "relative" : "absolute" );

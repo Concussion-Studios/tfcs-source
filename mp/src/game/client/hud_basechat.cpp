@@ -784,7 +784,8 @@ void CBaseHudChat::MsgFunc_SayText( bf_read &msg )
 	CLocalPlayerFilter filter;
 	C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
 
-	Msg( "%s", szString );
+	// TERROR: color console echo
+	//Msg( "%s", szString );
 }
 
 int CBaseHudChat::GetFilterForString( const char *pString )
@@ -837,7 +838,7 @@ void CBaseHudChat::MsgFunc_SayText2( bf_read &msg )
 		// print raw chat text
 		ChatPrintf( client, iFilter, "%s", ansiString );
 
-		Msg( "%s\n", RemoveColorMarkup(ansiString) );
+		//Msg( "%s\n", RemoveColorMarkup(ansiString) );
 
 		CLocalPlayerFilter filter;
 		C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
@@ -924,7 +925,8 @@ void CBaseHudChat::MsgFunc_TextMsg( bf_read &msg )
 			Q_strncat( szString, "\n", sizeof(szString), 1 );
 		}
 		Printf( CHAT_FILTER_NONE, "%s", ConvertCRtoNL( szString ) );
-		Msg( "%s", ConvertCRtoNL( szString ) );
+		// TERROR: color console echo
+		//Msg( "%s", ConvertCRtoNL( szString ) );
 		break;
 
 	case HUD_PRINTCONSOLE:
@@ -995,7 +997,7 @@ void CBaseHudChat::MsgFunc_VoiceSubtitle( bf_read &msg )
 
 	const wchar_t *pVoicePrefix = g_pVGuiLocalize->Find( "#Voice" );
 	g_pVGuiLocalize->ConvertUnicodeToANSI( pVoicePrefix, szPrefix, sizeof(szPrefix) );
-	
+
 	ChatPrintf( client, CHAT_FILTER_NONE, "%c(%s) %s%c: %s", COLOR_PLAYERNAME, szPrefix, GetDisplayedSubtitlePlayerName( client ), COLOR_NORMAL, ConvertCRtoNL( szString ) );
 
 	SetVoiceSubtitleState( false );
@@ -1161,59 +1163,45 @@ void CBaseHudChat::Printf( int iFilter, const char *fmt, ... )
 //-----------------------------------------------------------------------------
 void CBaseHudChat::StartMessageMode( int iMessageModeType )
 {
-#ifndef _XBOX
 	m_nMessageMode = iMessageModeType;
 
-	m_pChatInput->ClearEntry();
-
-	const wchar_t *pszPrompt = ( m_nMessageMode == MM_SAY ) ? g_pVGuiLocalize->Find( "#chat_say" ) : g_pVGuiLocalize->Find( "#chat_say_team" ); 
-	if ( pszPrompt )
+	if ( !IsConsole() )
 	{
-		m_pChatInput->SetPrompt( pszPrompt );
-	}
-	else
-	{
-		if ( m_nMessageMode == MM_SAY )
-		{
-			m_pChatInput->SetPrompt( L"Say :" );
-		}
-		else
-		{
-			m_pChatInput->SetPrompt( L"Say (TEAM) :" );
-		}
-	}
+		m_pChatInput->ClearEntry();
 	
-	if ( GetChatHistory() )
-	{
-		GetChatHistory()->SetMouseInputEnabled( true );
-		GetChatHistory()->SetKeyBoardInputEnabled( false );
-		GetChatHistory()->SetVerticalScrollbar( true );
-		GetChatHistory()->ResetAllFades( true );
-		GetChatHistory()->SetPaintBorderEnabled( true );
-		GetChatHistory()->SetVisible( true );
+		if ( GetChatHistory() )
+		{
+			// TERROR: hack to get ChatFont back
+			GetChatHistory()->SetFont( vgui::scheme()->GetIScheme( GetScheme() )->GetFont( "ChatFont", false ) );
+			GetChatHistory()->SetMouseInputEnabled( true );
+			GetChatHistory()->SetKeyBoardInputEnabled( false );
+			GetChatHistory()->SetVerticalScrollbar( true );
+			GetChatHistory()->ResetAllFades( true );
+			GetChatHistory()->SetPaintBorderEnabled( true );
+			GetChatHistory()->SetVisible( true );
+		}
+
+		vgui::SETUP_PANEL( this );
+		SetKeyBoardInputEnabled( true );
+		SetMouseInputEnabled( true );
+		m_pChatInput->SetVisible( true );
+		vgui::surface()->CalculateMouseVisible();
+		m_pChatInput->RequestFocus();
+		m_pChatInput->SetPaintBorderEnabled( true );
+		m_pChatInput->SetMouseInputEnabled( true );
+
+		// Place the mouse cursor near the text so people notice it.
+		int x, y, w, h;
+		GetBounds( x, y, w, h );
+#ifndef INFESTED_DLL
+		vgui::input()->SetCursorPos( x + ( w/2), y + (h/2) );
+#endif
+		m_pFilterPanel->SetVisible( false );
 	}
-
-	vgui::SETUP_PANEL( this );
-	SetKeyBoardInputEnabled( true );
-	SetMouseInputEnabled( true );
-	m_pChatInput->SetVisible( true );
-	vgui::surface()->CalculateMouseVisible();
-	m_pChatInput->RequestFocus();
-	m_pChatInput->SetPaintBorderEnabled( true );
-	m_pChatInput->SetMouseInputEnabled( true );
-
-	//Place the mouse cursor near the text so people notice it.
-	int x, y, w, h;
-	GetChatHistory()->GetBounds( x, y, w, h );
-	vgui::input()->SetCursorPos( x + ( w/2), y + (h/2) );
 
 	m_flHistoryFadeTime = gpGlobals->curtime + CHAT_HISTORY_FADE_TIME;
 
-	m_pFilterPanel->SetVisible( false );
-
 	engine->ClientCmd_Unrestricted( "gameui_preventescapetoshow\n" );
-		
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1238,6 +1226,7 @@ void CBaseHudChat::StopMessageMode( void )
 		GetChatHistory()->SelectNoText();
 	}
 
+	m_nMessageMode = MM_NONE; // TERROR
 	//Clear the entry since we wont need it anymore.
 	m_pChatInput->ClearEntry();
 
@@ -1553,6 +1542,9 @@ void CBaseHudChatLine::Colorize( int alpha )
 			InsertColorChange( color );
 			InsertString( wText );
 
+			// TERROR: color console echo
+			ConColorMsg( color, "%ls", wText );
+
 			CBaseHudChat *pChat = dynamic_cast<CBaseHudChat*>(GetParent() );
 
 			if ( pChat && pChat->GetChatHistory() )
@@ -1569,6 +1561,8 @@ void CBaseHudChatLine::Colorize( int alpha )
 
 		}
 	}
+
+	Msg( "\n" );
 
 	InvalidateLayout( true );
 }
@@ -1609,7 +1603,7 @@ This is a very long string that I am going to attempt to paste into the cs hud c
 		ansi[ len - 1 ] = '\0';
 	}
 
-	if( len > 0 )
+	if ( len > 0 )
 	{
 		// Let the game rules at it
 		if ( GameRules() )
@@ -1624,6 +1618,7 @@ This is a very long string that I am going to attempt to paste into the cs hud c
 	}
 	
 	m_pChatInput->ClearEntry();
+	m_nMessageMode = MM_NONE;	// TERROR
 #endif
 }
 
@@ -1715,6 +1710,9 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 	{
 		msg[ strlen( msg ) - 1 ] = 0;
 	}
+	 
+	// Strip any trailing whitespace
+	Q_StripPrecedingAndTrailingWhitespace( msg );
 
 	// Strip leading \n characters ( or notify/color signifiers ) for empty string check
 	char *pmsg = msg;

@@ -445,7 +445,7 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		}
 
 		if ( FStrEq( pszEventName, "player_death" ) )
-			Msg( "%s\n", sDeathMsg );
+			DevMsg( "%s\n", sDeathMsg );
 	} 
 
 	OnGameEvent( event, iMsg );
