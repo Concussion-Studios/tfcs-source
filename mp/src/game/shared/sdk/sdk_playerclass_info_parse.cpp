@@ -158,6 +158,10 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	m_flSprintSpeed		= pKeyValuesData->GetFloat( "SprintSpeed", SDK_DEFAULT_PLAYER_SPRINTSPEED );
 	m_flProneSpeed		= pKeyValuesData->GetFloat( "ProneSpeed", SDK_DEFAULT_PLAYER_PRONESPEED );
 
+	m_iMaxHealth = pKeyValuesData->GetInt("MaxHealth", 100);
+
+	m_iMaxArmor = pKeyValuesData->GetInt("MaxArmor", 100);
+
 	m_iArmor			= pKeyValuesData->GetInt( "armor", 0 );
 
 }

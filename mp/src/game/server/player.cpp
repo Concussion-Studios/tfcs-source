@@ -4978,9 +4978,10 @@ void CBasePlayer::Spawn( void )
 	SetAnimatedEveryTick( true );
 
 	//TEST TEST
-	//m_ArmorValue		= SpawnArmorValue();
-	int ArmorMax = SpawnArmorValue();
-	m_ArmorValue = ArmorMax;
+	
+	m_iMaxArmor = MaxArmorValue();
+	m_ArmorValue = SpawnArmorValue();
+	
 	
 	SetBlocksLOS( false );
 	m_iMaxHealth		= m_iHealth;
@@ -5329,6 +5330,9 @@ void CBasePlayer::OnRestore( void )
 void CBasePlayer::SetArmorValue( int value )
 {
 	m_ArmorValue = value;
+	if ( m_ArmorValue > m_iMaxArmor)
+		m_ArmorValue = m_iMaxArmor;
+	
 }
 
 void CBasePlayer::IncrementArmorValue( int nCount, int nMaxValue )
@@ -5336,7 +5340,7 @@ void CBasePlayer::IncrementArmorValue( int nCount, int nMaxValue )
 	m_ArmorValue += nCount;
 	if (nMaxValue > 0)
 	{
-		if (m_ArmorValue > nMaxValue)
+		if (m_ArmorValue > nMaxValue || m_ArmorValue >m_iMaxArmor )
 			m_ArmorValue = nMaxValue;
 	}
 }

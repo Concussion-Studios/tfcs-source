@@ -975,6 +975,9 @@ protected:
 	int						m_vphysicsCollisionState;
 
 	virtual int SpawnArmorValue( void ) const { return 0; }
+	virtual int MaxArmorValue(void) const { return 200; }
+
+	int m_iMaxArmor;
 
 	float					m_fNextSuicideTime; // the time after which the player can next use the suicide command
 	int						m_iSuicideCustomKillFlags;

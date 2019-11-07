@@ -49,6 +49,9 @@ public:
 	float m_flSprintSpeed;
 	float m_flProneSpeed;
 
+	int m_iMaxArmor;
+	int m_iMaxHealth;
+
 	int m_iArmor;
 };
 

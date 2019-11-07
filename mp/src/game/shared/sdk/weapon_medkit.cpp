@@ -100,7 +100,7 @@ bool CWeaponMedkit::CanHealPlayer( void )
 				if ( pBCC )
 				{
 					// If player does not have 100 health
-					if ( pBCC->GetHealth() < 100 )
+					if (pBCC->GetHealth() < pBCC->GetMaxHealth())
 						return true;
 				}
 			}
