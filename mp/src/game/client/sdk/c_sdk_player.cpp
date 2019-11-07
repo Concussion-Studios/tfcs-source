@@ -39,7 +39,6 @@ extern ConVar cl_sidespeed;
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
 // -------------------------------------------------------------------------------- //
-
 class C_TEPlayerAnimEvent : public C_BaseTempEntity
 {
 public:
@@ -695,7 +694,10 @@ void C_SDKPlayer::CalcVehicleView(IClientVehicle *pVehicle,	Vector& eyeOrigin, Q
 
 bool C_SDKPlayer::CanShowClassMenu( void )
 {
-	return ( GetTeamNumber() == SDK_TEAM_BLUE || GetTeamNumber() == SDK_TEAM_RED );
+	return ( GetTeamNumber() == SDK_TEAM_BLUE || 
+			 GetTeamNumber() == SDK_TEAM_RED || 
+			 GetTeamNumber() == SDK_TEAM_GREEN || 
+			 GetTeamNumber() == SDK_TEAM_YELLOW );
 }
 
 bool C_SDKPlayer::CanShowTeamMenu( void )

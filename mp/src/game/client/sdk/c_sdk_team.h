@@ -82,6 +82,26 @@ public:
 	virtual			~C_SDKTeam_Red() {}
 };
 
+class C_SDKTeam_Green : public C_SDKTeam
+{
+	DECLARE_CLASS( C_SDKTeam_Green, C_SDKTeam );
+public:
+	DECLARE_CLIENTCLASS();
+
+				     C_SDKTeam_Green();
+	 virtual		~C_SDKTeam_Green() {}
+};
+
+class C_SDKTeam_Yellow : public C_SDKTeam
+{
+	DECLARE_CLASS( C_SDKTeam_Yellow, C_SDKTeam );
+public:
+	DECLARE_CLIENTCLASS();
+
+					 C_SDKTeam_Yellow();
+	virtual			~C_SDKTeam_Yellow() {}
+};
+
 extern C_SDKTeam *GetGlobalSDKTeam( int iIndex );
 
 #endif // C_SDK_TEAM_H

@@ -120,10 +120,6 @@ const char *GetGameDescription()
 //-----------------------------------------------------------------------------
 void ClientGamePrecache( void )
 {
-	// Materials used by the client effects
-	CBaseEntity::PrecacheModel( "sprites/white.vmt" );
-	CBaseEntity::PrecacheModel( "sprites/physbeam.vmt" );
-
 	const char *pFilename = "scripts/client_precache.txt";
 	KeyValues *pValues = new KeyValues( "ClientPrecache" );
 

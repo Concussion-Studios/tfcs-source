@@ -113,9 +113,9 @@ class CSDKTeam_Blue : public CSDKTeam
 		BaseClass::Init( pName, iNumber );
 
 		int i = 0;
-		while( pszTeamBlueClasses[i] != NULL )
+		while( pszPlayerClasses[i] != NULL )
 		{
-			AddPlayerClass( pszTeamBlueClasses[i] );
+			AddPlayerClass( pszPlayerClasses[i] );
 			i++;
 		}
 	}
@@ -129,7 +129,7 @@ END_SEND_TABLE()
 LINK_ENTITY_TO_CLASS( sdk_team_blue, CSDKTeam_Blue );
 
 
-// REDTEAM
+// RED TEAM
 //==================
 class CSDKTeam_Red : public CSDKTeam
 {
@@ -141,9 +141,9 @@ class CSDKTeam_Red : public CSDKTeam
 		BaseClass::Init( pName, iNumber );
 
 		int i = 0;
-		while( pszTeamRedClasses[i] != NULL )
+		while( pszPlayerClasses[i] != NULL )
 		{
-			AddPlayerClass( pszTeamRedClasses[i] );
+			AddPlayerClass( pszPlayerClasses[i] );
 			i++;
 		}
 	}
@@ -155,6 +155,61 @@ IMPLEMENT_SERVERCLASS_ST(CSDKTeam_Red, DT_SDKTeam_Red)
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( sdk_team_red, CSDKTeam_Red );
+
+// GREEN TEAM
+//==================
+class CSDKTeam_Green : public CSDKTeam
+{
+	DECLARE_CLASS( CSDKTeam_Green, CSDKTeam );
+	DECLARE_SERVERCLASS();
+
+	virtual void Init( const char *pName, int iNumber )
+	{
+		BaseClass::Init( pName, iNumber );
+
+		int i = 0;
+		while( pszPlayerClasses[i] != NULL )
+		{
+			AddPlayerClass( pszPlayerClasses[i] );
+			i++;
+		}
+	}
+
+	virtual const char *GetTeamName( void ) { return "#Teamname_Green"; }
+};
+
+IMPLEMENT_SERVERCLASS_ST(CSDKTeam_Green, DT_SDKTeam_Green)
+END_SEND_TABLE()
+
+LINK_ENTITY_TO_CLASS( sdk_team_green, CSDKTeam_Green );
+
+
+// YELLOW TEAM
+//==================
+class CSDKTeam_Yellow : public CSDKTeam
+{
+	DECLARE_CLASS( CSDKTeam_Yellow, CSDKTeam );
+	DECLARE_SERVERCLASS();
+
+	virtual void Init( const char *pName, int iNumber )
+	{
+		BaseClass::Init( pName, iNumber );
+
+		int i = 0;
+		while( pszPlayerClasses[i] != NULL )
+		{
+			AddPlayerClass( pszPlayerClasses[i] );
+			i++;
+		}
+	}
+
+	virtual const char *GetTeamName( void ) { return "#Teamname_Yellow"; }
+};
+
+IMPLEMENT_SERVERCLASS_ST(CSDKTeam_Yellow, DT_SDKTeam_Yellow)
+END_SEND_TABLE()
+
+LINK_ENTITY_TO_CLASS( sdk_team_yellow, CSDKTeam_Yellow );
 
 // UNASSIGNED
 //==================

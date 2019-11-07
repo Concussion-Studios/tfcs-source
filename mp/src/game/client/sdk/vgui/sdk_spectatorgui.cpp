@@ -51,10 +51,14 @@ ConVar overview_preferred_view_size( "overview_preferred_view_size", "600", FCVA
 //-----------------------------------------------------------------------------
 CSDKSpectatorGUI::CSDKSpectatorGUI(IViewPort *pViewPort) : CSpectatorGUI(pViewPort)
 {
-	m_pBlueLabel =	NULL;
-	m_pBlueScore =	NULL;
-	m_pRedLabel =	NULL;
-	m_pRedScore =	NULL;
+	m_pBlueLabel =		NULL;
+	m_pBlueScore =		NULL;
+	m_pRedLabel =		NULL;
+	m_pRedScore =		NULL;
+	m_pGreenLabel =		NULL;
+	m_pGreenScore =		NULL;
+	m_pYellowLabel =	NULL;
+	m_pYellowScore =	NULL;
 
 	m_pTimer =		NULL;
 	m_pTimerLabel =	NULL;
@@ -77,10 +81,14 @@ void CSDKSpectatorGUI::ApplySchemeSettings(vgui::IScheme *pScheme)
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	// Grab some control pointers
-	m_pBlueLabel =	dynamic_cast<Label *>(FindChildByName("BlueScoreLabel"));
-	m_pBlueScore =	dynamic_cast<Label *>(FindChildByName("BlueScoreValue"));
-	m_pRedLabel =	dynamic_cast<Label *>(FindChildByName("RedScoreLabel"));
-	m_pRedScore =	dynamic_cast<Label *>(FindChildByName("RedScoreValue"));
+	m_pBlueLabel =		dynamic_cast<Label *>(FindChildByName("BlueScoreLabel"));
+	m_pBlueScore =		dynamic_cast<Label *>(FindChildByName("BlueScoreValue"));
+	m_pRedLabel =		dynamic_cast<Label *>(FindChildByName("RedScoreLabel"));
+	m_pRedScore =		dynamic_cast<Label *>(FindChildByName("RedScoreValue"));
+	m_pGreenLabel =		dynamic_cast<Label *>(FindChildByName("GreenScoreLabel"));
+	m_pGreenScore =		dynamic_cast<Label *>(FindChildByName("GreenScoreValue"));
+	m_pYellowLabel =	dynamic_cast<Label *>(FindChildByName("YellowScoreLabel"));
+	m_pYellowScore =	dynamic_cast<Label *>(FindChildByName("YellowScoreValue"));
 
 	m_pTimer =		dynamic_cast<Panel *>(FindChildByName("timerclock"));
 	m_pTimerLabel =	dynamic_cast<Label *>(FindChildByName("timerlabel"));
@@ -113,10 +121,34 @@ void CSDKSpectatorGUI::UpdateSpectatorPlayerList()
 		SetLabelText( "RedScoreValue", frags );
 	}
 
+
+	/*C_SDKTeam *green = GetGlobalSDKTeam( SDK_TEAM_GREEN );
+	if ( green )
+	{
+		wchar_t frags[ 10 ];
+		_snwprintf( frags, sizeof( frags ), L"%i",  green->Get_Score()  );
+
+		SetLabelText( "GreenScoreValue", frags );
+	}
+
+	C_SDKTeam *yellow = GetGlobalSDKTeam( SDK_TEAM_YELLOW );
+	if ( yellow )
+	{
+		wchar_t frags[ 10 ];
+		_snwprintf( frags, sizeof( frags ), L"%i", yellow->Get_Score()  );
+		
+		SetLabelText( "YellowScoreValue", frags );
+	}*/
+
 	//m_pBlueLabel->SetVisible( false );
 	//m_pBlueScore->SetVisible( false );
 	//m_pRedLabel->SetVisible( false );
 	//m_pRedScore->SetVisible( false );
+
+	m_pGreenLabel->SetVisible( false );
+	m_pGreenScore->SetVisible( false );
+	m_pYellowLabel->SetVisible( false );
+	m_pYellowScore->SetVisible( false );
 
 }
 

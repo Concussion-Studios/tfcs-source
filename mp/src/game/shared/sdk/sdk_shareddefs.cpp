@@ -21,22 +21,7 @@ ConVar	tfc_classlimit_sniper( "tfc_classlimit_sniper", "-1", FCVAR_REPLICATED, "
 ConVar	tfc_classlimit_spy( "tfc_classlimit_spy", "-1", FCVAR_REPLICATED, "Class limit for Spy" );
 ConVar	tfc_classlimit_civilian( "tfc_classlimit_civilian", "-1", FCVAR_REPLICATED, "Class limit for Civilian" );
 
-const char *pszTeamBlueClasses[] = 
-{
-	"scout",
-	"soldier",
-	"pyro",
-	"hwguy",
-	"demoman",
-	"engineer",
-	"medic",
-	"sniper",
-	"spy",
-	"civilian",
-	NULL
-};
-
-const char *pszTeamRedClasses[] = 
+const char *pszPlayerClasses[] = 
 {
 	"scout",
 	"soldier",
@@ -57,6 +42,8 @@ const char *pszTeamNames[] =
 	"#SDK_Team_Spectator",
 	"#SDK_Team_Blue",
 	"#SDK_Team_Red",
+	"#SDK_Team_Green",
+	"#SDK_Team_Yellow",
 };
 
 // Precache all possible player models that we're going to use

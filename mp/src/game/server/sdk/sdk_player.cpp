@@ -30,6 +30,8 @@ ConVar mp_TeamFull_Spawnpoints("mp_TeamFull_Spawnpoints", "0", FCVAR_GAMEDLL, "m
 EHANDLE g_pLastDMSpawn;
 EHANDLE g_pLastBlueSpawn;
 EHANDLE g_pLastRedSpawn;
+EHANDLE g_pLastGreenSpawn;
+EHANDLE g_pLastYellowSpawn;
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
@@ -316,8 +318,25 @@ void CSDKPlayer::SDKPushawayThink(void)
 
 void CSDKPlayer::Spawn()
 {
-	SetModel( SDK_PLAYER_MODEL );	//Tony; basically, leave this alone ;) unless you're not using classes or teams, then you can change it to whatever.
-	
+	switch ( GetTeamNumber() )
+	{
+		case SDK_TEAM_RED:
+			m_nSkin = 0;
+			break;
+
+		case SDK_TEAM_BLUE:
+			m_nSkin = 1;
+			break;
+
+		case SDK_TEAM_GREEN:
+			m_nSkin = 2;
+			break;
+
+		case SDK_TEAM_YELLOW:
+			m_nSkin = 3;
+			break;
+	}
+
 	SetBloodColor( BLOOD_COLOR_RED );
 	
 	SetMoveType( MOVETYPE_WALK );
@@ -325,11 +344,7 @@ void CSDKPlayer::Spawn()
 
 	//Tony; if we're spawning in active state, equip the suit so the hud works. -- Gotta love base code !
 	if ( State_Get() == STATE_ACTIVE )
-	{
 		EquipSuit( false );
-//Tony; bleh, don't do this here.
-//		GiveDefaultItems();
-	}
 
 	m_hRagdoll = NULL;
 	
@@ -423,16 +438,27 @@ CBaseEntity* CSDKPlayer::EntSelectSpawnPoint()
 			}
 		}		
 		break;
-	case TEAM_UNASSIGNED:
+	case SDK_TEAM_GREEN:
 		{
-			pSpawnPointName = "info_player_deathmatch";
-			pSpot = g_pLastDMSpawn;
+			pSpawnPointName = "info_player_green";
+			pSpot = g_pLastGreenSpawn;
 			if ( SelectSpawnSpot( pSpawnPointName, pSpot ) )
 			{
-				g_pLastDMSpawn = pSpot;
+				g_pLastGreenSpawn = pSpot;
+			}
+		}
+		break;
+	case SDK_TEAM_YELLOW:
+		{
+			pSpawnPointName = "info_player_yellow";
+			pSpot = g_pLastYellowSpawn;
+			if ( SelectSpawnSpot( pSpawnPointName, pSpot ) )
+			{
+				g_pLastYellowSpawn = pSpot;
 			}
 		}		
 		break;
+	case TEAM_UNASSIGNED:
 	case TEAM_SPECTATOR:
 	default:
 		{
@@ -443,8 +469,18 @@ CBaseEntity* CSDKPlayer::EntSelectSpawnPoint()
 
 	if ( !pSpot )
 	{
+		pSpawnPointName = "info_player_deathmatch";
+		pSpot = g_pLastDMSpawn;
+		if ( pSpot ) 
+		{
+			if ( SelectSpawnSpot( pSpawnPointName, pSpot ) )
+				g_pLastDMSpawn = pSpot;
+
+			return pSpot;
+		}
+
 		Warning( "PutClientInServer: no %s on level\n", pSpawnPointName );
-		return CBaseEntity::Instance( INDEXENT(0) );
+		return CBaseEntity::Instance(INDEXENT(0));
 	}
 
 	return pSpot;
@@ -1134,6 +1170,14 @@ bool CSDKPlayer::HandleCommand_JoinTeam( int team )
 		{
 			ClientPrint(this, HUD_PRINTTALK, "#RedTeam_Full");
 		}
+		else if (team == SDK_TEAM_YELLOW)
+		{
+			ClientPrint(this, HUD_PRINTTALK, "#YellowTeam_Full");
+		}
+		else if (team == SDK_TEAM_GREEN)
+		{
+			ClientPrint(this, HUD_PRINTTALK, "#GreenTeam_Full");
+		}
 		ShowViewPortPanel(PANEL_TEAM);
 		return false;
 	}
@@ -1163,7 +1207,7 @@ bool CSDKPlayer::HandleCommand_JoinTeam( int team )
 		ClientPrint( 
 			this,
 			HUD_PRINTCENTER,
-			( team == SDK_TEAM_BLUE ) ?	"#BlueTeam_full" : "#RedTeam_full" );
+			( team == SDK_TEAM_BLUE ) ? "#BlueTeam_full" : "#RedTeam_full" ? "#YellowTeam_full" : "#GreenTeam_full" );
 
 		ShowViewPortPanel( PANEL_TEAM );
 		return false;
@@ -1264,8 +1308,10 @@ void CSDKPlayer::ShowClassSelectMenu()
 		ShowViewPortPanel( PANEL_CLASS_BLUE );
 	else if ( GetTeamNumber() == SDK_TEAM_RED	)
 		ShowViewPortPanel( PANEL_CLASS_RED );
-	//if ( GetTeamNumber() == TEAM_UNASSIGNED )
-	//	ShowViewPortPanel( PANEL_CLASS_NOTEAMS );
+	else if ( GetTeamNumber() == SDK_TEAM_YELLOW )
+		ShowViewPortPanel( PANEL_CLASS_YELLOW );
+	else if ( GetTeamNumber() == SDK_TEAM_GREEN )
+		ShowViewPortPanel( PANEL_CLASS_GREEN );
 }
 
 void CSDKPlayer::SetClassMenuOpen( bool bOpen )

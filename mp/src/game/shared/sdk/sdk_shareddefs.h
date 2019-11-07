@@ -47,11 +47,10 @@ enum sdkteams_e
 
 #define PANEL_CLASS_BLUE		"class_blue"
 #define PANEL_CLASS_RED			"class_red"
-//#define PANEL_CLASS_NOTEAMS		"class_noteams"
+#define PANEL_CLASS_GREEN		"class_green"
+#define PANEL_CLASS_YELLOW		"class_yellow"
 
-extern const char *pszTeamBlueClasses[];
-extern const char *pszTeamRedClasses[];
-//extern const char *pszPlayerClasses[];
+extern const char *pszPlayerClasses[];
 
 #define SDK_PLAYER_MODEL "models/player/scout.mdl"
 

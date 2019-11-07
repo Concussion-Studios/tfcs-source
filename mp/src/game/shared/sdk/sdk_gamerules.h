@@ -160,8 +160,11 @@ private:
 
 	Vector2D	m_vecPlayerPositions[MAX_PLAYERS];
 
-	int	m_iSpawnPointCount_Blue;	//number of blue spawns on the map
-	int	m_iSpawnPointCount_Red;	//number of red spawns on the map
+	int	m_iSpawnPointCount_Blue;		//number of blue spawns on the map
+	int	m_iSpawnPointCount_Red;			//number of red spawns on the map
+	int	m_iSpawnPointCount_Yellow;		//number of yellow spawns on the map
+	int	m_iSpawnPointCount_Green;		//number of green spawns on the map
+	int	m_iSpawnPointCount_deathmatch;	//number of deathmatch spawns on the map
 
 	void RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore, bool bIgnoreWorld );
 

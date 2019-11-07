@@ -43,6 +43,7 @@ C_SDKTeam::C_SDKTeam()
 C_SDKTeam::~C_SDKTeam()
 {
 }
+
 char *C_SDKTeam::Get_Name( void )
 {
 	wchar_t *teamname;
@@ -161,9 +162,9 @@ C_SDKTeam_Blue::C_SDKTeam_Blue()
 {
 	//parse our classes
 	int i = 0;
-	while( pszTeamBlueClasses[i] != NULL )
+	while( pszPlayerClasses[i] != NULL )
 	{
-		AddPlayerClass( pszTeamBlueClasses[i] );
+		AddPlayerClass( pszPlayerClasses[i] );
 		i++;
 	}	
 }
@@ -176,9 +177,38 @@ C_SDKTeam_Red::C_SDKTeam_Red()
 {
 	//parse our classes
 	int i = 0;
-	while( pszTeamRedClasses[i] != NULL )
+	while( pszPlayerClasses[i] != NULL )
 	{
-		AddPlayerClass( pszTeamRedClasses[i] );
+		AddPlayerClass( pszPlayerClasses[i] );
+		i++;
+	}	
+}
+
+IMPLEMENT_CLIENTCLASS_DT(C_SDKTeam_Green, DT_SDKTeam_Green, CSDKTeam_Green)
+END_RECV_TABLE()
+
+C_SDKTeam_Green::C_SDKTeam_Green()
+{
+	//parse our classes
+	int i = 0;
+	while( pszPlayerClasses[i] != NULL )
+	{
+		AddPlayerClass( pszPlayerClasses[i] );
+		i++;
+	}	
+}
+
+
+IMPLEMENT_CLIENTCLASS_DT(C_SDKTeam_Yellow, DT_SDKTeam_Yellow, CSDKTeam_Yellow)
+END_RECV_TABLE()
+
+C_SDKTeam_Yellow::C_SDKTeam_Yellow()
+{
+	//parse our classes
+	int i = 0;
+	while( pszPlayerClasses[i] != NULL )
+	{
+		AddPlayerClass( pszPlayerClasses[i] );
 		i++;
 	}	
 }

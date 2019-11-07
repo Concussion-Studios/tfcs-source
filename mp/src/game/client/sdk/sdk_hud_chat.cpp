@@ -148,7 +148,7 @@ Color CHudChat::GetClientColor( int clientIndex )
 	IScheme *pScheme = scheme()->GetIScheme( GetScheme() );
 
 	if ( pScheme == NULL )
-		return Color( 255, 255, 255, 255 );
+		return g_ColorWhite;
 
 	if ( clientIndex == 0 ) // console msg
 	{
@@ -160,12 +160,12 @@ Color CHudChat::GetClientColor( int clientIndex )
 
 		C_SDK_PlayerResource *sdk_PR = dynamic_cast<C_SDK_PlayerResource *>(g_PR);
 		if ( !sdk_PR )
-			return g_ColorGrey;
+			return g_ColorWhite;
 
 		return sdk_PR->GetTeamColor( iTeam );
 	}
 
-	return g_ColorYellow;
+	return g_ColorWhite;
 }
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -183,7 +183,7 @@ Color CHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 	IScheme *pScheme = scheme()->GetIScheme( GetScheme() );
 
 	if ( pScheme == NULL )
-		return Color( 255, 255, 255, 255 );
+		return g_ColorWhite;
 
 	Color c;
 	switch ( colorNum )
@@ -205,12 +205,12 @@ Color CHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 			}
 			else
 			{
-				c = g_ColorYellow;
+				c = g_ColorWhite;
 			}
 		}
 		break;
 	default:
-		c = g_ColorYellow;
+		c = g_ColorWhite;
 	}
 
 	return Color( c[0], c[1], c[2], 255 );

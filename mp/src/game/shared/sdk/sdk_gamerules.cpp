@@ -59,6 +59,8 @@ END_DATADESC();
 	LINK_ENTITY_TO_CLASS( info_player_deathmatch, CSpawnPoint );
 	LINK_ENTITY_TO_CLASS( info_player_blue, CSpawnPoint );
 	LINK_ENTITY_TO_CLASS( info_player_red, CSpawnPoint );
+	LINK_ENTITY_TO_CLASS( info_player_yellow, CSpawnPoint );
+	LINK_ENTITY_TO_CLASS( info_player_green, CSpawnPoint );
 #endif
 
 REGISTER_GAMERULES_CLASS( CSDKGameRules );
@@ -74,6 +76,9 @@ END_NETWORK_TABLE()
 ConVar mp_allowrandomclass( "mp_allowrandomclass", "1", FCVAR_REPLICATED, "Allow players to select random class" );
 ConVar mp_allowspecialclass("mp_allowspecialclass", "0", FCVAR_REPLICATED, "Allow players to select civilian class");
 ConVar mp_ignorefriendlyjustheal("mp_ignorefriendlyjustheal", "0", FCVAR_REPLICATED, "Allow players to ignore if they heal a friendly");
+ConVar mp_4team("mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random.");
+ConVar mp_deathmatch("mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn.");
+ConVar mp_teamfull_spawnpoints("mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>");
 
 LINK_ENTITY_TO_CLASS( sdk_gamerules, CSDKGameRulesProxy );
 IMPLEMENT_NETWORKCLASS_ALIASED( SDKGameRulesProxy, DT_SDKGameRulesProxy )
@@ -163,6 +168,8 @@ CSDKGameRules::CSDKGameRules()
 
 	m_iSpawnPointCount_Blue = 0;
 	m_iSpawnPointCount_Red = 0;
+	m_iSpawnPointCount_Yellow = 0;
+	m_iSpawnPointCount_Green = 0;
 
 	m_flGameStartTime = 0;
 
@@ -236,6 +243,8 @@ static const char *s_PreserveEnts[] =
 	"sdk_team_unassigned",
 	"sdk_team_blue",
 	"sdk_team_red",
+	"sdk_team_yellow",
+	"sdk_team_green",
 	"sdk_player_manager",
 	"env_soundscape",
 	"env_soundscape_proxy",
@@ -252,6 +261,9 @@ static const char *s_PreserveEnts[] =
 	"info_node_hint",
 	"info_player_red",
 	"info_player_blue",
+	"info_player_yellow",
+	"info_player_green",
+	"info_player_deathmatch",
 	"point_viewcontrol",
 	"shadow_control",
 	"sky_camera",
@@ -285,6 +297,7 @@ void CSDKGameRules::ServerActivate()
 		m_flGameStartTime.GetForModify() = 0.0f;
 	}
 }
+
 void CSDKGameRules::CheckLevelInitialized()
 {
 	if ( !m_bLevelInitialized )
@@ -295,6 +308,9 @@ void CSDKGameRules::CheckLevelInitialized()
 
 		m_iSpawnPointCount_Blue		= 0;
 		m_iSpawnPointCount_Red		= 0;
+		m_iSpawnPointCount_Yellow	= 0;
+		m_iSpawnPointCount_Green	= 0;
+		m_iSpawnPointCount_deathmatch = 0;
 
 		while ( ( ent = gEntList.FindEntityByClassname( ent, "info_player_blue" ) ) != NULL )
 		{
@@ -308,8 +324,7 @@ void CSDKGameRules::CheckLevelInitialized()
 					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
 			}
 		}
-
-		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_red")) != NULL)
+		while ( ( ent = gEntList.FindEntityByClassname(ent, "info_player_red")) != NULL)
 		{
 			if ( IsSpawnPointValid( ent, NULL ) ) 
 			{
@@ -321,16 +336,39 @@ void CSDKGameRules::CheckLevelInitialized()
 					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
 			}
 		}
+		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_yellow")) != NULL)
+		{
+			if (IsSpawnPointValid(ent, NULL))
+			{
+				m_iSpawnPointCount_Yellow++;
+			}
+			else
+			{
+				Warning("Invalid yellow spawnpoint at (%.1f,%.1f,%.1f)\n",
+					ent->GetAbsOrigin()[0], ent->GetAbsOrigin()[2], ent->GetAbsOrigin()[2]);
+			}
+		}
+		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_green")) != NULL)
+		{
+			if (IsSpawnPointValid(ent, NULL))
+			{
+				m_iSpawnPointCount_Green++;
+			}
+			else
+			{
+				Warning("Invalid green spawnpoint at (%.1f,%.1f,%.1f)\n",
+					ent->GetAbsOrigin()[0], ent->GetAbsOrigin()[2], ent->GetAbsOrigin()[2]);
+			}
+		}
 		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_deathmatch")) != NULL)
 		{
 			if ( IsSpawnPointValid( ent, NULL ) ) 
 			{
-				m_iSpawnPointCount_Red++;
-				m_iSpawnPointCount_Blue++;
+				m_iSpawnPointCount_deathmatch++;
 			}
 			else
 			{
-				Warning("Invalid red spawnpoint at (%.1f,%.1f,%.1f)\n",
+				Warning("Invalid deathmatch spawnpoint at (%.1f,%.1f,%.1f)\n",
 					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
 			}
 		}
@@ -483,6 +521,7 @@ void CSDKGameRules::Think()
 {
 	BaseClass::Think();
 }
+
 Vector DropToGround( 
 					CBaseEntity *pMainEnt, 
 					const Vector &vPos, 
@@ -536,6 +575,8 @@ void TestSpawns()
 	TestSpawnPointType( "info_player_deathmatch" );
 	TestSpawnPointType( "info_player_blue" );
 	TestSpawnPointType( "info_player_red" );
+	TestSpawnPointType( "info_player_yellow" );
+	TestSpawnPointType( "info_player_green" );
 }
 ConCommand cc_TestSpawns( "map_showspawnpoints", TestSpawns, "Dev - test the spawn points, draws for 60 seconds", FCVAR_CHEAT );
 
@@ -1085,6 +1126,18 @@ void CSDKGameRules::InitTeams( void )
 	Assert( pRed );
 	pRed->Init( pszTeamNames[SDK_TEAM_RED], SDK_TEAM_RED );
 	g_Teams.AddToTail( pRed ); 
+
+	//Anthony; create the yellow team
+	CTeam *pYellow = static_cast<CTeam*>(CreateEntityByName("sdk_team_yellow"));
+	Assert(pYellow);
+	pYellow->Init(pszTeamNames[SDK_TEAM_YELLOW], SDK_TEAM_YELLOW);
+	g_Teams.AddToTail(pYellow);
+
+	//Anthony; create the greem team
+	CTeam *pGreen = static_cast<CTeam*>(CreateEntityByName("sdk_team_green"));
+	Assert(pGreen);
+	pGreen->Init(pszTeamNames[SDK_TEAM_GREEN], SDK_TEAM_GREEN);
+	g_Teams.AddToTail(pGreen);
 }
 
 /* create some proxy entities that we use for transmitting data */
@@ -1107,12 +1160,18 @@ int CSDKGameRules::SelectDefaultTeam()
 
 	CSDKTeam *pBlue = GetGlobalSDKTeam(SDK_TEAM_BLUE);
 	CSDKTeam *pRed = GetGlobalSDKTeam(SDK_TEAM_RED);
+	CSDKTeam *pYellow = GetGlobalSDKTeam(SDK_TEAM_GREEN);
+	CSDKTeam *pGreen = GetGlobalSDKTeam(SDK_TEAM_GREEN);
 
 	int iNumBlue = pBlue->GetNumPlayers();
 	int iNumRed = pRed->GetNumPlayers();
+	int iNumYellow = pYellow->GetNumPlayers();
+	int iNumGreen = pGreen->GetNumPlayers();
 
 	int iBluePoints = pBlue->GetScore();
 	int iRedPoints  = pRed->GetScore();
+	int iYellowPoints = pYellow->GetScore();
+	int iGreenPoints = pGreen->GetScore();
 
 	// Choose the team that's lacking players
 	if ( iNumBlue < iNumRed )
@@ -1123,6 +1182,14 @@ int CSDKGameRules::SelectDefaultTeam()
 	{
 		team = SDK_TEAM_RED;
 	}
+	else if ( iNumYellow < iNumGreen )
+	{
+		team = SDK_TEAM_YELLOW;
+	}
+	else if ( iNumGreen > iNumYellow )
+	{
+		team = SDK_TEAM_GREEN;
+	}
 	// choose the team with fewer points
 	else if ( iBluePoints < iRedPoints )
 	{
@@ -1132,10 +1199,21 @@ int CSDKGameRules::SelectDefaultTeam()
 	{
 		team = SDK_TEAM_RED;
 	}
+	else if ( iYellowPoints < iGreenPoints )
+	{
+		team = SDK_TEAM_YELLOW;
+	}
+	else if ( iYellowPoints > iGreenPoints )
+	{
+		team = SDK_TEAM_GREEN;
+	}
 	else
 	{
-		// Teams and scores are equal, pick a random team
-		team = ( random->RandomInt(0,1) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED;		
+		// if our cvar allows 4teams then randomize between the four else just pick between two.
+		if ( mp_4team.GetBool() )
+			team = ( random->RandomInt( 0, 3 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED ? SDK_TEAM_YELLOW : SDK_TEAM_GREEN;
+		else
+			team = ( random->RandomInt( 0, 1 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED;
 	}
 
 	if ( TeamFull( team ) )
@@ -1145,9 +1223,13 @@ int CSDKGameRules::SelectDefaultTeam()
 		{
 			team = SDK_TEAM_RED;
 		}
+		else if ( team == SDK_TEAM_RED )
+		{
+			team = SDK_TEAM_YELLOW;
+		}
 		else
 		{
-			team = SDK_TEAM_BLUE;
+			team = SDK_TEAM_GREEN;
 		}
 
 		// No choices left
@@ -1161,6 +1243,9 @@ int CSDKGameRules::SelectDefaultTeam()
 //Tony; we only check this when using teams, unassigned can never get full.
 bool CSDKGameRules::TeamFull( int team_id )
 {
+	if ( mp_teamfull_spawnpoints.GetBool() || !mp_deathmatch.GetBool() )
+		return false;
+
 	switch ( team_id )
 	{
 	case SDK_TEAM_BLUE:
@@ -1172,6 +1257,16 @@ bool CSDKGameRules::TeamFull( int team_id )
 		{
 			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_RED)->GetNumPlayers();
 			return iNumRed >= m_iSpawnPointCount_Red;
+		}
+	case SDK_TEAM_YELLOW:
+		{
+			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_YELLOW)->GetNumPlayers();
+			return iNumRed >= m_iSpawnPointCount_Yellow;
+		}
+	case SDK_TEAM_GREEN:
+		{
+			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_GREEN)->GetNumPlayers();
+			return iNumRed >= m_iSpawnPointCount_Green;
 		}
 	}
 	return false;
@@ -1189,6 +1284,8 @@ bool CSDKGameRules::TeamStacked( int iNewTeam, int iCurTeam  )
 	// Tabulate the number of players on each team.
 	int iNumBlue = GetGlobalTeam( SDK_TEAM_BLUE )->GetNumPlayers();
 	int iNumRed = GetGlobalTeam( SDK_TEAM_RED )->GetNumPlayers();
+	int iNumYellow = GetGlobalTeam( SDK_TEAM_YELLOW )->GetNumPlayers();
+	int iNumGreen = GetGlobalTeam( SDK_TEAM_GREEN )->GetNumPlayers();
 
 	switch ( iNewTeam )
 	{
@@ -1219,6 +1316,38 @@ bool CSDKGameRules::TeamStacked( int iNewTeam, int iCurTeam  )
 		else
 		{
 			if((iNumRed + 1) > (iNumBlue + iTeamLimit))
+				return true;
+			else
+				return false;
+		}
+		break;
+	case SDK_TEAM_YELLOW:
+		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		{
+			if ((iNumBlue + 1) > (iNumRed + iTeamLimit - 1) && (iNumYellow + 1) > (iNumGreen + iTeamLimit - 1))
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			if ((iNumBlue + 1) > (iNumRed + iTeamLimit) && (iNumYellow + 1) > (iNumGreen + iTeamLimit))
+				return true;
+			else
+				return false;
+		}
+		break;
+	case SDK_TEAM_GREEN:
+		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		{
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit - 1) && (iNumGreen + 1) > (iNumYellow + iTeamLimit - 1) )
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit) && (iNumGreen+ 1) > (iNumYellow + iTeamLimit))
 				return true;
 			else
 				return false;

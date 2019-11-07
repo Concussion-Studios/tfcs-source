@@ -79,18 +79,6 @@ private:
 	Color m_borderColor;
 };
 
-
-/*class CSDKClassMenu_NoTeams : public CSDKClassMenu
-{
-private:
-	DECLARE_CLASS_SIMPLE( CSDKClassMenu_NoTeams, CSDKClassMenu );
-
-public:
-	CSDKClassMenu_NoTeams::CSDKClassMenu_NoTeams(IViewPort *pViewPort) : BaseClass(pViewPort, PANEL_CLASS_NOTEAMS)	{ LoadControlSettings( "Resource/UI/ClassMenu_NoTeams.res" ); }
-	virtual const char *GetName( void )	{ return PANEL_CLASS_NOTEAMS; }
-	virtual int GetTeamNumber( void ) {	return TEAM_UNASSIGNED;	}
-};*/
-
 class CSDKClassMenu_Blue : public CSDKClassMenu
 {
 private:
@@ -111,6 +99,28 @@ public:
 	CSDKClassMenu_Red::CSDKClassMenu_Red(IViewPort *pViewPort) : BaseClass(pViewPort, PANEL_CLASS_RED)	{ LoadControlSettings( "Resource/UI/ClassMenu_Red.res" ); }
 	virtual const char *GetName( void )	{ return PANEL_CLASS_RED; }
 	virtual int GetTeamNumber( void ) {	return SDK_TEAM_RED; }
+};
+
+class CSDKClassMenu_Green : public CSDKClassMenu
+{
+private:
+	DECLARE_CLASS_SIMPLE( CSDKClassMenu_Green, CSDKClassMenu );
+
+public:
+	CSDKClassMenu_Green::CSDKClassMenu_Green(IViewPort *pViewPort) : BaseClass(pViewPort, PANEL_CLASS_GREEN) {	LoadControlSettings( "Resource/UI/ClassMenu_Green.res" ); }
+	virtual const char *GetName( void )	{ return PANEL_CLASS_GREEN; }
+	virtual int GetTeamNumber( void ) {	return SDK_TEAM_GREEN; }
+};
+
+class CSDKClassMenu_Yellow : public CSDKClassMenu
+{
+private:
+	DECLARE_CLASS_SIMPLE( CSDKClassMenu_Yellow, CSDKClassMenu );
+
+public:
+	CSDKClassMenu_Yellow::CSDKClassMenu_Yellow(IViewPort *pViewPort) : BaseClass(pViewPort, PANEL_CLASS_YELLOW)	{ LoadControlSettings( "Resource/UI/ClassMenu_Yellow.res" ); }
+	virtual const char *GetName( void )	{ return PANEL_CLASS_YELLOW; }
+	virtual int GetTeamNumber( void ) {	return SDK_TEAM_YELLOW; }
 };
 
 #endif //SDK_CLASSMENU_H

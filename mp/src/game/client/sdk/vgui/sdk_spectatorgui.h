@@ -50,6 +50,10 @@ protected:
 	vgui::Label *m_pBlueScore;
 	vgui::Label *m_pRedLabel;
 	vgui::Label *m_pRedScore;
+	vgui::Label *m_pGreenLabel;
+	vgui::Label *m_pGreenScore;
+	vgui::Label *m_pYellowLabel;
+	vgui::Label *m_pYellowScore;
 
 	vgui::Panel *m_pTimer;
 	vgui::Label *m_pTimerLabel;
