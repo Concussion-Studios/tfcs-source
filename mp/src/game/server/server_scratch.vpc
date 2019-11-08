@@ -83,7 +83,7 @@ $Project "Server (TFCSOURCE)"
 			}
 			$Folder	"HL2"
 			{
-				$File	"hl2\item_battery.cpp"
+				$File	"hl2\item_armor.cpp"
 				$File	"hl2\item_ammo.cpp"
 				$File	"hl2\items.h"
 				

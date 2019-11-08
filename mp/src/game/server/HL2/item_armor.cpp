@@ -15,10 +15,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-class CItemBattery : public CItem
+class CItemArmor : public CItem
 {
 public:
-	DECLARE_CLASS( CItemBattery, CItem );
+	DECLARE_CLASS( CItemArmor, CItem );
 
 	void Spawn( void )
 	{ 
@@ -47,6 +47,6 @@ public:
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_armor, CItemBattery);
+LINK_ENTITY_TO_CLASS(item_armor, CItemArmor);
 PRECACHE_REGISTER(item_armor);
 
