@@ -5330,8 +5330,8 @@ void CBasePlayer::OnRestore( void )
 void CBasePlayer::SetArmorValue( int value )
 {
 	m_ArmorValue = value;
-	if ( m_ArmorValue > m_iMaxArmor)
-		m_ArmorValue = m_iMaxArmor;
+	if (m_ArmorValue > MaxArmorValue())
+		m_ArmorValue = MaxArmorValue();
 	
 }
 
@@ -5340,8 +5340,8 @@ void CBasePlayer::IncrementArmorValue( int nCount, int nMaxValue )
 	m_ArmorValue += nCount;
 	if (nMaxValue > 0)
 	{
-		if (m_ArmorValue > nMaxValue || m_ArmorValue >m_iMaxArmor )
-			m_ArmorValue = nMaxValue;
+		if (m_ArmorValue > MaxArmorValue())
+			m_ArmorValue = MaxArmorValue();
 	}
 }
 

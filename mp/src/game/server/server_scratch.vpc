@@ -81,6 +81,13 @@ $Project "Server (TFCSOURCE)"
 				$File	"sdk\sdk_bot_temp.cpp"
 				$File	"sdk\sdk_bot_temp.h"
 			}
+			$Folder	"HL2"
+			{
+				$File	"hl2\item_battery.cpp"
+				$File	"hl2\item_ammo.cpp"
+				$File	"hl2\items.h"
+				
+			}
 
 			$Folder	"Player"
 			{

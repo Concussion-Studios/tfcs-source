@@ -31,7 +31,6 @@ public:
 	virtual SDKWeaponID GetWeaponID(void) const	{ return WEAPON_MEDKIT; }
 	virtual bool CanWeaponBeDropped() const				{ return false; }
 	virtual float GetRange(void) { return 64.0f; }
-	virtual bool CanWeaponBeDropped() const	{ return false; }
 
 private:
 	CWeaponMedkit(const CWeaponMedkit &);

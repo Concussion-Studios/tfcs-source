@@ -53,6 +53,8 @@ CBaseViewModel::CBaseViewModel()
 	m_nViewModelIndex	= 0;
 
 	m_nAnimationParity	= 0;
+
+	
 }
 
 //-----------------------------------------------------------------------------
@@ -84,6 +86,8 @@ void CBaseViewModel::Spawn( void )
 	Precache( );
 	SetSize( Vector( -8, -4, -2), Vector(8, 4, 2) );
 	SetSolid( SOLID_NONE );
+
+	
 }
 
 
@@ -315,6 +319,7 @@ void CBaseViewModel::SetWeaponModel( const char *modelname, CBaseCombatWeapon *w
 
 #if defined( CLIENT_DLL )
 	SetModel( modelname );
+	
 #else
 	string_t str;
 	if ( modelname != NULL )
@@ -339,6 +344,8 @@ void CBaseViewModel::SetWeaponModel( const char *modelname, CBaseCombatWeapon *w
 		SetControlPanelsActive( showControlPanels );
 	}
 #endif
+
+	
 }
 
 //-----------------------------------------------------------------------------

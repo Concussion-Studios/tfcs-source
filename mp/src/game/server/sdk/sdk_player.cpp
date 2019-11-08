@@ -942,12 +942,33 @@ void CSDKPlayer::CreateViewModel( int index /*=0*/ )
 	CPredictedViewModel *vm = ( CPredictedViewModel * )CreateEntityByName( "predicted_viewmodel" );
 	if ( vm )
 	{
+		switch (GetTeamNumber())
+		{
+		case SDK_TEAM_RED:
+			vm->m_nSkin = 0;
+			break;
+
+		case SDK_TEAM_BLUE:
+			vm->m_nSkin = 1;
+			break;
+
+		case SDK_TEAM_GREEN:
+			vm->m_nSkin = 2;
+			break;
+
+		case SDK_TEAM_YELLOW:
+			vm->m_nSkin = 3;
+			break;
+		}
 		vm->SetAbsOrigin( GetAbsOrigin() );
 		vm->SetOwner( this );
 		vm->SetIndex( index );
 		DispatchSpawn( vm );
 		vm->FollowEntity( this, false );
 		m_hViewModel.Set( index, vm );
+		
+		
+		
 	}
 }
 
