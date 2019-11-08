@@ -30,6 +30,7 @@ public:
 	CWeaponPistol();
 
 	virtual SDKWeaponID GetWeaponID( void ) const		{ return WEAPON_PISTOL; }
+	virtual bool CanWeaponBeDropped() const				{ return false; }
 	virtual int GetFireMode() const { return FM_SEMIAUTOMATIC; }
 
 private:

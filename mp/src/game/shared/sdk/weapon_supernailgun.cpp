@@ -42,6 +42,7 @@ public:
 	DECLARE_PREDICTABLE();
 
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_SUPERNAILGUN; }
+	virtual bool CanWeaponBeDropped() const				{ return false; }
 
 	void	Precache(void);
 	void	AddViewKick(void);

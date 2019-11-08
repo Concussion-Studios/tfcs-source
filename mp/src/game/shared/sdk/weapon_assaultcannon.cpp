@@ -30,6 +30,7 @@ public:
 	CWeaponAC();
 
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_AC; }
+	virtual bool CanWeaponBeDropped() const				{ return false; }
 
 private:
 

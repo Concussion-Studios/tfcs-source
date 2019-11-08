@@ -33,6 +33,7 @@ public:
 	DECLARE_PREDICTABLE();
 
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_SHOTGUN; }
+	virtual bool CanWeaponBeDropped() const				{ return false; }
 
 	virtual float GetWeaponSpread() { return 0.04362f; }
 
@@ -62,7 +63,7 @@ public:
 	void ItemHolsterFrame(void);
 	void ItemPostFrame(void);
 	void PrimaryAttack(void);
-	void SecondaryAttack(void);
+	//void SecondaryAttack(void);
 	void DryFire(void);
 	virtual float GetFireRate(void) { return 0.7; };
 
@@ -323,7 +324,7 @@ void CWeaponShotgun::PrimaryAttack(void)
 
 	// Don't fire again until fire animation has completed
 	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
-	m_iClip1 -= 1;
+	m_iClip1 -= 2;
 
 	// player "shoot" animation
 	pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -358,7 +359,7 @@ void CWeaponShotgun::PrimaryAttack(void)
 //
 //
 //-----------------------------------------------------------------------------
-void CWeaponShotgun::SecondaryAttack(void)
+/*void CWeaponShotgun::SecondaryAttack(void)
 {
 	// Only the player fires this way so we can cast
 	CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
@@ -400,7 +401,7 @@ void CWeaponShotgun::SecondaryAttack(void)
 	}
 
 	m_bNeedPump = true;
-}
+}*/
 
 //-----------------------------------------------------------------------------
 // Purpose: Override so shotgun can do mulitple reloads in a row
