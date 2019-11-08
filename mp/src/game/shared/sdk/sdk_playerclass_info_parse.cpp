@@ -19,17 +19,6 @@ CSDKPlayerClassInfo::CSDKPlayerClassInfo()
 	m_iPrimaryWeapon	= WEAPON_NONE;
 	m_iSecondaryWeapon	= WEAPON_NONE;
 	m_iMeleeWeapon		= WEAPON_NONE;
-
-	m_iWeapon1			= WEAPON_NONE;
-	m_iWeapon2			= WEAPON_NONE;
-	m_iWeapon3			= WEAPON_NONE;
-	m_iWeapon4			= WEAPON_NONE;
-	m_iWeapon5			= WEAPON_NONE;
-	m_iWeapon6			= WEAPON_NONE;
-	m_iWeapon7			= WEAPON_NONE;
-	m_iWeapon8			= WEAPON_NONE;
-	m_iWeapon9			= WEAPON_NONE;
-	m_iWeapon10			= WEAPON_NONE;
 	
 	m_iNumGrensType1	= 0;
 	m_iGrenType1		= WEAPON_NONE;
