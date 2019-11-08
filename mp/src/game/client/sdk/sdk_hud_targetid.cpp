@@ -214,6 +214,12 @@ void CSDKTargetId::Paint()
 			}
 			
 			vgui::surface()->DrawSetTextFont( m_hFont );
+
+			// draw a black dropshadow ( the default one looks horrible )
+			vgui::surface()->DrawSetTextPos( xpos+1, ypos+1 );
+			vgui::surface()->DrawSetTextColor( Color(0,0,0,255) );
+			vgui::surface()->DrawPrintText( sIDString, wcslen(sIDString) );		
+
 			vgui::surface()->DrawSetTextPos( xpos, ypos );
 			vgui::surface()->DrawSetTextColor( c );
 			vgui::surface()->DrawPrintText( sIDString, wcslen(sIDString) );
