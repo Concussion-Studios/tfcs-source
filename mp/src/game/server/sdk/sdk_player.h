@@ -90,12 +90,20 @@ public:
 	virtual void	CreateViewModel( int viewmodelindex = 0 );
 
 	virtual void	CheatImpulseCommands( int iImpulse );
-	
-	virtual int		SpawnArmorValue( void ) const { return m_iSpawnArmorValue; }
-	virtual void	SetSpawnArmorValue( int i ) { m_iSpawnArmorValue = i; }
 
-	virtual int		MaxArmorValue(void) const { return m_iMaxArmorValue; }
-	virtual void	SetMaxArmorValue(int i) { m_iMaxArmorValue = i; }
+	// Armor
+	virtual void	IncrementArmorValue( int nCount, int nMaxValue = -1 );
+	virtual void	SetArmorValue( int value );
+	virtual void	SetMaxArmorValue( int MaxArmorValue );
+	virtual int		GetArmorValue()	{ return m_ArmorValue; }
+	virtual int		GetMaxArmorValue() { return m_MaxArmorValue; }
+
+	// Health
+	virtual		void SetHealth( int value );
+	virtual		void SetMaxHealth( int MaxValue );
+	virtual		int GetHealth() { return m_iHealth; }
+	virtual		int GetMaxHealth()	{ return m_iMaxHealth;	}
+	virtual		void IncrementHealthValue( int nCount );
 
 	CNetworkQAngle( m_angEyeAngles );	// Copied from EyeAngles() so we can send it to the client.
 	CNetworkVar( int, m_iShotsFired );	// number of shots fired recently
@@ -241,11 +249,11 @@ private:
 
 	CNetworkVar( bool, m_bSpawnInterpCounter );
 
-	int m_iSpawnArmorValue;
-
-	int m_iMaxArmorValue;
-
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_ArmorValue );
+	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iHealth );
+	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iMaxHealth );
+	CNetworkVarForDerived( int, m_MaxArmorValue );
+
 public:
 #if defined ( SDK_USE_PRONE )
 	bool m_bUnProneToDuck;		//Tony; GAMEMOVEMENT USED VARIABLE

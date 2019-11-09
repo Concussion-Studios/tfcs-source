@@ -926,7 +926,7 @@ protected:
 	int						m_iTrain;				// Train control position
 
 	float					m_iRespawnFrames;	// used in PlayerDeathThink() to make sure players can always respawn
- 	unsigned int			m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
+	unsigned int			m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
 	
 	// Vehicles
 	CNetworkHandle( CBaseEntity, m_hVehicle );
@@ -975,9 +975,6 @@ protected:
 	int						m_vphysicsCollisionState;
 
 	virtual int SpawnArmorValue( void ) const { return 0; }
-	virtual int MaxArmorValue(void) const { return 200; }
-
-	int m_iMaxArmor;
 
 	float					m_fNextSuicideTime; // the time after which the player can next use the suicide command
 	int						m_iSuicideCustomKillFlags;
@@ -1048,9 +1045,12 @@ private:
 	// Multiplayer handling
 	PlayerConnectedState	m_iConnected;
 
+public:
 	// from edict_t
 	// CBasePlayer doesn't send this but CCSPlayer does.
 	CNetworkVarForDerived( int, m_ArmorValue );
+
+private:
 	float					m_AirFinished;
 	float					m_PainFinished;
 

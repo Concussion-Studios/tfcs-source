@@ -143,7 +143,11 @@ public: // Public Variables
 	float m_flCurrentHeadPitch;
 
 	int	  m_iIDEntIndex;
+
+	// Armor
 	int GetArmorValue() { return m_ArmorValue; }
+	int GetMaxArmorValue() { return m_MaxArmorValue; }
+
 private:
 	void UpdateSoundEvents();
 
@@ -154,7 +158,7 @@ private:
 
 	C_SDKPlayer( const C_SDKPlayer & );
 
-	int m_ArmorValue;
+	int m_ArmorValue, m_MaxArmorValue;
 
 	class CSDKSoundEvent
 	{

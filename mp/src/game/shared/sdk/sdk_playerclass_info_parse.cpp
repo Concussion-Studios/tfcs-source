@@ -140,17 +140,16 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	}
 
 	Q_strncpy( m_szLimitCvar, pKeyValuesData->GetString( "limitcvar", "!! Missing limit cvar on Player Class" ), sizeof(m_szLimitCvar) );
-
 	Assert( Q_strlen( m_szLimitCvar ) > 0 && "Every class must specify a limitcvar" );
 
-	m_flRunSpeed		= pKeyValuesData->GetFloat( "RunSpeed", SDK_DEFAULT_PLAYER_RUNSPEED );
-	m_flSprintSpeed		= pKeyValuesData->GetFloat( "SprintSpeed", SDK_DEFAULT_PLAYER_SPRINTSPEED );
-	m_flProneSpeed		= pKeyValuesData->GetFloat( "ProneSpeed", SDK_DEFAULT_PLAYER_PRONESPEED );
+	m_flRunSpeed		= pKeyValuesData->GetFloat( "runspeed", SDK_DEFAULT_PLAYER_RUNSPEED );
+	m_flSprintSpeed		= pKeyValuesData->GetFloat( "sprintspeed", SDK_DEFAULT_PLAYER_SPRINTSPEED );
+	m_flProneSpeed		= pKeyValuesData->GetFloat( "pronespeed", SDK_DEFAULT_PLAYER_PRONESPEED );
 
-	m_iMaxHealth = pKeyValuesData->GetInt("MaxHealth", 100);
+	m_iMaxHealth		= pKeyValuesData->GetInt( "maxhealth", 100 );
+	m_iHealth			= pKeyValuesData->GetInt( "health", 100 );
 
-	m_iMaxArmor = pKeyValuesData->GetInt("MaxArmor", 100);
-
+	m_iMaxArmor			= pKeyValuesData->GetInt( "maxarmor", 100 );
 	m_iArmor			= pKeyValuesData->GetInt( "armor", 0 );
 
 }

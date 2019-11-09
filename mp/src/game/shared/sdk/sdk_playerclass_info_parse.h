@@ -53,6 +53,7 @@ public:
 	int m_iMaxHealth;
 
 	int m_iArmor;
+	int m_iHealth;
 };
 
-#endif // DOD_PLAYERCLASS_INFO_PARSE_H
+#endif // SDK_PLAYERCLASS_INFO_PARSE_H
