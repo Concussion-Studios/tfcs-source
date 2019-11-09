@@ -312,7 +312,7 @@ void CSDKGameRules::CheckGameMode()
 	/*CCaptureFlag *pFlag = dynamic_cast<CCaptureFlag*> ( gEntList.FindEntityByClassname( NULL, "item_teamflag" ) );
 	if ( pFlag )
 	{
-		AddGametype( GAMEMODE_CTF );
+		AddGameMode( GAMEMODE_CTF );
 		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CTF gamemode config file\n" );
 		engine->ServerCommand( "exec config_default_ctf.cfg \n" );
 		engine->ServerExecute();
@@ -323,7 +323,7 @@ void CSDKGameRules::CheckGameMode()
 		// We use a logic for tc for controlling stuffs like cap unlock, caps locket at start ect
 		if ( !Q_strncmp( STRING( gpGlobals->mapname ), "tc_", 3 ) && gEntList.FindEntityByClassname( NULL, "logic_tc" ) )
 		{
-			AddGametype( GAMEMODE_TC );
+			AddGameMode( GAMEMODE_TC );
 			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TC gamemode config file\n" );
 			engine->ServerCommand( "exec config_default_tc.cfg \n" );
 			engine->ServerExecute();
@@ -331,7 +331,7 @@ void CSDKGameRules::CheckGameMode()
 		// Same for above but controls the time need for taking the point, the number of players ect.
 		else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "cp_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_cp" ) )
 		{
-			AddGametype( GAMEMODE_CP );
+			AddGameMode( GAMEMODE_CP );
 			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
 			engine->ServerCommand( "exec config_default_cp.cfg \n" );
 			engine->ServerExecute();
@@ -339,14 +339,14 @@ void CSDKGameRules::CheckGameMode()
 		// same story but defines what of the cp will be lock/unlock
 		else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "ad_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_ad" ) )
 		{
-			AddGametype( GAMEMODE_AD );
+			AddGameMode( GAMEMODE_AD );
 			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server AD gamemode config file\n" );
 			engine->ServerCommand( "exec config_default_cp.cfg \n" );
 			engine->ServerExecute();	
 		}
 		else // this is a normal cp but will be define some default stuffs
 		{
-			AddGametype( GAMEMODE_CP );
+			AddGameMode( GAMEMODE_CP );
 			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
 			engine->ServerCommand( "exec config_default_cp.cfg \n" );
 			engine->ServerExecute();	
@@ -355,7 +355,7 @@ void CSDKGameRules::CheckGameMode()
 
 	if ( gEntList.FindEntityByClassname( NULL, "logic_tdm" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "tdm_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "dm_", 3 ) )
 	{
-		AddGametype( GAMEMODE_TDM );
+		AddGameMode( GAMEMODE_TDM );
 		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TDM gamemode config file\n" );
 		engine->ServerCommand( "exec config_default_tdm.cfg \n" );
 		engine->ServerExecute();
@@ -363,7 +363,7 @@ void CSDKGameRules::CheckGameMode()
 
 	if ( gEntList.FindEntityByClassname( NULL, "logic_esc" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "esc_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "vip_", 4 ) )
 	{
-		AddGametype( GAMEMODE_ESC );
+		AddGameMode( GAMEMODE_ESC );
 		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server Escort/VIP gamemode config file\n" );
 		engine->ServerCommand( "exec config_default_esc.cfg \n" );
 		engine->ServerExecute();
@@ -371,7 +371,7 @@ void CSDKGameRules::CheckGameMode()
 
 	if ( gEntList.FindEntityByClassname( NULL, "logic_dom" ) || !Q_strncmp ( STRING( gpGlobals->mapname ), "dom_", 4 ) )
 	{
-		AddGametype( GAMEMODE_DOM );
+		AddGameMode( GAMEMODE_DOM );
 		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server Domination gamemode config file\n" );
 		engine->ServerCommand( "exec config_default_dom.cfg \n" );
 		engine->ServerExecute();
