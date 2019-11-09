@@ -1,4 +1,4 @@
-//============ Copyright © 1996-2008, Valve Corporation, All rights reserved. ===============//
+//============ Copyright Â© 1996-2008, Valve Corporation, All rights reserved. ===============//
 //
 // Purpose: Shared Player Variables / Functions and variables that may or may not be networked
 //
@@ -40,15 +40,17 @@ public:
 
 	void	Init( OuterClass *pOuter );
 
-	Vector		GetAttackSpread(CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL);
+	Vector	GetAttackSpread(CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL);
 	bool	IsSniperZoomed( void ) const;
 	bool	IsDucking( void ) const; 
 
 	void	SetDesiredPlayerClass( int playerclass );
-	int		DesiredPlayerClass( void );
+	int	DesiredPlayerClass( void );
+	int	GetClassIndex( void ) { return m_iPlayerClass; }
 
 	void	SetPlayerClass( int playerclass );
-	int		PlayerClass( void );
+	int	PlayerClass( void );
+	bool	IsClass( int playerclass ) const { return ( m_iPlayerClass == playerclass ); }
 
 	CWeaponSDKBase* GetActiveSDKWeapon() const;
 
