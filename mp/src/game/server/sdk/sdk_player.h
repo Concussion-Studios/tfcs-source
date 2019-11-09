@@ -13,6 +13,7 @@
 #include "server_class.h"
 #include "sdk_playeranimstate.h"
 #include "sdk_player_shared.h"
+#include "sdk_basegrenade_projectile.h"
 
 #define MAX_DAMAGER_HISTORY 2
 
@@ -115,6 +116,11 @@ public:
 	void SetClassMenuOpen( bool bIsOpen );
 	bool IsClassMenuOpen( void );
 
+	float				timeholster;
+	float				timethrow;
+	float				timedeploy;
+	bool				WantThrow;
+
 	void PhysObjectSleep();
 	void PhysObjectWake();
 
@@ -213,6 +219,9 @@ private:
 #endif // SDK_USE_PRONE
 
 	void InitSpeeds( void ); //Tony; called EVERY spawn on server and client after class has been chosen (if any!)
+	void  HandleThrowGrenade(void);
+	void  ThrowGrenade(void);
+	void  CreateGrenade(void);
 
 	// from CBasePlayer
 	void			SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize );
@@ -277,5 +286,6 @@ inline SDKPlayerState CSDKPlayer::State_Get() const
 {
 	return m_iPlayerState;
 }
+
 
 #endif	// SDK_PLAYER_H
