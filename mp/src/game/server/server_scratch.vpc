@@ -85,7 +85,13 @@ $Project "Server (TFCSOURCE)"
 			$Folder	"Items"
 			{
 				$File	"sdk\entity_armor.cpp"
-				$File	"sdk\entity_ammo.cpp"				
+				$File	"sdk\entity_ammo.cpp"
+			}
+			
+			$Folder	"Solid Entities"
+			{
+				$File	"sdk\func_vehicle.cpp"
+				$File	"sdk\func_vehicle.h"
 			}
 
 			$Folder	"Player"
