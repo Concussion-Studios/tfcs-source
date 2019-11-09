@@ -81,12 +81,17 @@ $Project "Server (TFCSOURCE)"
 				$File	"sdk\sdk_bot_temp.cpp"
 				$File	"sdk\sdk_bot_temp.h"
 			}
-			$Folder	"HL2"
+
+			$Folder	"Items"
 			{
-				$File	"hl2\item_armor.cpp"
-				$File	"hl2\item_ammo.cpp"
-				$File	"hl2\items.h"
-				
+				$File	"sdk\entity_armor.cpp"
+				$File	"sdk\entity_ammo.cpp"
+			}
+			
+			$Folder	"Solid Entities"
+			{
+				$File	"sdk\func_vehicle.cpp"
+				$File	"sdk\func_vehicle.h"
 			}
 
 			$Folder	"Player"
@@ -135,10 +140,10 @@ $Project "Server (TFCSOURCE)"
 				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase.cpp"
 				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase.h"
 				$File	"$SRCDIR\game\shared\sdk\weapon_shotgun.cpp"
-				$File	"$SRCDIR\game\shared\sdk\weapon_hl2mpbase_machinegun.cpp"
-				$File	"$SRCDIR\game\shared\sdk\weapon_hl2mpbase_machinegun.h"
-				$File	"$SRCDIR\game\shared\sdk\weapon_hl2mpbasehlmpcombatweapon.cpp"
-				$File	"$SRCDIR\game\shared\sdk\weapon_hl2mpbasehlmpcombatweapon.h"
+				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase_machinegun.cpp"
+				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase_machinegun.h"
+				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase_combatweapon.cpp"
+				$File	"$SRCDIR\game\shared\sdk\weapon_sdkbase_combatweapon.h"
 				$File	"$SRCDIR\game\shared\sdk\weapon_nailgun.cpp"
 				$File	"$SRCDIR\game\shared\sdk\weapon_shotgun12gauge.cpp"
 				$File	"$SRCDIR\game\shared\sdk\weapon_supernailgun.cpp"

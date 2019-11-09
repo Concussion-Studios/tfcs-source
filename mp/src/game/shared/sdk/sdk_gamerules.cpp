@@ -917,10 +917,14 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			}
 
 			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pPrimaryWpn );
-			pPlayer->SetMaxArmorValue(pClassInfo.m_iMaxArmor);
-			pPlayer->SetSpawnArmorValue( pClassInfo.m_iArmor );
-			pPlayer->SetMaxHealth(pClassInfo.m_iMaxHealth);
-			pPlayer->SetHealth(pClassInfo.m_iMaxHealth);
+
+			//Armor
+			pPlayer->SetMaxArmorValue( pClassInfo.m_iMaxArmor );
+			pPlayer->SetArmorValue( pClassInfo.m_iArmor );
+
+			// Health
+			pPlayer->SetMaxHealth( pClassInfo.m_iMaxHealth );
+			pPlayer->SetHealth( pClassInfo.m_iHealth );
 
 		}
 		else

@@ -7,105 +7,97 @@
 #include "cbase.h"
 #include "npcevent.h"
 #include "in_buttons.h"
-
-#ifdef CLIENT_DLL
-#include "c_sdk_player.h"
-#else
-#include "sdk_player.h"
-#endif
-
-#include "weapon_hl2mpbasehlmpcombatweapon.h"
+#include "weapon_sdkbase_combatweapon.h"
 #include "sdk_fx_shared.h"
 
 #ifdef CLIENT_DLL
-#define CWeapon12Gauge C_Weapon12Gauge
+	#include "c_sdk_player.h"
+#else
+	#include "sdk_player.h"
 #endif
 
-extern ConVar sk_auto_reload_time;
-extern ConVar sk_plr_num_shotgun_pellets;
+#ifdef CLIENT_DLL
+	#define CWeapon12Gauge C_Weapon12Gauge
+#endif
 
-class CWeapon12Gauge : public CBaseHL2MPCombatWeapon
+class CWeapon12Gauge : public CSDKCombatWeapon
 {
 public:
-	DECLARE_CLASS(CWeapon12Gauge, CBaseHL2MPCombatWeapon);
+	DECLARE_CLASS( CWeapon12Gauge, CSDKCombatWeapon );
 
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
-	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_12GAUGE; }
-	virtual bool CanWeaponBeDropped() const				{ return false; }
+	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_12GAUGE; }
+	virtual bool CanWeaponBeDropped() const { return false; }
 
 	virtual float GetWeaponSpread() { return 0.04362f; }
 
 private:
-	CNetworkVar(bool, m_bNeedPump);		// When emptied completely
-	CNetworkVar(bool, m_bDelayedFire1);	// Fire primary when finished reloading
-	CNetworkVar(bool, m_bDelayedFire2);	// Fire secondary when finished reloading
-	CNetworkVar(bool, m_bDelayedReload);	// Reload when finished pump
+	CNetworkVar( bool, m_bNeedPump );		// When emptied completely
+	CNetworkVar( bool, m_bDelayedFire1 );	// Fire primary when finished reloading
+	CNetworkVar( bool, m_bDelayedFire2 );	// Fire secondary when finished reloading
+	CNetworkVar( bool, m_bDelayedReload );	// Reload when finished pump
 
 public:
-	virtual const Vector& GetBulletSpread(void)
+	virtual const Vector& GetBulletSpread( void )
 	{
 		static Vector cone = VECTOR_CONE_10DEGREES;
 		return cone;
 	}
 
-	virtual int				GetMinBurst() { return 1; }
-	virtual int				GetMaxBurst() { return 3; }
+	virtual int GetMinBurst() { return 1; }
+	virtual int GetMaxBurst() { return 3; }
 
-	bool StartReload(void);
-	bool Reload(void);
-	void FillClip(void);
-	void FinishReload(void);
-	void CheckHolsterReload(void);
-	void Pump(void);
-	//	void WeaponIdle( void );
-	void ItemHolsterFrame(void);
-	void ItemPostFrame(void);
-	void PrimaryAttack(void);
-	//void SecondaryAttack(void);
-	void DryFire(void);
-	virtual float GetFireRate(void) { return 0.7; };
+	bool StartReload( void );
+	bool Reload( void );
+	void FillClip( void );
+	void FinishReload( void );
+	void CheckHolsterReload( void );
+	void Pump( void );
+	void ItemHolsterFrame( void );
+	void ItemPostFrame( void );
+	void PrimaryAttack( void );
+	void DryFire( void );
 
-#ifndef CLIENT_DLL
+	virtual float GetFireRate( void ) { return 0.7; };
+
 	DECLARE_ACTTABLE();
-#endif
 
-	CWeapon12Gauge(void);
+	CWeapon12Gauge( void );
 
 private:
-	CWeapon12Gauge(const CWeapon12Gauge &);
+	CWeapon12Gauge( const CWeapon12Gauge & );
 };
 
-IMPLEMENT_NETWORKCLASS_ALIASED(Weapon12Gauge, DT_Weapon12Gauge)
+IMPLEMENT_NETWORKCLASS_ALIASED( Weapon12Gauge, DT_Weapon12Gauge )
 
-BEGIN_NETWORK_TABLE(CWeapon12Gauge, DT_Weapon12Gauge)
+BEGIN_NETWORK_TABLE( CWeapon12Gauge, DT_Weapon12Gauge )
 #ifdef CLIENT_DLL
-RecvPropBool(RECVINFO(m_bNeedPump)),
-RecvPropBool(RECVINFO(m_bDelayedFire1)),
-RecvPropBool(RECVINFO(m_bDelayedFire2)),
-RecvPropBool(RECVINFO(m_bDelayedReload)),
+	RecvPropBool( RECVINFO( m_bNeedPump ) ),
+	RecvPropBool( RECVINFO( m_bDelayedFire1 ) ),
+	RecvPropBool( RECVINFO( m_bDelayedFire2 ) ),
+	RecvPropBool( RECVINFO( m_bDelayedReload ) ),
 #else
-SendPropBool(SENDINFO(m_bNeedPump)),
-SendPropBool(SENDINFO(m_bDelayedFire1)),
-SendPropBool(SENDINFO(m_bDelayedFire2)),
-SendPropBool(SENDINFO(m_bDelayedReload)),
+	SendPropBool( SENDINFO( m_bNeedPump ) ),
+	SendPropBool( SENDINFO( m_bDelayedFire1 ) ),
+	SendPropBool( SENDINFO( m_bDelayedFire2 ) ),
+	SendPropBool( SENDINFO( m_bDelayedReload ) ),
 #endif
 END_NETWORK_TABLE()
 
 #ifdef CLIENT_DLL
-BEGIN_PREDICTION_DATA(CWeapon12Gauge)
-DEFINE_PRED_FIELD(m_bNeedPump, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
-DEFINE_PRED_FIELD(m_bDelayedFire1, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
-DEFINE_PRED_FIELD(m_bDelayedFire2, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
-DEFINE_PRED_FIELD(m_bDelayedReload, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+BEGIN_PREDICTION_DATA( CWeapon12Gauge )
+	DEFINE_PRED_FIELD( m_bNeedPump, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bDelayedFire1, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bDelayedFire2, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bDelayedReload, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 #endif
 
-LINK_ENTITY_TO_CLASS(weapon_12gauge, CWeapon12Gauge);
-PRECACHE_WEAPON_REGISTER(weapon_12gauge);
+LINK_ENTITY_TO_CLASS( weapon_12gauge, CWeapon12Gauge );
+PRECACHE_WEAPON_REGISTER( weapon_12gauge );
 
-#ifndef CLIENT_DLL
 acttable_t CWeapon12Gauge::m_acttable[] =
 {
 	{ ACT_MP_STAND_IDLE, ACT_DOD_STAND_IDLE_TOMMY, false },
@@ -128,9 +120,6 @@ acttable_t CWeapon12Gauge::m_acttable[] =
 };
 
 IMPLEMENT_ACTTABLE(CWeapon12Gauge);
-
-#endif
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Override so only reload one shell at a time
@@ -355,55 +344,6 @@ void CWeapon12Gauge::PrimaryAttack(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//
-//
-//-----------------------------------------------------------------------------
-/*void CWeapon12Gauge::SecondaryAttack(void)
-{
-	// Only the player fires this way so we can cast
-	CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
-
-	if (!pPlayer)
-	{
-		return;
-	}
-
-	pPlayer->m_nButtons &= ~IN_ATTACK2;
-	// MUST call sound before removing a round from the clip of a CMachineGun
-	WeaponSound(WPN_DOUBLE);
-
-	pPlayer->DoMuzzleFlash();
-
-	SendWeaponAnim(ACT_VM_SECONDARYATTACK);
-
-	// Don't fire again until fire animation has completed
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
-	m_iClip1 -= 2;	// Shotgun uses same clip for primary and secondary attacks
-
-	// player "shoot" animation
-	pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-	Vector vecSrc = pPlayer->Weapon_ShootPosition();
-	Vector vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	FireBulletsInfo_t info(12, vecSrc, vecAiming, GetBulletSpread(), MAX_TRACE_LENGTH, m_iPrimaryAmmoType);
-	info.m_pAttacker = pPlayer;
-
-	// Fire the bullets, and force the first shot to be perfectly accuracy
-	pPlayer->FireBullets(info);
-	pPlayer->ViewPunch(QAngle(SharedRandomFloat("shotgunsax", -5, 5), 0, 0));
-
-	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
-	{
-		// HEV suit - indicate out of ammo condition
-		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-	}
-
-	m_bNeedPump = true;
-}*/
-
-//-----------------------------------------------------------------------------
 // Purpose: Override so shotgun can do mulitple reloads in a row
 //-----------------------------------------------------------------------------
 void CWeapon12Gauge::ItemPostFrame(void)
@@ -612,11 +552,8 @@ void CWeapon12Gauge::ItemHolsterFrame(void)
 		return;
 
 	// If it's been longer than three seconds, reload
-	if ((gpGlobals->curtime - m_flHolsterTime) > sk_auto_reload_time.GetFloat())
+	if ( (gpGlobals->curtime) > 3 )
 	{
-		// Reset the timer
-		m_flHolsterTime = gpGlobals->curtime;
-
 		if (GetOwner() == NULL)
 			return;
 
@@ -630,23 +567,3 @@ void CWeapon12Gauge::ItemHolsterFrame(void)
 		m_iClip1 += ammoFill;
 	}
 }
-
-//==================================================
-// Purpose: 
-//==================================================
-/*
-void CWeapon12Gauge::WeaponIdle( void )
-{
-//Only the player fires this way so we can cast
-CBasePlayer *pPlayer = GetOwner()
-
-if ( pPlayer == NULL )
-return;
-
-//If we're on a target, play the new anim
-if ( pPlayer->IsOnTarget() )
-{
-SendWeaponAnim( ACT_VM_IDLE_ACTIVE );
-}
-}
-*/

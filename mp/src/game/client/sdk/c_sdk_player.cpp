@@ -104,6 +104,7 @@ BEGIN_RECV_TABLE_NOBASE( C_SDKPlayer, DT_SDKLocalPlayerExclusive )
 	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
 //	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
 	RecvPropInt( RECVINFO( m_ArmorValue ) ),
+	RecvPropInt( RECVINFO( m_MaxArmorValue ) ),
 END_RECV_TABLE()
 
 BEGIN_RECV_TABLE_NOBASE( C_SDKPlayer, DT_SDKNonLocalPlayerExclusive )

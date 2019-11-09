@@ -7,57 +7,53 @@
 #include "cbase.h"
 #include "npcevent.h"
 #include "in_buttons.h"
+#include "weapon_sdkbase_combatweapon.h"
+#include "tfc_projectile_base.h"
+#include "sdk_fx_shared.h"
 
 #ifdef CLIENT_DLL
-#include "c_sdk_player.h"
+	#include "c_sdk_player.h"
 #else
-#include "sdk_player.h"
-#include "basegrenade_shared.h"
+	#include "sdk_player.h"
 #endif
 
-#include "weapon_sdkbase.h"
-#include "weapon_hl2mpbase_machinegun.h"
-#include "tfc_projectile_base.h"
-
 #ifdef CLIENT_DLL
-#define CWeaponSuperNailGun C_WeaponSuperNailGun
+	#define CWeaponSuperNailGun C_WeaponSuperNailGun
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define SMG1_GRENADE_DAMAGE 100.0f
-#define SMG1_GRENADE_RADIUS 250.0f
 #define BOLT_AIR_VELOCITY	3500
 #define BOLT_WATER_VELOCITY	1500
 
-class CWeaponSuperNailGun : public CHL2MPMachineGun
+class CWeaponSuperNailGun : public CSDKMachineGun
 {
 public:
-	DECLARE_CLASS(CWeaponSuperNailGun, CHL2MPMachineGun);
+	DECLARE_CLASS( CWeaponSuperNailGun, CSDKMachineGun );
 
 	CWeaponSuperNailGun();
 
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
-	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_SUPERNAILGUN; }
-	virtual bool CanWeaponBeDropped() const				{ return false; }
+	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_SUPERNAILGUN; }
+	virtual bool CanWeaponBeDropped() const { return false; }
 
-	void	Precache(void);
-	void	AddViewKick(void);
-	virtual void	PrimaryAttack();
+	void Precache( void );
+	void AddViewKick( void );
+	virtual void PrimaryAttack();
 
-	int		GetMinBurst() { return 2; }
-	int		GetMaxBurst() { return 5; }
+	int GetMinBurst() { return 2; }
+	int GetMaxBurst() { return 5; }
 
-	virtual void Equip(CBaseCombatCharacter *pOwner);
-	bool	Reload(void);
+	virtual void Equip( CBaseCombatCharacter *pOwner );
+	bool Reload( void );
 
-	float	GetFireRate(void) { return 0.075f; }	// 13.3hz
-	Activity	GetPrimaryAttackActivity(void);
+	float GetFireRate( void ) { return 0.075f; }	// 13.3hz
+	Activity GetPrimaryAttackActivity( void );
 
-	virtual const Vector& GetBulletSpread(void)
+	virtual const Vector& GetBulletSpread( void )
 	{
 		static const Vector cone = VECTOR_CONE_5DEGREES;
 		return cone;
@@ -65,9 +61,7 @@ public:
 
 	const WeaponProficiencyInfo_t *GetProficiencyValues();
 
-#ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
-#endif
 
 protected:
 
@@ -75,21 +69,20 @@ protected:
 	float	m_flNextGrenadeCheck;
 
 private:
-	CWeaponSuperNailGun(const CWeaponSuperNailGun &);
+	CWeaponSuperNailGun( const CWeaponSuperNailGun & );
 };
 
-IMPLEMENT_NETWORKCLASS_ALIASED(WeaponSuperNailGun, DT_WeaponSuperNailGun)
+IMPLEMENT_NETWORKCLASS_ALIASED( WeaponSuperNailGun, DT_WeaponSuperNailGun )
 
-BEGIN_NETWORK_TABLE(CWeaponSuperNailGun, DT_WeaponSuperNailGun)
+BEGIN_NETWORK_TABLE( CWeaponSuperNailGun, DT_WeaponSuperNailGun )
 END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CWeaponSuperNailGun)
+BEGIN_PREDICTION_DATA( CWeaponSuperNailGun )
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS(weapon_supernailgun, CWeaponSuperNailGun);
-PRECACHE_WEAPON_REGISTER(weapon_supernailgun);
+LINK_ENTITY_TO_CLASS( weapon_supernailgun, CWeaponSuperNailGun );
+PRECACHE_WEAPON_REGISTER( weapon_supernailgun );
 
-#ifndef CLIENT_DLL
 acttable_t CWeaponSuperNailGun::m_acttable[] =
 {
 	{ ACT_MP_STAND_IDLE, ACT_DOD_STAND_IDLE_TOMMY, false },
@@ -116,7 +109,6 @@ acttable_t CWeaponSuperNailGun::m_acttable[] =
 };
 
 IMPLEMENT_ACTTABLE(CWeaponSuperNailGun);
-#endif
 
 //=========================================================
 CWeaponSuperNailGun::CWeaponSuperNailGun()
@@ -209,91 +201,82 @@ void CWeaponSuperNailGun::AddViewKick(void)
 //-----------------------------------------------------------------------------
 void CWeaponSuperNailGun::PrimaryAttack(void)
 {
-	// Only the player fires this way so we can cast
-	CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
-	if (!pPlayer)
-		return;
-
-	// Abort here to handle burst and auto fire modes
-	if ((UsesClipsForAmmo1() && m_iClip1 == 0) || (!UsesClipsForAmmo1() && !pPlayer->GetAmmoCount(m_iPrimaryAmmoType)))
-		return;
-
-	m_nShotsFired++;
-
-	pPlayer->DoMuzzleFlash();
-
-	// To make the firing framerate independent, we may have to fire more than one bullet here on low-framerate systems, 
-	// especially if the weapon we're firing has a really fast rate of fire.
-	int iBulletsToFire = 0;
-	float fireRate = GetFireRate();
-
-	while (m_flNextPrimaryAttack <= gpGlobals->curtime)
+	// If my clip is empty (and I use clips) start reload
+	if ( UsesClipsForAmmo1() && !m_iClip1 ) 
 	{
-		// MUST call sound before removing a round from the clip of a CHLMachineGun
-		WeaponSound(SINGLE, m_flNextPrimaryAttack);
-		m_flNextPrimaryAttack = m_flNextPrimaryAttack + fireRate;
-		iBulletsToFire++;
-	}
-
-	// Make sure we don't fire more than the amount in the clip, if this weapon uses clips
-	if (UsesClipsForAmmo1())
-	{
-		if (iBulletsToFire > m_iClip1)
-			iBulletsToFire = m_iClip1;
-		m_iClip1 -= iBulletsToFire;
-	}
-
-	//Fire the Nails
-	CBasePlayer *pOwner = ToBasePlayer(GetOwner());
-
-	if (pOwner == NULL)
+		Reload();
 		return;
+	}
+ 
+	CSDKPlayer *pPlayer = GetPlayerOwner();
+	if ( !pPlayer )
+		return;
+ 
+	//Tony; check firemodes -- 
+	switch(GetFireMode())
+	{
+	case FM_SEMIAUTOMATIC:
+		if ( pPlayer->GetShotsFired() > 0 )
+			return;
+		break;
+		//Tony; added an accessor to determine the max burst on a per-weapon basis.
+	case FM_BURST:
+		if ( pPlayer->GetShotsFired() > MaxBurstShots() )
+			return;
+		break;
+	}
 
 #ifndef CLIENT_DLL
-	Vector vecAiming = pOwner->GetAutoaimVector(0);
-	Vector vecSrc = pOwner->Weapon_ShootPosition();
+	Vector vecAiming = pPlayer->GetAutoaimVector( 0 );
+	Vector vecSrc = pPlayer->Weapon_ShootPosition();
 
 	QAngle angAiming;
-	VectorAngles(vecAiming, angAiming);
+	VectorAngles( vecAiming, angAiming );
 
-	CTFCProjectileBase* pBolt = CTFCProjectileBase::Create("tf_proj_nail", pOwner->Weapon_ShootPosition(), pOwner->EyeAngles(), pOwner, Vector(0, 0, 0), 8.0f);
-
-	if (pOwner->GetWaterLevel() == 3)
-	{
-		pBolt->SetAbsVelocity(vecAiming * BOLT_WATER_VELOCITY);
-	}
+	CTFCProjectileBase* pBolt = CTFCProjectileBase::Create( "tf_proj_nail", pPlayer->Weapon_ShootPosition(), pPlayer->EyeAngles(), pPlayer, Vector( 0,0,0 ), 8.0f );
+	if ( pPlayer->GetWaterLevel() == 3 )
+		pBolt->SetAbsVelocity( vecAiming * BOLT_WATER_VELOCITY );
 	else
-	{
-		pBolt->SetAbsVelocity(vecAiming * BOLT_AIR_VELOCITY);
-	}
+		pBolt->SetAbsVelocity( vecAiming * BOLT_AIR_VELOCITY );
 
 #endif
 
-	//Factor in the view kick
-	AddViewKick();
-
-	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
-	{
-		// HEV suit - indicate out of ammo condition
-		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
-	}
-
-	SendWeaponAnim(GetPrimaryAttackActivity());
-	pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-	// Decrease ammo
-	if (UsesClipsForAmmo1())
-	{
-		pPlayer->RemoveAmmo(1, m_iClip1);
-	}
+#ifdef GAME_DLL
+	pPlayer->NoteWeaponFired();
+#endif
+ 
+	pPlayer->DoMuzzleFlash();
+ 
+	SendWeaponAnim( GetPrimaryAttackActivity() );
+ 
+	// Make sure we don't fire more than the amount in the clip
+	if ( UsesClipsForAmmo1() )
+		m_iClip1 --;
 	else
-	{
-		pPlayer->RemoveAmmo(1, m_iPrimaryAmmoType);
-	}
-
-
-	// Can shoot again immediately
-	m_flNextPrimaryAttack = gpGlobals->curtime + 0.2f;
+		pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+ 
+	pPlayer->IncreaseShotsFired();
+ 
+	float flSpread = GetWeaponSpread();
+ 
+	FX_FireBullets(
+		pPlayer->entindex(),
+		pPlayer->Weapon_ShootPosition(),
+		pPlayer->EyeAngles() + pPlayer->GetPunchAngle(),
+		GetWeaponID(),
+		0, //Tony; fire mode - this is unused at the moment, left over from CSS when SDK* was created in the first place.
+		CBaseEntity::GetPredictionRandomSeed() & 255,
+		flSpread
+		);
+ 
+ 
+	//Add our view kick in
+	AddViewKick();
+ 
+	//Tony; update our weapon idle time
+	SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration() );
+ 
+	m_flNextPrimaryAttack = gpGlobals->curtime + GetFireRate();
 
 }
 

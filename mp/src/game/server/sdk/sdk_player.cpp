@@ -83,7 +83,10 @@ void* SendProxy_SendNonLocalDataTable( const SendProp* pProp, const void* pStruc
 // Tables.
 // -------------------------------------------------------------------------------- //
 BEGIN_DATADESC( CSDKPlayer )
-DEFINE_THINKFUNC( SDKPushawayThink ),
+	DEFINE_THINKFUNC( SDKPushawayThink ),
+
+	DEFINE_FIELD( m_ArmorValue, FIELD_INTEGER ),
+	DEFINE_FIELD( m_MaxArmorValue, FIELD_INTEGER ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( player, CSDKPlayer );
@@ -118,6 +121,7 @@ BEGIN_SEND_TABLE_NOBASE( CSDKPlayer, DT_SDKLocalPlayerExclusive )
 //	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 10, SPROP_CHANGES_OFTEN ),
 
 	SendPropInt( SENDINFO( m_ArmorValue ), 8, SPROP_UNSIGNED ),
+	SendPropInt( SENDINFO( m_MaxArmorValue ), 8, SPROP_UNSIGNED ),
 END_SEND_TABLE()
 
 BEGIN_SEND_TABLE_NOBASE( CSDKPlayer, DT_SDKNonLocalPlayerExclusive )
@@ -368,12 +372,13 @@ void CSDKPlayer::Spawn()
 
 	ClearDamagerHistory();// clear damager History
 
-	SetArmorValue(SpawnArmorValue());
+	//SetArmorValue( SpawnArmorValue() );
 
 	SetContextThink( &CSDKPlayer::SDKPushawayThink, gpGlobals->curtime + PUSHAWAY_THINK_INTERVAL, SDK_PUSHAWAY_THINK_CONTEXT );
 	pl.deadflag = false;
 
 }
+
 bool CSDKPlayer::SelectSpawnSpot( const char *pEntClassName, CBaseEntity* &pSpot )
 {
 	// Find the next spawn spot.
@@ -1730,4 +1735,41 @@ bool CSDKPlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const
 		return false;
 
 	return BaseClass::WantsLagCompensationOnEntity( pPlayer, pCmd, pEntityTransmitBits );
+}
+
+void CSDKPlayer::IncrementHealthValue( int nCount )
+{ 
+	m_iHealth += nCount;
+	if ( m_iMaxHealth > 0 && m_iHealth > m_iMaxHealth )
+		m_iHealth = m_iMaxHealth;
+}
+
+void CSDKPlayer::SetHealth( int value ) 
+{ 
+	m_iHealth = value; 
+}
+
+void CSDKPlayer::SetMaxHealth( int MaxValue ) 
+{ 
+	m_iMaxHealth = MaxValue; 
+}
+
+void CSDKPlayer::IncrementArmorValue( int nCount, int nMaxValue )
+{ 
+	nMaxValue = m_MaxArmorValue;
+	if ( nMaxValue > 0 )
+	{
+		if ( m_MaxArmorValue > nMaxValue )
+			m_MaxArmorValue = nMaxValue;
+	}
+}	
+
+void CSDKPlayer::SetArmorValue( int value )
+{
+	m_ArmorValue = value;
+}
+
+void CSDKPlayer::SetMaxArmorValue( int MaxArmorValue )
+{
+	m_MaxArmorValue = MaxArmorValue;
 }
