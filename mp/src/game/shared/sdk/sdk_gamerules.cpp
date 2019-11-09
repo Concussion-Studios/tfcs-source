@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: The TF Game rules 
 //
@@ -13,13 +13,10 @@
 #include "filesystem.h"
 
 #ifdef CLIENT_DLL
-
 	#include "precache_register.h"
 	#include "c_sdk_player.h"
 	#include "c_sdk_team.h"
-
 #else
-	
 	#include "voice_gamemgr.h"
 	#include "sdk_player.h"
 	#include "sdk_team.h"
@@ -68,8 +65,10 @@ REGISTER_GAMERULES_CLASS( CSDKGameRules );
 BEGIN_NETWORK_TABLE_NOBASE( CSDKGameRules, DT_SDKGameRules )
 #if defined ( CLIENT_DLL )
 	RecvPropFloat( RECVINFO( m_flGameStartTime ) ),
+	RecvPropInt( RECVINFO( m_nGamemode ) ),
 #else
 	SendPropFloat( SENDINFO( m_flGameStartTime ), 32, SPROP_NOSCALE ),
+	SendPropInt( SENDINFO( m_nGamemode ), GAMEMODE_LAST, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 #endif
 END_NETWORK_TABLE()
 
@@ -79,40 +78,6 @@ ConVar mp_ignorefriendlyjustheal("mp_ignorefriendlyjustheal", "0", FCVAR_REPLICA
 ConVar mp_4team("mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random.");
 ConVar mp_deathmatch("mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn.");
 ConVar mp_teamfull_spawnpoints("mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>");
-
-LINK_ENTITY_TO_CLASS( sdk_gamerules, CSDKGameRulesProxy );
-IMPLEMENT_NETWORKCLASS_ALIASED( SDKGameRulesProxy, DT_SDKGameRulesProxy )
-
-
-#ifdef CLIENT_DLL
-	void RecvProxy_SDKGameRules( const RecvProp *pProp, void **pOut, void *pData, int objectID )
-	{
-		CSDKGameRules *pRules = SDKGameRules();
-		Assert( pRules );
-		*pOut = pRules;
-	}
-
-	BEGIN_RECV_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
-		RecvPropDataTable( "sdk_gamerules_data", 0, 0, &REFERENCE_RECV_TABLE( DT_SDKGameRules ), RecvProxy_SDKGameRules )
-	END_RECV_TABLE()
-#else
-	void *SendProxy_SDKGameRules( const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID )
-	{
-		CSDKGameRules *pRules = SDKGameRules();
-		Assert( pRules );
-		pRecipients->SetAllRecipients();
-		return pRules;
-	}
-
-	BEGIN_SEND_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
-		SendPropDataTable( "sdk_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_SDKGameRules ), SendProxy_SDKGameRules )
-	END_SEND_TABLE()
-#endif
-
-#ifndef CLIENT_DLL
-	ConVar sk_plr_dmg_grenade( "sk_plr_dmg_grenade","0");		
-#endif
-
 ConVar mp_limitteams( 
 	"mp_limitteams", 
 	"2", 
@@ -121,6 +86,34 @@ ConVar mp_limitteams(
 	true, 0,	// min value
 	true, 30	// max value
 );
+
+LINK_ENTITY_TO_CLASS( sdk_gamerules, CSDKGameRulesProxy );
+IMPLEMENT_NETWORKCLASS_ALIASED( SDKGameRulesProxy, DT_SDKGameRulesProxy )
+
+#ifdef CLIENT_DLL
+void RecvProxy_SDKGameRules( const RecvProp *pProp, void **pOut, void *pData, int objectID )
+{
+	CSDKGameRules *pRules = SDKGameRules();
+	Assert( pRules );
+	*pOut = pRules;
+}
+
+BEGIN_RECV_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
+	RecvPropDataTable( "sdk_gamerules_data", 0, 0, &REFERENCE_RECV_TABLE( DT_SDKGameRules ), RecvProxy_SDKGameRules )
+END_RECV_TABLE()
+#else
+void *SendProxy_SDKGameRules( const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID )
+{
+	CSDKGameRules *pRules = SDKGameRules();
+	Assert( pRules );
+	pRecipients->SetAllRecipients();
+	return pRules;
+}
+
+BEGIN_SEND_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
+	SendPropDataTable( "sdk_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_SDKGameRules ), SendProxy_SDKGameRules )
+END_SEND_TABLE()
+#endif
 
 static CSDKViewVectors g_SDKViewVectors(
 
@@ -196,15 +189,37 @@ CSDKGameRules::~CSDKGameRules()
 #endif
 }
 
-#ifdef CLIENT_DLL
+//-----------------------------------------------------------------------------
+// Purpose: Returns the game mode whe are currently
+//-----------------------------------------------------------------------------
+bool CTFGameRules::InGametype( int nGamemode )
+{	
+	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
+	return ( ( m_nGamemode & (1<<nGamemode) ) != 0 );
+}
 
+//-----------------------------------------------------------------------------
+// Purpose: Change this gamemode
+//-----------------------------------------------------------------------------
+void CTFGameRules::AddGametype( int nGametype )
+{
+	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
+	m_nGamemode |= (1<<nGamemode);
+}
 
-#else
+//-----------------------------------------------------------------------------
+// Purpose: Remove this gamemode
+//-----------------------------------------------------------------------------
+void CTFGameRules::RemoveGametype( int nGametype )
+{
+	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
+	m_nGamemode &= ~(1<<nGamemode);
+}
 
+#ifndef CLIENT_DLL
 // --------------------------------------------------------------------------------------------------- //
 // Voice helper
 // --------------------------------------------------------------------------------------------------- //
-
 class CVoiceGameMgrHelper : public IVoiceGameMgrHelper
 {
 public:
@@ -224,9 +239,9 @@ public:
 };
 CVoiceGameMgrHelper g_VoiceGameMgrHelper;
 IVoiceGameMgrHelper *g_pVoiceGameMgrHelper = &g_VoiceGameMgrHelper;
+#endif //!CLIENT_DLL
 
-
-
+#ifndef CLIENT_DLL
 // --------------------------------------------------------------------------------------------------- //
 // Globals.
 // --------------------------------------------------------------------------------------------------- //
