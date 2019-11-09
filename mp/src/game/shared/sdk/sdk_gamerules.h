@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: The TF Game rules object
 //
@@ -6,14 +6,11 @@
 // $Date:         $
 // $NoKeywords: $
 //=============================================================================//
-
 #ifndef SDK_GAMERULES_H
 #define SDK_GAMERULES_H
-
 #ifdef _WIN32
 #pragma once
 #endif
-
 
 #include "teamplay_gamerules.h"
 #include "convar.h"
@@ -27,7 +24,6 @@
 	#include "sdk_player.h"
 	#include "utlqueue.h"
 	#include "playerclass_info_parse.h"
-
 #endif
 
 
@@ -35,7 +31,6 @@
 	#define CSDKGameRules C_SDKGameRules
 	#define CSDKGameRulesProxy C_SDKGameRulesProxy
 #endif
-
 
 class CSDKGameRulesProxy : public CGameRulesProxy
 {
@@ -97,7 +92,7 @@ public:
 
 	virtual bool	ShouldCollide( int collisionGroup0, int collisionGroup1 );
 
-	virtual int		PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
+	virtual int	PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 	virtual bool	IsTeamplay( void ) { return true; }
 
 	// Get the view vectors for this mod.
@@ -113,11 +108,8 @@ public:
 	virtual bool IsConnectedUserInfoChangeAllowed( CBasePlayer *pPlayer ) { return true; }
 
 #ifdef CLIENT_DLL
-
 	DECLARE_CLIENTCLASS_NOBASE(); // This makes datatables able to access our private vars.
-
 #else
-
 	DECLARE_SERVERCLASS_NOBASE(); // This makes datatables able to access our private vars.
 
 	virtual const char *GetGameDescription( void ) { return SDK_GAME_DESCRIPTION; } 
@@ -151,6 +143,7 @@ public:
 	int SelectDefaultTeam( void );
 
 	virtual void ServerActivate();
+
 protected:
 	void CheckPlayerPositions( void );
 
@@ -171,10 +164,14 @@ private:
 public:
 	virtual void DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	const char *GetKillingWeaponName( const CTakeDamageInfo &info, CSDKPlayer *pVictim, int *iWeaponID );
-	CBasePlayer* GetAssister(CBasePlayer *pVictim, CBasePlayer *pScorer, CBaseEntity *pInflictor);
-	CSDKPlayer*		GetRecentDamager(CSDKPlayer *pVictim, int iDamager, float flMaxElapsed);
+	CBasePlayer* GetAssister( CBasePlayer *pVictim, CBasePlayer *pScorer, CBaseEntity *pInflictor );
+	CSDKPlayer* GetRecentDamager( CSDKPlayer *pVictim, int iDamager, float flMaxElapsed );
 
 #endif
+	// changes, restor our gamemode based on the map/logic ent.
+	bool InGameMode( int nGamemode );
+	void AddGameMode( int nGamemode );
+	void RemoveGameMode( int nGamemode );
 
 public:
 	float GetMapRemainingTime();	// time till end of map, -1 if timelimit is disabled
@@ -182,16 +179,15 @@ public:
 
 private:
 	CNetworkVar( float, m_flGameStartTime );
+	CNetworkVar( int, m_nGamemode ); // Type of game mode this map is ( CTF, CP )
 };
 
 //-----------------------------------------------------------------------------
-// Gets us at the team fortress game rules
+// Gets us at the team fortress classic game rules
 //-----------------------------------------------------------------------------
-
 inline CSDKGameRules* SDKGameRules()
 {
 	return static_cast<CSDKGameRules*>(g_pGameRules);
 }
-
 
 #endif // SDK_GAMERULES_H
