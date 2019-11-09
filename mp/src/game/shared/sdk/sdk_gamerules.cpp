@@ -153,6 +153,8 @@ const CSDKViewVectors *CSDKGameRules::GetSDKViewVectors() const
 CSDKGameRules::CSDKGameRules()
 {
 #ifndef CLIENT_DLL
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[C_SDKGameRules] Creating Gamerules....\n" );
+
 	InitTeams();
 
 	InitDefaultAIRelationships();
@@ -168,12 +170,17 @@ CSDKGameRules::CSDKGameRules()
 
 	if ( filesystem->FileExists( UTIL_VarArgs( "maps/cfg/%s.cfg", STRING(gpGlobals->mapname) ) ) )
 	{
-		// Execute a map specific cfg file - as in Day of Defeat
+		// Execute a map specific cfg file
+		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing map %s config file\n",  STRING( gpGlobals->mapname )  );
 		engine->ServerCommand( UTIL_VarArgs( "exec %s.cfg */maps\n", STRING(gpGlobals->mapname) ) );
 		engine->ServerExecute();
 	}
+	else
+	{
+		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Could not load map %s config file skiping...\n",  STRING( gpGlobals->mapname )  );
+	}
 #else
-
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Creating Gamerules....\n" );
 #endif
 }
 
@@ -183,9 +190,13 @@ CSDKGameRules::CSDKGameRules()
 CSDKGameRules::~CSDKGameRules()
 {
 #ifndef CLIENT_DLL
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[CSDKGameRules] Destroying Gamerules....\n" );
+
 	// Note, don't delete each team since they are in the gEntList and will 
 	// automatically be deleted from there, instead.
 	g_Teams.Purge();
+#else
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[C_SDKGameRules] Destroying Gamerules....\n" );
 #endif
 }
 
@@ -393,7 +404,7 @@ void CSDKGameRules::ServerActivate()
 	m_flGameStartTime = gpGlobals->curtime;
 	if ( !IsFinite( m_flGameStartTime.Get() ) )
 	{
-		Warning( "Trying to set a NaN game start time\n" );
+		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Trying to set a NaN game start time!\n" );
 		m_flGameStartTime.GetForModify() = 0.0f;
 	}
 }
@@ -1066,7 +1077,7 @@ void CSDKGameRules::ChooseRandomClass( CSDKPlayer *pPlayer )
 	// If ALL the classes are full
 	if( numChoices == 0 )
 	{
-		Msg( "Random class found that all classes were full - ignoring class limits for this spawn\n" );
+		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Random class found that all classes were full - ignoring class limits for this spawn!\n" );
 
 		// TEST TEST
 		//pPlayer->m_Shared.SetPlayerClass( random->RandomFloat( firstclass, lastclass ) );
@@ -1700,9 +1711,6 @@ CAmmoDef* GetAmmoDef()
 		// def.AddAmmoType( BULLET_PLAYER_50AE,		DMG_BULLET, TRACER_LINE, 0, 0, "ammo_50AE_max",		2400, 0, 10, 14 );
 		def.AddAmmoType( "shotgun", DMG_BUCKSHOT, TRACER_NONE, 0, 0,	200/*max carry*/, 1, 0 );
 		def.AddAmmoType( "grenades", DMG_BLAST, TRACER_NONE, 0, 0,	4/*max carry*/, 1, 0 );
-
-		//Tony; added for the sdk_jeep
-		def.AddAmmoType( "JeepAmmo",	DMG_SHOCK,					TRACER_NONE,			"sdk_jeep_weapon_damage",		"sdk_jeep_weapon_damage", "sdk_jeep_max_rounds", BULLET_IMPULSE(650, 8000), 0 );
 	}
 
 	return &def;
