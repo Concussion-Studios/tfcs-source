@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -65,6 +65,22 @@ extern const char *pszTeamNames[];
 #define SDK_DEFAULT_PLAYER_PRONESPEED		50
 
 #define SDK_PLAYER_INDEX_NONE			( MAX_PLAYERS + 1 )
+
+// For the game rules to determine which type of game we're playing
+enum TFCGameModes
+{
+	GAMEMODE_UNDEFINED = 0,
+	GAMEMODE_CTF, 		// Capture the Flag
+	GAMEMODE_CP, 		// Control Point
+	GAMEMODE_TC, 		// Territory Control
+	GAMEMODE_AD, 		// Atack & Defend
+	GAMEMODE_ESC, 		// Escort/VIP
+	GAMEMODE_TDM, 		// Team Deathmatch
+	GAMEMODE_DOM, 		// Domination
+	GAMEMODE_LAST
+};
+
+extern const char *pszGameModeNames[];	// localized gamemode names
 
 // Weapon IDs for all SDK Game weapons
 typedef enum
