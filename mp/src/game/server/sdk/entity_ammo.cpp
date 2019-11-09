@@ -155,12 +155,29 @@ LINK_ENTITY_TO_CLASS( item_ammo_explosives, CBoxShellRounds );
 // ========================================================================
 //	>> CEntityBackPack
 // ========================================================================
-class CEntityBackPack : public CEntityAmmo
+class CEntityBackPack : public CItem
 {
 public:
-	DECLARE_CLASS( CEntityBackPack, CEntityAmmo );
+	DECLARE_CLASS( CEntityBackPack, CItem );
 
-	const char* WorldModel() { return "models/items/boxmrounds.mdl"; }
+	void Spawn( void )
+	{
+		Precache();
+
+		SetModel( WorldModel() );
+
+		BaseClass::Spawn();
+	}
+
+	void Precache( void )
+	{
+		PrecacheModel( WorldModel() );
+	}
+
+	const char* WorldModel() 
+	{ 
+		return "models/items/boxmrounds.mdl"; 
+	}
 
 	bool MyTouch( CBasePlayer *pPlayer )
 	{

@@ -50,5 +50,5 @@ bool CEntityArmor::MyTouch( CBasePlayer *pPlayer )
 	return bSuccess;
 }
 
-LINK_ENTITY_TO_CLASS( item_armor, CEntityArmor );
-PRECACHE_REGISTER( item_armor );
+LINK_ENTITY_TO_CLASS( entity_armor, CEntityArmor );
+PRECACHE_REGISTER( entity_armor );
