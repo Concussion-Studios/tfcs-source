@@ -33,7 +33,15 @@ bool CEntityArmor::MyTouch( CBasePlayer *pPlayer )
 	CSDKPlayer *pSDKPlayer = ToSDKPlayer( pPlayer );
 	if ( pSDKPlayer )
 	{
-		pSDKPlayer->IncrementArmorValue( ARMOR_CAPACITY, -1 );
+		const float MaxArmor = pSDKPlayer->GetMaxArmorValue();
+		float Armor = pSDKPlayer->GetArmorValue();
+		float DefaultArmot = ARMOR_CAPACITY;
+
+		if ( MaxArmor == Armor )
+			return false;
+
+		if ( Armor <= MaxArmor )
+			pSDKPlayer->IncrementArmorValue( DefaultArmot );
 	
 		CSingleUserRecipientFilter user( pPlayer );
 		user.MakeReliable();
