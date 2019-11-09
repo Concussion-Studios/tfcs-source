@@ -192,7 +192,7 @@ CSDKGameRules::~CSDKGameRules()
 //-----------------------------------------------------------------------------
 // Purpose: Returns the game mode whe are currently
 //-----------------------------------------------------------------------------
-bool CSDKGameRules::InGametype( int nGamemode )
+bool CSDKGameRules::InGameMode( int nGamemode )
 {	
 	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
 	return ( ( m_nGamemode & (1<<nGamemode) ) != 0 );
@@ -201,7 +201,7 @@ bool CSDKGameRules::InGametype( int nGamemode )
 //-----------------------------------------------------------------------------
 // Purpose: Change this gamemode
 //-----------------------------------------------------------------------------
-void CSDKGameRules::AddGametype( int nGametype )
+void CSDKGameRules::AddGameMode( int nGamemode )
 {
 	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
 	m_nGamemode |= (1<<nGamemode);
@@ -210,7 +210,7 @@ void CSDKGameRules::AddGametype( int nGametype )
 //-----------------------------------------------------------------------------
 // Purpose: Remove this gamemode
 //-----------------------------------------------------------------------------
-void CSDKGameRules::RemoveGametype( int nGametype )
+void CSDKGameRules::RemoveGameMode( int nGamemode )
 {
 	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
 	m_nGamemode &= ~(1<<nGamemode);
