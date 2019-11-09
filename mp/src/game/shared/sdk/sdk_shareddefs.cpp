@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -44,6 +44,19 @@ const char *pszTeamNames[] =
 	"#SDK_Team_Red",
 	"#SDK_Team_Green",
 	"#SDK_Team_Yellow",
+};
+
+// GameModes.
+const char *pszGameModeNames[] =
+{
+	"Undefined",			// GAMEMODE_UNDEFINED : #GameMode_Undefined
+	"Capture The Flag",		// GAMEMODE_CTF : #GameMode_CTF
+	"Control Point",		// GAMEMODE_CP : #GameMode_CP
+	"Territorial Control",		// GAMEMODE_TC : #GameMode_TC
+	"Atack & Defend",		// GAMEMODE_AD : #GameMode_AD
+	"Player Escort",		// GAMEMODE_ESC : #GameMode_ESC
+	"Team DeathMatch",		// GAMEMODE_TDM : #GameMode_TDM
+	"Domination"			// GAMEMODE_DOM : #GameMode_DOM
 };
 
 // Precache all possible player models that we're going to use
