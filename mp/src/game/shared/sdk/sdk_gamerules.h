@@ -143,6 +143,7 @@ public:
 	int SelectDefaultTeam( void );
 
 	virtual void ServerActivate();
+	virtual void Activate();
 
 protected:
 	void CheckPlayerPositions( void );
@@ -172,6 +173,7 @@ public:
 	bool InGameMode( int nGamemode );
 	void AddGameMode( int nGamemode );
 	void RemoveGameMode( int nGamemode );
+	void CheckGameMode( void );
 
 public:
 	float GetMapRemainingTime();	// time till end of map, -1 if timelimit is disabled
