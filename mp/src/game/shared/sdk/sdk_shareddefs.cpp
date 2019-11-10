@@ -75,6 +75,28 @@ const char *pszPossiblePlayerModels[] =
 	NULL
 };
 
+const char *pszPossibleGibModels[] =
+{
+	"models/gibs/pgib_p1.mdl",
+	"models/gibs/pgib_p2.mdl",
+	"models/gibs/pgib_p3.mdl",
+	"models/gibs/pgib_p4.mdl",
+	"models/gibs/pgib_p5.mdl",
+	"models/gibs/hgibs_jaw.mdl",
+	"models/gibs/hgibs_scapula.mdl",
+	"models/gibs/hgibs_scapula.mdl",
+	"models/gibs/rgib_p1.mdl",
+	"models/gibs/rgib_p2.mdl",
+	"models/gibs/rgib_p3.mdl",
+	"models/gibs/rgib_p4.mdl",
+	"models/gibs/rgib_p5.mdl",
+	"models/gibs/rgib_p6.mdl",
+	"models/gibs/gibhead.mdl",
+	"models/zombie/classic_legs.mdl",
+	"models/zombie/classic_torso.mdl",
+	NULL
+};
+
 // ----------------------------------------------------------------------------- //
 // Global Weapon Definitions
 // ----------------------------------------------------------------------------- //

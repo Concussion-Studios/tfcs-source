@@ -19,6 +19,7 @@
 #include "in_buttons.h"
 #include "game.h"
 #include "tfc_projectile_base.h"
+#include "gib.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -308,7 +309,13 @@ void CSDKPlayer::Precache()
 	{
 		PrecacheModel( pszPossiblePlayerModels[i] );
 		i++;
-	}	
+	}
+	int g = 0;
+	while (pszPossibleGibModels[g] != NULL)
+	{
+		PrecacheModel(pszPossibleGibModels[g]);
+		g++;
+	}
 
 	BaseClass::Precache();
 }
@@ -779,8 +786,63 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	//Tony; after transition, remove remaining items
 	RemoveAllItems( true );
 
+	// Vector force's
+
+	//Do Not Delete, commented out until proper ragdoll models replace zombie Torso/Legs
+
+	/*Vector vecLegsForce; 
+	vecLegsForce.x = random->RandomFloat(-400, 400); //Random INT -400 or 400
+	vecLegsForce.y = random->RandomFloat(-400, 400); //Random INT -400 or 400
+	vecLegsForce.z = random->RandomFloat(0, 250); //Random INT 0 or 250
+	float flFadeTime = 10.0; // ammount of time ragdoll gibs stay in the world.
+	*/
+	// „B„u„{„„„€„‚ „t„|„‘ „ƒ„„‚„p„z„„„p
+	Vector vecDamageDir = info.GetDamageForce();
+
+	if (info.GetDamageType() & (DMG_BUCKSHOT | DMG_BLAST | DMG_BURN) || info.GetDamage() >= (m_iMaxHealth * 0.75f))
+	{
+		// „Q„u„p„|„y„x„p„ˆ„y„‘ „{„‚„€„r„y
+		UTIL_BloodSpray(WorldSpaceCenter(), vecDamageDir, BLOOD_COLOR_RED, 13, FX_BLOODSPRAY_ALL);
+
+		//Ragdoll for legs
+
+		/*CBaseEntity *pLegsGib = CreateRagGib("models/zombie/classic_legs.mdl", GetAbsOrigin(), GetAbsAngles(), vecLegsForce, flFadeTime, false);
+		if (pLegsGib)	{ CopyRenderColorTo(pLegsGib); }
+		*/
+
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p1.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p2.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p3.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p4.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p5.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_jaw.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p1.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p2.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p3.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p4.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p5.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p6.mdl", 5);
+		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5);
+	}
+
+	// Ragdoll Gib for Torso
+
+		/*CBaseEntity *pTorsoGib = CreateRagGib("models/zombie/classic_torso.mdl", GetAbsOrigin(), GetAbsAngles(), vecLegsForce, flFadeTime, false);
+		if (pTorsoGib)	{ CopyRenderColorTo(pTorsoGib); }
+		*/
+
 	BaseClass::Event_Killed( info );
 
+}
+
+//---------------------------------------------------------
+//---------------------------------------------------------
+void CSDKPlayer::CopyRenderColorTo(CBaseEntity *pOther)
+{
+	color32 color = GetRenderColor();
+	pOther->SetRenderColor(color.r, color.g, color.b, color.a);
 }
 
 void CSDKPlayer::ClearDamagerHistory()

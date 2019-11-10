@@ -67,6 +67,9 @@ extern const char *pszPlayerClasses[];
 //Tony; We need to precache all possible player models that we're going to use
 extern const char *pszPossiblePlayerModels[];
 
+//Anthony; We need all the Gib models we will use for gibing a player, let's precache that!
+extern const char *pszPossibleGibModels[];
+
 extern const char *pszTeamNames[];
 
 //Tony; these defines handle the default speeds for all of these - all are listed regardless of which option is enabled.

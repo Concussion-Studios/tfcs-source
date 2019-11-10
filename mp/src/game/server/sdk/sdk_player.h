@@ -214,6 +214,8 @@ private:
 	void ShowClassSelectMenu();
 	bool m_bIsClassMenuOpen;
 
+	void CopyRenderColorTo(CBaseEntity *pOther);
+
 #if defined ( SDK_USE_PRONE )
 	void InitProne( void );
 #endif // SDK_USE_PRONE
