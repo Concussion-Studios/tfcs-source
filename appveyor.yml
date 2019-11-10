@@ -30,8 +30,7 @@ deploy:
   release: tfcsource_nightly$(appveyor_build_version)
   description: 'AppVeyor Nightly Build'
   provider: GitHub
-  auth_token:
-    secure: baaee2605a10af823201efea68ac17f5d4056006
+  auth_token: baaee2605a10af823201efea68ac17f5d4056006
   artifact: mp\game\tfcsource\bin\tfcsource-win.zip 
   draft: false
   prerelease: false
