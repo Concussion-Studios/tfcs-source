@@ -45,11 +45,10 @@ public:
 	bool	IsDucking( void ) const; 
 
 	void	SetDesiredPlayerClass( int playerclass );
-	int	DesiredPlayerClass( void );
-	int	GetClassIndex( void ) { return m_iPlayerClass; }
-
+	int		DesiredPlayerClass( void );
+	int		GetClassIndex( void ) { return m_iPlayerClass; }
 	void	SetPlayerClass( int playerclass );
-	int	PlayerClass( void );
+	int		PlayerClass( void );
 	bool	IsClass( int playerclass ) const { return ( m_iPlayerClass == playerclass ); }
 
 	CWeaponSDKBase* GetActiveSDKWeapon() const;
