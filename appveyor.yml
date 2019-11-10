@@ -1,0 +1,61 @@
+version: 1.03-{build}
+skip_tags: true
+
+image:
+  - Visual Studio 2013
+  - Ubuntu
+
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2013
+
+  install:
+    - cd mp
+    - src\devtools\bin\vpc.exe /2013 /sdk +game /mksln tfcsource.sln
+    - '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.com" tfcsource.sln /upgrade'
+
+  build_script:
+    - 'MsBuild.exe tfcsource.sln /p:Configuration=Release /p:Platform=Win32 /verbosity:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
+
+  after_build:
+    - cd %APPVEYOR_BUILD_FOLDER%\mp\game\tfcsource\bin
+    - 7z a tfcsource-win.zip server.* client.*
+
+  artifacts:
+    - path: mp\game\tfcsource\bin\tfcsource-win.zip
+-
+  matrix:
+    only:
+      - image: Ubuntu
+
+  init:
+    - cd /
+    - sudo mkdir valve
+    - cd valve
+    - sudo wget http://media.steampowered.com/client/runtime/steam-runtime-sdk_latest.tar.xz
+    - sudo tar xvf steam-runtime-sdk_latest.tar.xz
+    - sudo mv steam-runtime-sdk_2013-09-05 steam-runtime
+    - cd steam-runtime
+    - 'sudo ./setup.sh "--target=i386 amd64" --release --auto-upgrade'
+    - sudo cp /usr/bin/objcopy /valve/steam-runtime/bin/objcopy
+    - cd ${APPVEYOR_BUILD_FOLDER}
+
+  install:
+    - cd mp
+    - sudo chmod +x ./src/devtools/bin/vpc
+    - sudo chmod +x ./src/devtools/bin/vpc_linux
+    - sudo chmod +x ./src/devtools/bin/linux/ccache
+    - sudo chmod +x ./src/devtools/gendbg.sh
+    - ./src/devtools/bin/vpc /sdk +game /mksln tfcsource_linux
+
+  build_script:
+    - make -f tfcsource_linux.mak
+
+  after_build:
+    - cd ${APPVEYOR_BUILD_FOLDER}/src/game/tfcsource/bin
+    - tar cvfz tfport-linux.tar.gz server.* client.* server_srv.*
+
+  artifacts:
+    - path: src/game/tfcsource/bin/tfcsource-linux.tar.gz
