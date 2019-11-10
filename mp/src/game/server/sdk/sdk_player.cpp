@@ -943,6 +943,25 @@ void CSDKPlayer::CreateRagdollEntity()
 		pRagdoll->m_nForceBone = m_nForceBone;
 		pRagdoll->m_vecForce = Vector( 0, 0, 0 );
 		pRagdoll->SetAbsOrigin( GetAbsOrigin() );
+
+		switch ( GetTeamNumber() )
+		{
+			case SDK_TEAM_RED:
+				pRagdoll->m_nSkin = 0;
+				break;
+
+			case SDK_TEAM_BLUE:
+				pRagdoll->m_nSkin = 1;
+				break;
+
+			case SDK_TEAM_GREEN:
+				pRagdoll->m_nSkin = 2;
+				break;
+
+			case SDK_TEAM_YELLOW:
+				pRagdoll->m_nSkin = 3;
+				break;
+		}
 	}
 
 	// ragdolls will be removed on round restart automatically
