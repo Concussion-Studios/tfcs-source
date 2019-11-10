@@ -27,12 +27,12 @@ for:
     - path: mp\game\tfcsource\bin\tfcsource-win.zip
 
 deploy:
-  release: myproduct-v$(appveyor_build_version)
-  description: 'Release description'
+  release: tfcsource_nightly$(appveyor_build_version)
+  description: 'AppVeyor Nightly Build'
   provider: GitHub
   auth_token:
-    secure: <your encrypted token> # your encrypted token from GitHub
-  artifact: /.*\.nupkg/            # upload all NuGet packages to release assets
+    secure: baaee2605a10af823201efea68ac17f5d4056006 # your encrypted token from GitHub
+  artifact: mp\game\tfcsource\bin\tfcsource-win.zip            # upload all NuGet packages to release assets
   draft: false
   prerelease: false
   on:
