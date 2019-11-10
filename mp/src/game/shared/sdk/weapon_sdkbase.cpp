@@ -41,9 +41,6 @@ BEGIN_PREDICTION_DATA( CWeaponSDKBase )
 END_PREDICTION_DATA()
 #endif
  
-LINK_ENTITY_TO_CLASS( weapon_sdk_base, CWeaponSDKBase );
- 
- 
 #ifdef GAME_DLL
 BEGIN_DATADESC( CWeaponSDKBase )
 	// New weapon Think and Touch Functions go here..

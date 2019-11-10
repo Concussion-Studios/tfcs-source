@@ -34,7 +34,6 @@ public:
 
  #ifdef CLIENT_DLL
 	virtual bool ShouldPredict();
-	//void UTIL_ClipPunchAngleOffset(QAngle &in, const QAngle &punch, const QAngle &clip);
 #endif
 
 	// All predicted weapons need to implement and return true
