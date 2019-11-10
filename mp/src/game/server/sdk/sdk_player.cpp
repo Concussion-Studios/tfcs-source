@@ -823,6 +823,14 @@ void CSDKPlayer::BecomeAGibs( const CTakeDamageInfo &info )
 	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5 );
 }
 
+void CSDKPlayer::ClearDamagerHistory()
+{
+	for ( int i = 0; i < ARRAYSIZE( m_DamagerHistory ); i++ )
+	{
+		m_DamagerHistory[i].Reset();
+	}
+}
+
 void CSDKPlayer::AddDamagerToHistory(EHANDLE hDamager)
 {
 	//Check if same team

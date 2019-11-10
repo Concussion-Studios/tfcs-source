@@ -92,8 +92,6 @@ const char *pszPossibleGibModels[] =
 	"models/gibs/rgib_p5.mdl",
 	"models/gibs/rgib_p6.mdl",
 	"models/gibs/gibhead.mdl",
-	"models/zombie/classic_legs.mdl",
-	"models/zombie/classic_torso.mdl",
 	NULL
 };
 
