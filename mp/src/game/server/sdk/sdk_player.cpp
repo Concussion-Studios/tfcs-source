@@ -777,9 +777,7 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	else
 		m_hObserverTarget.Set( NULL );
 
-	// Note: since we're dead, it won't draw us on the client, but we don't set EF_NODRAW
-	// because we still want to transmit to the clients in our PVS.
-	CreateRagdollEntity();
+	
 
 	State_Transition( STATE_DEATH_ANIM );	// Transition into the dying state.
 
@@ -825,13 +823,20 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p5.mdl", 5);
 		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p6.mdl", 5);
 		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5);
-	}
 
-	// Ragdoll Gib for Torso
+		// Ragdoll Gib for Torso
 
 		/*CBaseEntity *pTorsoGib = CreateRagGib("models/zombie/classic_torso.mdl", GetAbsOrigin(), GetAbsAngles(), vecLegsForce, flFadeTime, false);
 		if (pTorsoGib)	{ CopyRenderColorTo(pTorsoGib); }
 		*/
+	}
+	else
+	{
+		// Note: since we're dead, it won't draw us on the client, but we don't set EF_NODRAW
+		// because we still want to transmit to the clients in our PVS.
+		CreateRagdollEntity();
+	}
+
 
 	BaseClass::Event_Killed( info );
 
