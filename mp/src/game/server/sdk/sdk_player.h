@@ -17,6 +17,8 @@
 
 #define MAX_DAMAGER_HISTORY 2
 
+#define SDK_PUSHAWAY_THINK_CONTEXT	"SDKPushawayThink"
+
 // Function table for each player state.
 class CSDKPlayerStateInfo
 {
@@ -77,9 +79,10 @@ public:
 	void SetAnimation( PLAYER_ANIM playerAnim ) { return; }
 
 	virtual void Precache();
-	virtual int			OnTakeDamage( const CTakeDamageInfo &inputInfo );
-	virtual int			OnTakeDamage_Alive( const CTakeDamageInfo &info );
+	virtual int	 OnTakeDamage( const CTakeDamageInfo &inputInfo );
+	virtual int	 OnTakeDamage_Alive( const CTakeDamageInfo &info );
 	virtual void Event_Killed( const CTakeDamageInfo &info );
+	virtual void BecomeAGibs( const CTakeDamageInfo &info );
 	virtual void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator );
 	virtual void LeaveVehicle( const Vector &vecExitPoint, const QAngle &vecExitAngles );
 	
@@ -93,18 +96,18 @@ public:
 	virtual void	CheatImpulseCommands( int iImpulse );
 
 	// Armor
-	virtual void	IncrementArmorValue( int nCount, int nMaxValue = -1 );
-	virtual void	SetArmorValue( int value );
-	virtual void	SetMaxArmorValue( int MaxArmorValue );
-	virtual int		GetArmorValue()	{ return m_ArmorValue; }
-	virtual int		GetMaxArmorValue() { return m_MaxArmorValue; }
+	virtual void IncrementArmorValue( int nCount, int nMaxValue = -1 );
+	virtual void SetArmorValue( int value );
+	virtual void SetMaxArmorValue( int MaxArmorValue );
+	virtual int GetArmorValue()	{ return m_ArmorValue; }
+	virtual int GetMaxArmorValue() { return m_MaxArmorValue; }
 
 	// Health
-	virtual		void SetHealth( int value );
-	virtual		void SetMaxHealth( int MaxValue );
-	virtual		int GetHealth() { return m_iHealth; }
-	virtual		int GetMaxHealth()	{ return m_iMaxHealth;	}
-	virtual		void IncrementHealthValue( int nCount );
+	virtual void SetHealth( int value );
+	virtual void SetMaxHealth( int MaxValue );
+	virtual int GetHealth() { return m_iHealth; }
+	virtual int GetMaxHealth()	{ return m_iMaxHealth;	}
+	virtual void IncrementHealthValue( int nCount );
 
 	CNetworkQAngle( m_angEyeAngles );	// Copied from EyeAngles() so we can send it to the client.
 	CNetworkVar( int, m_iShotsFired );	// number of shots fired recently
@@ -116,10 +119,10 @@ public:
 	void SetClassMenuOpen( bool bIsOpen );
 	bool IsClassMenuOpen( void );
 
-	float				timeholster;
-	float				timethrow;
-	float				timedeploy;
-	bool				WantThrow;
+	float timeholster;
+	float timethrow;
+	float timedeploy;
+	bool WantThrow;
 
 	void PhysObjectSleep();
 	void PhysObjectWake();
@@ -213,8 +216,6 @@ private:
 	bool HandleCommand_JoinClass( int iClass );
 	void ShowClassSelectMenu();
 	bool m_bIsClassMenuOpen;
-
-	void CopyRenderColorTo(CBaseEntity *pOther);
 
 #if defined ( SDK_USE_PRONE )
 	void InitProne( void );

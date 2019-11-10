@@ -28,7 +28,6 @@
 extern int gEvilImpulse101;
 
 ConVar SDK_ShowStateTransitions( "sdk_ShowStateTransitions", "-2", FCVAR_CHEAT, "sdk_ShowStateTransitions <ent index or -1 for all>. Show player state transitions." );
-ConVar mp_TeamFull_Spawnpoints("mp_TeamFull_Spawnpoints", "0", FCVAR_GAMEDLL, "mp_baseTeamFull_Spawnpoints Should teams being full be based on SpawnPoints? <0, 1>");
 
 EHANDLE g_pLastDMSpawn;
 EHANDLE g_pLastBlueSpawn;
@@ -45,9 +44,9 @@ public:
 	DECLARE_CLASS( CTEPlayerAnimEvent, CBaseTempEntity );
 	DECLARE_SERVERCLASS();
 
-					CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name )
-					{
-					}
+	CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name )
+	{
+	}
 
 	CNetworkHandle( CBasePlayer, m_hPlayer );
 	CNetworkVar( int, m_iEvent );
@@ -310,6 +309,7 @@ void CSDKPlayer::Precache()
 		PrecacheModel( pszPossiblePlayerModels[i] );
 		i++;
 	}
+
 	int g = 0;
 	while (pszPossibleGibModels[g] != NULL)
 	{
@@ -319,8 +319,6 @@ void CSDKPlayer::Precache()
 
 	BaseClass::Precache();
 }
-
-#define SDK_PUSHAWAY_THINK_CONTEXT	"SDKPushawayThink"
 
 void CSDKPlayer::SDKPushawayThink(void)
 {
@@ -777,58 +775,18 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	else
 		m_hObserverTarget.Set( NULL );
 
-	
 
 	State_Transition( STATE_DEATH_ANIM );	// Transition into the dying state.
 
 	//Tony; after transition, remove remaining items
 	RemoveAllItems( true );
 
-	// Vector force's
-
-	//Do Not Delete, commented out until proper ragdoll models replace zombie Torso/Legs
-
-	/*Vector vecLegsForce; 
-	vecLegsForce.x = random->RandomFloat(-400, 400); //Random INT -400 or 400
-	vecLegsForce.y = random->RandomFloat(-400, 400); //Random INT -400 or 400
-	vecLegsForce.z = random->RandomFloat(0, 250); //Random INT 0 or 250
-	float flFadeTime = 10.0; // ammount of time ragdoll gibs stay in the world.
-	*/
-	// „B„u„{„„„€„‚ „t„|„‘ „ƒ„„‚„p„z„„„p
 	Vector vecDamageDir = info.GetDamageForce();
 
-	if (info.GetDamageType() & (DMG_BUCKSHOT | DMG_BLAST | DMG_BURN) || info.GetDamage() >= (m_iMaxHealth * 0.75f))
+	if ( info.GetDamageType() & ( DMG_BUCKSHOT | DMG_BLAST ) || info.GetDamage() >= ( GetMaxHealth() * 0.75f ) )
 	{
-		// „Q„u„p„|„y„x„p„ˆ„y„‘ „{„‚„€„r„y
-		UTIL_BloodSpray(WorldSpaceCenter(), vecDamageDir, BLOOD_COLOR_RED, 13, FX_BLOODSPRAY_ALL);
-
-		//Ragdoll for legs
-
-		/*CBaseEntity *pLegsGib = CreateRagGib("models/zombie/classic_legs.mdl", GetAbsOrigin(), GetAbsAngles(), vecLegsForce, flFadeTime, false);
-		if (pLegsGib)	{ CopyRenderColorTo(pLegsGib); }
-		*/
-
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p1.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p2.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p3.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p4.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/pgib_p5.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_jaw.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p1.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p2.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p3.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p4.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p5.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/rgib_p6.mdl", 5);
-		CGib::SpawnSpecificGibs(this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5);
-
-		// Ragdoll Gib for Torso
-
-		/*CBaseEntity *pTorsoGib = CreateRagGib("models/zombie/classic_torso.mdl", GetAbsOrigin(), GetAbsAngles(), vecLegsForce, flFadeTime, false);
-		if (pTorsoGib)	{ CopyRenderColorTo(pTorsoGib); }
-		*/
+		// Release our gibs
+		BecomeAGibs( info );
 	}
 	else
 	{
@@ -842,20 +800,27 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 
 }
 
-//---------------------------------------------------------
-//---------------------------------------------------------
-void CSDKPlayer::CopyRenderColorTo(CBaseEntity *pOther)
+void CSDKPlayer::BecomeAGibs( const CTakeDamageInfo &info )
 {
-	color32 color = GetRenderColor();
-	pOther->SetRenderColor(color.r, color.g, color.b, color.a);
-}
+	Vector vecDamageDir = info.GetDamageForce();
 
-void CSDKPlayer::ClearDamagerHistory()
-{
-	for (int i = 0; i < ARRAYSIZE(m_DamagerHistory); i++)
-	{
-		m_DamagerHistory[i].Reset();
-	}
+	UTIL_BloodSpray( WorldSpaceCenter(), vecDamageDir, BLOOD_COLOR_RED, 13, FX_BLOODSPRAY_ALL );
+
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/pgib_p1.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/pgib_p2.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/pgib_p3.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/pgib_p4.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/pgib_p5.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/hgibs_jaw.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/hgibs_scapula.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p1.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p2.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p3.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p4.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p5.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/rgib_p6.mdl", 5 );
+	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5 );
 }
 
 void CSDKPlayer::AddDamagerToHistory(EHANDLE hDamager)
