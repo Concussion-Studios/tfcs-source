@@ -25,18 +25,6 @@ for:
 
   artifacts:
     - path: mp\game\tfcsource\bin\tfcsource-win.zip
-
-deploy:
-  release: tfcsource_nightly$(appveyor_build_version)
-  description: 'AppVeyor Nightly Build'
-  provider: GitHub
-  auth_token: baaee2605a10af823201efea68ac17f5d4056006
-  artifact: mp\game\tfcsource\bin\tfcsource-win.zip 
-  draft: false
-  prerelease: false
-  on:
-    branch: master
-    APPVEYOR_REPO_TAG: true
 -
   matrix:
     only:
@@ -71,13 +59,3 @@ deploy:
 
   artifacts:
     - path: mp/game/tfcsource/bin/tfcsource-linux.tar.gz
-    
-  provider: GitHub
-    auth_token:
-        secure: baaee2605a10af823201efea68ac17f5d4056006
-    artifact: mp/game/tfcsource/bin/tfcsource-linux.tar.gz
-    draft: false
-    prerelease: false
-        on:
-        branch: master
-        APPVEYOR_REPO_TAG: true
