@@ -12,8 +12,8 @@ for:
       - image: Visual Studio 2013
 
   install:
-    - cd mp
-    - src\devtools\bin\vpc.exe /2013 /sdk +game /mksln tfcsource.sln
+    - cd mp\src
+    - devtools\bin\vpc.exe /2013 /sdk +game /mksln tfcsource.sln
     - '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.com" tfcsource.sln /upgrade'
 
   build_script:
@@ -43,19 +43,19 @@ for:
     - cd ${APPVEYOR_BUILD_FOLDER}
 
   install:
-    - cd mp
-    - sudo chmod +x ./src/devtools/bin/vpc
-    - sudo chmod +x ./src/devtools/bin/vpc_linux
-    - sudo chmod +x ./src/devtools/bin/linux/ccache
-    - sudo chmod +x ./src/devtools/gendbg.sh
-    - ./src/devtools/bin/vpc /sdk +game /mksln tfcsource_linux
+    - cd mp/src
+    - sudo chmod +x ./devtools/bin/vpc
+    - sudo chmod +x ./devtools/bin/vpc_linux
+    - sudo chmod +x ./devtools/bin/linux/ccache
+    - sudo chmod +x ./devtools/gendbg.sh
+    - ./devtools/bin/vpc /sdk +game /mksln tfcsource_linux
 
   build_script:
     - make -f tfcsource_linux.mak
 
   after_build:
-    - cd ${APPVEYOR_BUILD_FOLDER}/src/game/tfcsource/bin
+    - cd ${APPVEYOR_BUILD_FOLDER}/mp/game/tfcsource/bin
     - tar cvfz tfport-linux.tar.gz server.* client.* server_srv.*
 
   artifacts:
-    - path: src/game/tfcsource/bin/tfcsource-linux.tar.gz
+    - path: mp/game/tfcsource/bin/tfcsource-linux.tar.gz
