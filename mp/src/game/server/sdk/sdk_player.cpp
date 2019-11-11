@@ -496,7 +496,6 @@ CBaseEntity* CSDKPlayer::EntSelectSpawnPoint()
 //-----------------------------------------------------------------------------
 // Purpose: Put the player in the specified team
 //-----------------------------------------------------------------------------
-
 void CSDKPlayer::ChangeTeam( int iTeamNum )
 {
 	if ( !GetGlobalTeam( iTeamNum ) )
@@ -797,6 +796,8 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 void CSDKPlayer::BecomeAGibs( const CTakeDamageInfo &info )
 {
 	Vector vecDamageDir = info.GetDamageForce();
+
+	EmitSound( "Player.FallGib" );
 
 	UTIL_BloodSpray( WorldSpaceCenter(), vecDamageDir, BLOOD_COLOR_RED, 13, FX_BLOODSPRAY_ALL );
 
