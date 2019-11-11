@@ -84,7 +84,7 @@ $Project "Server (TFCSOURCE)"
 
 			$Folder	"Items"
 			{
-				$File	"sdk\entity_backpack.cpp"
+				$File	"entity_backpack.cpp"
 				$File	"sdk\entity_armor.cpp"
 				$File	"sdk\entity_ammo.cpp"
 			}

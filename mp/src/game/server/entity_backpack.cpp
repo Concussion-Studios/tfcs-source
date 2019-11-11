@@ -93,11 +93,11 @@ class CEntityBackPack : public CItem
 {
 	DECLARE_CLASS(CEntityBackPack, CItem);
 
-	int m_iammo_cells = 50;
-	int m_iammo_nails = 50;
-	int m_iammo_explosives = 20;
-	int m_iammo_shells = 50;
-	int m_ishouldwerespawn = GR_AMMO_RESPAWN_NO;
+	int m_iammo_cells;
+	int m_iammo_nails;
+	int m_iammo_explosives;
+	int m_iammo_shells;
+	int m_ishouldwerespawn;
 	const char* m_sworldmodel = "models/items/boxmrounds.mdl";
 
 	DECLARE_DATADESC();
@@ -145,11 +145,11 @@ public:
 };
 BEGIN_DATADESC(CEntityBackPack)
 
-DEFINE_FIELD(m_iammo_cells, FIELD_INTEGER, "cells"),
-DEFINE_FIELD(m_iammo_nails, FIELD_INTEGER, "nails"),
-DEFINE_FIELD(m_iammo_explosives, FIELD_INTEGER, "explosives"),
-DEFINE_FIELD(m_iammo_shells, FIELD_INTEGER, "shells"),
-DEFINE_FIELD(m_ishouldwerespawn, FIELD_INTEGER, "shouldwespawn"),
-DEFINE_FIELD(m_sworldmodel, FIELD_MODELNAME, "model"),
+DEFINE_FIELD(m_iammo_cells, FIELD_INTEGER, "Cells"),
+DEFINE_FIELD(m_iammo_nails, FIELD_INTEGER, "Nails"),
+DEFINE_FIELD(m_iammo_explosives, FIELD_INTEGER, "Explosives"),
+DEFINE_FIELD(m_iammo_shells, FIELD_INTEGER, "Shells"),
+DEFINE_FIELD(m_ishouldwerespawn, FIELD_INTEGER, "Shouldwespawn"),
+DEFINE_FIELD(m_sworldmodel, FIELD_MODELNAME, "Model"),
 END_DATADESC()
 LINK_ENTITY_TO_CLASS(entity_backpack, CEntityBackPack);
