@@ -78,11 +78,11 @@ public:
 	}
 };
 BEGIN_DATADESC( CEntityBackPack )
-	DEFINE_FIELD( m_iammo_cells, FIELD_INTEGER, "Cells" ),
-	DEFINE_FIELD( m_iammo_nails, FIELD_INTEGER, "Nails" ),
-	DEFINE_FIELD( m_iammo_explosives, FIELD_INTEGER, "Explosives" ),
-	DEFINE_FIELD( m_iammo_shells, FIELD_INTEGER, "Shells" ),
-	DEFINE_FIELD( m_ishouldwerespawn, FIELD_INTEGER, "Shouldwespawn" ),
+	DEFINE_KEYFIELD( m_iammo_cells, FIELD_INTEGER, "Cells" ),
+	DEFINE_KEYFIELD( m_iammo_nails, FIELD_INTEGER, "Nails" ),
+	DEFINE_KEYFIELD( m_iammo_explosives, FIELD_INTEGER, "Explosives" ),
+	DEFINE_KEYFIELD( m_iammo_shells, FIELD_INTEGER, "Shells" ),
+	DEFINE_KEYFIELD( m_ishouldwerespawn, FIELD_INTEGER, "Shouldwespawn" ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( entity_backpack, CEntityBackPack );
