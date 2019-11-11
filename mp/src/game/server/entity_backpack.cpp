@@ -55,14 +55,14 @@ public:
 		BaseClass::Spawn();
 	}
 
-	void Precache(void)
+	void Precache( void )
 	{
 		PrecacheModel( STRING( GetModelName() ) );
 	}
 
-	bool MyTouch(CBasePlayer *pPlayer)
+	bool MyTouch( CBasePlayer *pPlayer )
 	{
-		if (pPlayer)
+		if ( pPlayer )
 		{
 			FillAmmo( pPlayer, m_iammo_shells, "shell" );
 			FillAmmo( pPlayer, m_iammo_cells, "cell" );
