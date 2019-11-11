@@ -18,138 +18,71 @@
 //---------------------------------------------------------
 // Applies ammo quantity scale.
 //---------------------------------------------------------
-int FillBAmmo(CBasePlayer *pPlayer, float flCount, const char *pszAmmoName, bool bSuppressSound = false)
-{
-	int iAmmoType = GetAmmoDef()->Index(pszAmmoName);
-	if (iAmmoType == -1)
-	{
-		Msg("ERROR: Attempting to give unknown ammo type (%s)\n", pszAmmoName);
-		return 0;
-	}
-
-	flCount *= g_pGameRules->GetAmmoQuantityScale(iAmmoType);
-
-	// Don't give out less than 1 of anything.
-	flCount = MAX(1.0f, flCount);
-
-	return pPlayer->GiveAmmo(flCount, iAmmoType, bSuppressSound);
-}
-
-// ========================================================================
-//	>> CEntityAmmo
-// ========================================================================
-class CEntityAmmo : public CItem
-{
-public:
-	DECLARE_CLASS(CEntityAmmo, CItem);
-
-	void Spawn(void)
-	{
-		Precache();
-
-		SetModel(WorldModel());
-
-		BaseClass::Spawn();
-	}
-
-	const char* WorldModel()
-	{
-		return nullptr;
-	}
-
-	const char* AmmoName()
-	{
-		return nullptr;
-	}
-
-	float AmmoSize()
-	{
-		return 0;
-	}
-
-	void Precache(void)
-	{
-		PrecacheModel(WorldModel());
-	}
-
-	bool MyTouch(CBasePlayer *pPlayer)
-	{
-		if (FillBAmmo(pPlayer, AmmoSize(), AmmoName()))
-		{
-			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
-				UTIL_Remove(this);
-
-			return true;
-		}
-
-		return false;
-	}
-};
+extern int FillAmmo( CBasePlayer *pPlayer, float flCount, const char *pszAmmoName, bool bSuppressSound = false );
 
 // ========================================================================
 //	>> CEntityBackPack
 // ========================================================================
 class CEntityBackPack : public CItem
 {
-	DECLARE_CLASS(CEntityBackPack, CItem);
+	DECLARE_CLASS( CEntityBackPack, CItem );
 
 	int m_iammo_cells;
 	int m_iammo_nails;
 	int m_iammo_explosives;
 	int m_iammo_shells;
 	int m_ishouldwerespawn;
-	const char* m_sworldmodel = "models/items/boxmrounds.mdl";
 
 	DECLARE_DATADESC();
-
-
 
 public:
 
 
-	void Spawn(void)
+	void Spawn( void )
 	{
+		char *szModel = (char *)STRING( GetModelName() );
+		if ( !szModel || !*szModel )
+		{
+			Warning( "entity_backpack at %.0f %.0f %0.f missing modelname\n", GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z );
+			UTIL_Remove( this );
+			return;
+		}
+
 		Precache();
 
-		SetModel(WorldModel());
+		SetModel( STRING( GetModelName() ) );
 
 		BaseClass::Spawn();
 	}
 
 	void Precache(void)
 	{
-		PrecacheModel(WorldModel());
-	}
-
-	const char* WorldModel()
-	{
-		return m_sworldmodel;
+		PrecacheModel( STRING( GetModelName() ) );
 	}
 
 	bool MyTouch(CBasePlayer *pPlayer)
 	{
 		if (pPlayer)
 		{
-			FillBAmmo(pPlayer, m_iammo_shells, "shell");
-			FillBAmmo(pPlayer, m_iammo_cells, "cell");
-			FillBAmmo(pPlayer, m_iammo_nails, "nail");
-			FillBAmmo(pPlayer, m_iammo_explosives, "explosive");
+			FillAmmo( pPlayer, m_iammo_shells, "shell" );
+			FillAmmo( pPlayer, m_iammo_cells, "cell" );
+			FillAmmo( pPlayer, m_iammo_nails, "nail" );
+			FillAmmo( pPlayer, m_iammo_explosives, "explosive" );
 
-			if (g_pGameRules->ItemShouldRespawn(this) == m_ishouldwerespawn)
-				UTIL_Remove(this);
+			if ( g_pGameRules->ItemShouldRespawn( this ) == m_ishouldwerespawn )
+				UTIL_Remove( this );
 
 			return true;
 		}
 		return false;
 	}
 };
-BEGIN_DATADESC(CEntityBackPack)
-
-DEFINE_FIELD(m_iammo_cells, FIELD_INTEGER, "Cells"),
-DEFINE_FIELD(m_iammo_nails, FIELD_INTEGER, "Nails"),
-DEFINE_FIELD(m_iammo_explosives, FIELD_INTEGER, "Explosives"),
-DEFINE_FIELD(m_iammo_shells, FIELD_INTEGER, "Shells"),
-DEFINE_FIELD(m_ishouldwerespawn, FIELD_INTEGER, "Shouldwespawn"),
-DEFINE_FIELD(m_sworldmodel, FIELD_MODELNAME, "Model"),
+BEGIN_DATADESC( CEntityBackPack )
+	DEFINE_FIELD( m_iammo_cells, FIELD_INTEGER, "Cells" ),
+	DEFINE_FIELD( m_iammo_nails, FIELD_INTEGER, "Nails" ),
+	DEFINE_FIELD( m_iammo_explosives, FIELD_INTEGER, "Explosives" ),
+	DEFINE_FIELD( m_iammo_shells, FIELD_INTEGER, "Shells" ),
+	DEFINE_FIELD( m_ishouldwerespawn, FIELD_INTEGER, "Shouldwespawn" ),
 END_DATADESC()
-LINK_ENTITY_TO_CLASS(entity_backpack, CEntityBackPack);
+
+LINK_ENTITY_TO_CLASS( entity_backpack, CEntityBackPack );
