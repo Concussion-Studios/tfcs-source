@@ -1,7 +1,7 @@
 Team Fortress Classic Source
 =====
 
-[![Build status](https://ci.appveyor.com/api/projects/status/l1ukwkp2qqn87p81/branch/master?svg=true?style=for-the-badge)](https://ci.appveyor.com/project/xXxToxicBlueDustxXx/tfcs-source-3kx9a/branch/master) ![Discord](https://img.shields.io/discord/637821719708434473?color=7289DA&label=DIscord%20Server&logoColor=2C2F33&style=for-the-badge)
+[![Build status](https://ci.appveyor.com/api/projects/status/l1ukwkp2qqn87p81/branch/master?style=for-the-badge)](https://ci.appveyor.com/project/xXxToxicBlueDustxXx/tfcs-source-3kx9a/branch/master) ![Discord](https://img.shields.io/discord/637821719708434473?color=7289DA&label=DIscord%20Server&logoColor=2C2F33&style=for-the-badge)
 
 This is the codebase for Team Fortress Classic: Source. Developers feel free to upload your changes here.
 This modification runs off of the Source Engine. It will always be free.
