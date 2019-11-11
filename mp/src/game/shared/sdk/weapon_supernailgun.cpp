@@ -251,9 +251,9 @@ void CWeaponSuperNailGun::PrimaryAttack(void)
  
 	// Make sure we don't fire more than the amount in the clip
 	if ( UsesClipsForAmmo1() )
-		m_iClip1 --;
+		m_iClip1 -= 2;
 	else
-		pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+		pPlayer->RemoveAmmo( 2, m_iPrimaryAmmoType );
  
 	pPlayer->IncreaseShotsFired();
  
