@@ -23,18 +23,18 @@ class CSDKBot;
 void Bot_Think( CSDKBot *pBot );
 
 
-ConVar bot_forcefireweapon( "bot_forcefireweapon", "", 0, "Force bots with the specified weapon to fire." );
-ConVar bot_forceattack2( "bot_forceattack2", "0", 0, "When firing, use attack2." );
-ConVar bot_forceattackon( "bot_forceattackon", "0", 0, "When firing, don't tap fire, hold it down." );
-ConVar bot_flipout( "bot_flipout", "0", 0, "When on, all bots fire their guns." );
-ConVar bot_changeclass( "bot_changeclass", "0", 0, "Force all bots to change to the specified class." );
-static ConVar bot_mimic( "bot_mimic", "0", 0, "Bot uses usercmd of player by index." );
-static ConVar bot_mimic_yaw_offset( "bot_mimic_yaw_offset", "0", 0, "Offsets the bot yaw." );
-ConVar bot_frozen( "bot_frozen", "0", 0, "Don't do anything." );
+ConVar puppet_forcefireweapon( "puppet_forcefireweapon", "", 0, "Force puppet with the specified weapon to fire." );
+ConVar puppet_forceattack2( "puppet_forceattack2", "0", 0, "When firing, use attack2." );
+ConVar puppet_forceattackon( "puppet_forceattackon", "0", 0, "When firing, don't tap fire, hold it down." );
+ConVar puppet_flipout( "puppet_flipout", "0", 0, "When on, all puppet fire their guns." );
+ConVar puppet_changeclass( "puppet_changeclass", "0", 0, "Force all puppets to change to the specified class." );
+static ConVar puppet_mimic( "puppet_mimic", "0", 0, "Bot uses usercmd of player by index." );
+static ConVar puppet_mimic_yaw_offset( "puppet_mimic_yaw_offset", "0", 0, "Offsets the puppet yaw." );
+ConVar puppet_frozen( "puppet_frozen", "1", 0, "Don't do anything." );
 
-ConVar bot_sendcmd( "bot_sendcmd", "", 0, "Forces bots to send the specified command." );
+ConVar puppet_sendcmd( "puppet_sendcmd", "", 0, "Forces puppets to send the specified command." );
 
-ConVar bot_crouch( "bot_crouch", "0", 0, "Bot crouches" );
+ConVar puppet_crouch( "puppet_crouch", "0", 0, "Puppet crouches" );
 
 static int g_CurBotNumber = 1;
 
@@ -123,7 +123,7 @@ CBasePlayer *BotPutInServer( bool bFrozen )
 }
 
 // Handler for the "bot" command.
-CON_COMMAND_F( bot_add, "Add a bot.", FCVAR_CHEAT )
+CON_COMMAND_F( bot, "Add a puppet bot.", FCVAR_CHEAT )
 {
 	// Look at -count.
 	int count = args.FindArgInt( "-count", 1 );
@@ -143,7 +143,7 @@ CON_COMMAND_F( bot_add, "Add a bot.", FCVAR_CHEAT )
 //-----------------------------------------------------------------------------
 // Purpose: Run through all the Bots in the game and let them think.
 //-----------------------------------------------------------------------------
-void Bot_RunAll( void )
+void Puppet_RunAll( void )
 {
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
@@ -161,14 +161,14 @@ void Bot_RunAll( void )
 
 bool Bot_RunMimicCommand( CUserCmd& cmd )
 {
-	if ( bot_mimic.GetInt() <= 0 )
+	if ( puppet_mimic.GetInt() <= 0 )
 		return false;
 
-	if ( bot_mimic.GetInt() > gpGlobals->maxClients )
+	if ( puppet_mimic.GetInt() > gpGlobals->maxClients )
 		return false;
 
 	
-	CBasePlayer *pPlayer = UTIL_PlayerByIndex( bot_mimic.GetInt()  );
+	CBasePlayer *pPlayer = UTIL_PlayerByIndex( puppet_mimic.GetInt()  );
 	if ( !pPlayer )
 		return false;
 
@@ -176,9 +176,9 @@ bool Bot_RunMimicCommand( CUserCmd& cmd )
 		return false;
 
 	cmd = *pPlayer->GetLastUserCommand();
-	cmd.viewangles[YAW] += bot_mimic_yaw_offset.GetFloat();
+	cmd.viewangles[YAW] += puppet_mimic_yaw_offset.GetFloat();
 
-	if( bot_crouch.GetInt() )
+	if( puppet_crouch.GetInt() )
 		cmd.buttons |= IN_DUCK;
 
 	return true;
@@ -307,14 +307,14 @@ void Bot_UpdateDirection( CSDKBot *pBot )
 
 void Bot_FlipOut( CSDKBot *pBot, CUserCmd &cmd )
 {
-	if ( bot_flipout.GetInt() > 0 && pBot->IsAlive() )
+	if ( puppet_flipout.GetInt() > 0 && pBot->IsAlive() )
 	{
-		if ( bot_forceattackon.GetBool() || (RandomFloat(0.0,1.0) > 0.5) )
+		if ( puppet_forceattackon.GetBool() || (RandomFloat(0.0,1.0) > 0.5) )
 		{
-			cmd.buttons |= bot_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
+			cmd.buttons |= puppet_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
 		}
 
-		if ( bot_flipout.GetInt() >= 2 )
+		if ( puppet_flipout.GetInt() >= 2 )
 		{
 			QAngle angOffset = RandomAngle( -1, 1 );
 
@@ -345,12 +345,12 @@ void Bot_FlipOut( CSDKBot *pBot, CUserCmd &cmd )
 
 void Bot_HandleSendCmd( CSDKBot *pBot )
 {
-	if ( strlen( bot_sendcmd.GetString() ) > 0 )
+	if ( strlen( puppet_sendcmd.GetString() ) > 0 )
 	{
 		//send the cmd from this bot
 //		pBot->ClientCommand( bot_sendcmd.GetString() );
 
-		bot_sendcmd.SetValue("");
+		puppet_sendcmd.SetValue("");
 	}
 }
 
@@ -358,9 +358,9 @@ void Bot_HandleSendCmd( CSDKBot *pBot )
 // If bots are being forced to fire a weapon, see if I have it
 void Bot_ForceFireWeapon( CSDKBot *pBot, CUserCmd &cmd )
 {
-	if ( bot_forcefireweapon.GetString() )
+	if ( puppet_forcefireweapon.GetString() )
 	{
-		CBaseCombatWeapon *pWeapon = pBot->Weapon_OwnsThisType( bot_forcefireweapon.GetString() );
+		CBaseCombatWeapon *pWeapon = pBot->Weapon_OwnsThisType( puppet_forcefireweapon.GetString() );
 		if ( pWeapon )
 		{
 			// Switch to it if we don't have it out
@@ -375,9 +375,9 @@ void Bot_ForceFireWeapon( CSDKBot *pBot, CUserCmd &cmd )
 			{
 				// Start firing
 				// Some weapons require releases, so randomise firing
-				if ( bot_forceattackon.GetBool() || (RandomFloat(0.0,1.0) > 0.5) )
+				if ( puppet_forceattackon.GetBool() || (RandomFloat(0.0,1.0) > 0.5) )
 				{
-					cmd.buttons |= bot_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
+					cmd.buttons |= puppet_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
 				}
 			}
 		}
@@ -442,7 +442,7 @@ void Bot_Think( CSDKBot *pBot )
 	
 	
 	// Finally, override all this stuff if the bot is being forced to mimic a player.
-	if ( !Bot_RunMimicCommand( cmd ) && !bot_frozen.GetBool() )
+	if ( !Bot_RunMimicCommand( cmd ) && !puppet_frozen.GetBool() )
 	{
 		cmd.sidemove = pBot->m_flSideMove;
 

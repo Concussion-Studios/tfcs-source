@@ -301,6 +301,8 @@ void CSDKPlayer::Precache()
 	PrecacheScriptSound( "Player.FlashlightOff" );
 	PrecacheScriptSound( "Player.JumpLanding" );
 	PrecacheScriptSound( "Player.Jump" );
+	PrecacheScriptSound("HealthVial.Touch");
+	
 
 	//Tony; go through our list of player models that we may be using and cache them
 	int i = 0;
@@ -781,7 +783,6 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	//Tony; after transition, remove remaining items
 	RemoveAllItems( true );
 
-	Vector vecDamageDir = info.GetDamageForce();
 
 	if ( info.GetDamageType() & ( DMG_BUCKSHOT | DMG_BLAST ) || info.GetDamage() >= ( GetMaxHealth() * 0.75f ) )
 	{

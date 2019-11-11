@@ -869,22 +869,22 @@ static void HandleDiscordError(int errcode, const char* message)
 
 static void HandleDiscordJoin(const char* secret)
 {
-	/*DiscordRichPresence discordPresence;
+	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
 	discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
 	discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";
-	Discord_UpdatePresence(&discordPresence);*/
+	Discord_UpdatePresence(&discordPresence);
 	// Not implemented
 }
 
 static void HandleDiscordSpectate(const char* secret)
 {
-	/*DiscordRichPresence discordPresence;
+	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
 	discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
 	discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0";
 
-	Discord_UpdatePresence(&discordPresence);*/
+	Discord_UpdatePresence(&discordPresence);
 	// Not implemented
 }
 
@@ -1726,7 +1726,6 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 		sprintf(map_buffer, "map_%s", pMapName);
 		discordPresence.details = buffer;
 		discordPresence.largeImageKey = map_buffer;
-		//discordPresence.largeImageKey = "map_dustbowl_classic";
 		Discord_UpdatePresence(&discordPresence);
 	}
 
@@ -1735,18 +1734,6 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 
 	gHUD.LevelInit();
 
-	// Discord RPC
-	if (!g_bTextMode)
-	{
-		DiscordRichPresence discordPresence;
-		memset(&discordPresence, 0, sizeof(discordPresence));
-
-		discordPresence.state = "In-Game";
-		discordPresence.details = "Main Menu";
-		discordPresence.startTimestamp = startTimestamp;
-		discordPresence.largeImageKey = "logo";
-		Discord_UpdatePresence(&discordPresence);
-	}
 
 #if defined( REPLAY_ENABLED )
 	// Initialize replay ragdoll recorder
@@ -1834,6 +1821,19 @@ void CHLClient::LevelShutdown( void )
 
 	gHUD.LevelShutdown();
 
+	// Discord RPC
+	if (!g_bTextMode)
+	{
+		DiscordRichPresence discordPresence;
+		memset(&discordPresence, 0, sizeof(discordPresence));
+
+		discordPresence.state = "In-Game";
+		discordPresence.details = "Main Menu";
+		discordPresence.startTimestamp = startTimestamp;
+		discordPresence.largeImageKey = "logo";
+		Discord_UpdatePresence(&discordPresence);
+	}
+
 	internalCenterPrint->Clear();
 
 	messagechars->Clear();
@@ -1849,6 +1849,7 @@ void CHLClient::LevelShutdown( void )
 	ReleaseRenderTargets();
 #endif
 
+	
 	// string tables are cleared on disconnect from a server, so reset our global pointers to NULL
 	ResetStringTablePointers();
 

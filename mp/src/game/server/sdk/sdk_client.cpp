@@ -184,8 +184,9 @@ void GameStartFrame( void )
 
 	gpGlobals->teamplay = true;
 
+	extern void Puppet_RunAll();
 	extern void Bot_RunAll();
-	Bot_RunAll();
+	Puppet_RunAll();
 }
 
 //=========================================================
