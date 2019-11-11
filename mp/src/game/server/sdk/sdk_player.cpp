@@ -297,13 +297,6 @@ void CSDKPlayer::PostThink()
 
 void CSDKPlayer::Precache()
 {
-	PrecacheScriptSound( "Player.FlashlightOn" );
-	PrecacheScriptSound( "Player.FlashlightOff" );
-	PrecacheScriptSound( "Player.JumpLanding" );
-	PrecacheScriptSound( "Player.Jump" );
-	PrecacheScriptSound("HealthVial.Touch");
-	
-
 	//Tony; go through our list of player models that we may be using and cache them
 	int i = 0;
 	while( pszPossiblePlayerModels[i] != NULL )

@@ -278,14 +278,6 @@ void CSDKGameMovement::CheckFalling( void )
 	// if we landed on the ground
 	if ( player->GetGroundEntity() != NULL && !IsDead() )
 	{
-		if ( player->m_Local.m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHOLD )
-		{
-
-			CPASFilter filter( player->GetAbsOrigin() );
-			filter.UsePredictionRules();
-			player->EmitSound( filter, player->entindex(), "Player.JumpLanding" );
-		}
-
 		if ( m_pSDKPlayer->m_Shared.IsJumping() )
 		{
 			m_pSDKPlayer->m_Shared.SetJumping( false );

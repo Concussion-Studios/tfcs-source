@@ -146,6 +146,8 @@ void ClientGamePrecache( void )
 				UTIL_PrecacheOther( pszFile );
 			else if ( !Q_stricmp( pData->GetName(), "particle" ) )
 				PrecacheParticleSystem( pszFile );
+
+			ConColorMsg( Color( 86, 156, 143, 255 ), "[CSDKGameRules] Precahing %s is now ready to use.\n", pszFile );
 		}
 	}
 
