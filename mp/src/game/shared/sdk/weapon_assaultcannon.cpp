@@ -12,6 +12,7 @@
 
 #define CWeaponAC C_WeaponAC
 #include "c_sdk_player.h"
+#include "soundenvelope.h"
 
 #else
 
@@ -29,14 +30,18 @@ public:
 	DECLARE_PREDICTABLE();
 	DECLARE_ACTTABLE();
 
-	
-
 	CWeaponAC();
+
+	CSoundPatch		*m_pSoundCur;				// the sound being currently played.
+	int				m_iACSoundCur;			// the enum value of sound being played.
+	float	m_flBarrelCurrentVelocity;
+	float	m_flBarrelTargetVelocity;
 
 	enum ACState_t
 	{
 		ACT_IDLE,
 		ACT_STARTFIRING,
+		ACT_SPINNING,
 		ACT_FIRING
 	};
 
@@ -46,10 +51,14 @@ public:
 	virtual float GetWeaponSpread() { return 0.25f; }
 	virtual void PrimaryAttack();
 	virtual void WeaponIdle();
+	virtual void	UpdateOnRemove(void);
+	virtual void	ItemPreFrame(void);
 	void WeaponReset();
 	void SharedAttack();
 	void WindUp();
 	void WindDown();
+	void WeaponSoundUpdate();
+	void UpdateBarrelMovement();
 	virtual bool CanWeaponBeDropped() const				{ return false; }
 
 private:
@@ -89,14 +98,13 @@ void CWeaponAC::WindUp()
 
 	if (!pPlayer)
 		return;
-#ifndef CLIENT_DLL
-	CPASAttenuationFilter filter(pPlayer, "Weapon_AC.RevUp"); // Filters
-	EmitSound(filter, pPlayer->entindex(), "Weapon_AC.RevUp"); // Play Weapon_AC.RevUp sound
-#endif
 	SendWeaponAnim(ACT_MP_ATTACK_STAND_PREFIRE);
 	
 
 	m_iWeaponState = ACT_STARTFIRING;
+#ifdef CLIENT_DLL 
+	WeaponSoundUpdate();
+#endif
 }
 
 void CWeaponAC::WindDown()
@@ -105,13 +113,12 @@ void CWeaponAC::WindDown()
 
 	if (!pPlayer)
 		return;
-#ifndef CLIENT_DLL
-	CPASAttenuationFilter filter(pPlayer, "Weapon_AC.RevDown"); // Filters
-	EmitSound(filter, pPlayer->entindex(), "Weapon_AC.RevDown"); // Play Weapon_AC.RevDown sound
-#endif
 	SendWeaponAnim(ACT_MP_ATTACK_STAND_POSTFIRE);
 	// Set us back to Idle.
 	m_iWeaponState = ACT_IDLE;
+#ifdef CLIENT_DLL 
+	WeaponSoundUpdate();
+#endif
 
 }
 
@@ -145,6 +152,20 @@ void CWeaponAC::WeaponIdle(void)
 void CWeaponAC::WeaponReset()
 {
 	m_iWeaponState = ACT_IDLE;
+
+	m_flBarrelCurrentVelocity = 0;
+	m_flBarrelTargetVelocity = 0;
+
+#ifdef CLIENT_DLL
+	if (m_pSoundCur)
+	{
+		CSoundEnvelopeController::GetController().SoundDestroy(m_pSoundCur);
+		m_pSoundCur = NULL;
+	}
+
+	m_iACSoundCur = -1;
+
+#endif
 }
 
 void CWeaponAC::SharedAttack()
@@ -196,13 +217,17 @@ void CWeaponAC::SharedAttack()
 		{
 			if (m_flNextPrimaryAttack <= gpGlobals->curtime)
 			{
-#ifndef CLIENT_DLL
-				CPASAttenuationFilter filter(pPlayer, "Weapon_AC.Rev"); // Filters
-				EmitSound(filter, pPlayer->entindex(), "Weapon_AC.Rev"); // Play Weapon_AC.RevDown sound
-#endif
-				m_iWeaponState = ACT_FIRING;
+				m_iWeaponState = ACT_SPINNING;
 
 				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.1;
+			}
+			break;
+		}
+	case ACT_SPINNING:
+		{
+			if(pPlayer->GetAmmoCount(m_iPrimaryAmmoType) > 0)
+			{
+				m_iWeaponState = ACT_FIRING;
 			}
 			break;
 		}
@@ -253,6 +278,106 @@ void CWeaponAC::SharedAttack()
 	m_flNextSecondaryAttack = gpGlobals->curtime + SequenceDuration();
 	*/
 }
+void CWeaponAC::UpdateOnRemove(void)
+{
+#ifdef CLIENT_DLL
+	if (m_pSoundCur)
+	{
+		CSoundEnvelopeController::GetController().SoundDestroy(m_pSoundCur);
+		m_pSoundCur = NULL;
+	}
+#endif
+
+	BaseClass::UpdateOnRemove();
+}
+
+void CWeaponAC::ItemPreFrame(void)
+{
+#ifdef CLIENT_DLL
+	UpdateBarrelMovement();
+#endif
+	BaseClass::ItemPreFrame();
+}
+#ifdef CLIENT_DLL
+
+void CWeaponAC::UpdateBarrelMovement()
+{
+	if (m_flBarrelCurrentVelocity != m_flBarrelTargetVelocity)
+	{
+		float flSpinupTime = 1.0f;
+		flSpinupTime = Max(flSpinupTime, FLT_EPSILON); // Don't divide by 0
+
+		// update barrel velocity to bring it up to speed or to rest
+		m_flBarrelCurrentVelocity = Approach(m_flBarrelTargetVelocity, m_flBarrelCurrentVelocity, 0.1 / flSpinupTime);
+
+		if (0 == m_flBarrelCurrentVelocity)
+		{
+			// if we've stopped rotating, turn off the wind-down sound
+			WeaponSoundUpdate();
+		}
+	}
+}
+
+
+void CWeaponAC::WeaponSoundUpdate()
+{
+	// determine the desired sound for our current state
+	int iSound = -1;
+	switch (m_iWeaponState)
+	{
+	case ACT_IDLE:
+		if (m_flBarrelCurrentVelocity > 0)
+		{
+			iSound = SPECIAL2;	// wind down sound
+			if (m_flBarrelTargetVelocity > 0)
+			{
+				m_flBarrelTargetVelocity = 0;
+			}
+		}
+		else
+			iSound = -1;
+		break;
+	case ACT_STARTFIRING:
+		iSound = SPECIAL2;	// wind up sound
+		break;
+	case ACT_FIRING:
+	{
+		iSound = SINGLE; // firing sound
+	}
+	break;
+	case ACT_SPINNING:
+		iSound = SPECIAL1;	// spinning sound
+		break;
+	default:
+		Assert(false);
+		break;
+	}
+
+	// if we're already playing the desired sound, nothing to do
+	if (m_iACSoundCur == iSound)
+		return;
+
+	// if we're playing some other sound, stop it
+	if (m_pSoundCur)
+	{
+		// Stop the previous sound immediately
+		CSoundEnvelopeController::GetController().SoundDestroy(m_pSoundCur);
+		m_pSoundCur = NULL;
+	}
+	m_iACSoundCur = iSound;
+	// if there's no sound to play for current state, we're done
+	if (-1 == iSound)
+		return;
+
+	// play the appropriate sound
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+	const char *shootsound = GetShootSound(iSound);
+	CLocalPlayerFilter filter;
+	m_pSoundCur = controller.SoundCreate(filter, entindex(), shootsound);
+	controller.Play(m_pSoundCur, 1.0, 100);
+	controller.SoundChangeVolume(m_pSoundCur, 1.0, 0.1);
+}
+#endif
 
 //Tony; todo; add ACT_MP_PRONE* activities, so we have them.
 acttable_t CWeaponAC::m_acttable[] =
