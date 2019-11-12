@@ -50,15 +50,12 @@ public:
 
 	void UpdateNumClassLabel( void );
 
-	MESSAGE_FUNC_PTR( OnSuicideOptionChanged, "CheckButtonChecked", panel );
-
 	virtual int GetTeamNumber( void ) = 0;
 
 
 private:
 	CSDKClassInfoPanel *m_pClassInfoPanel;
 	MouseOverButton<CSDKClassInfoPanel> *m_pInitialButton;
-	CheckButton *m_pSuicideOption;
 
 	int m_iActivePlayerClass;
 	int m_iLastPlayerClassCount;

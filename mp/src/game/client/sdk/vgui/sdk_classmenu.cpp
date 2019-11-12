@@ -47,7 +47,6 @@ using namespace vgui;
 ConVar _cl_classmenuopen( "_cl_classmenuopen", "0", FCVAR_CLIENTCMD_CAN_EXECUTE, "internal cvar used to tell server when class menu is open" );
 
 extern ConVar mp_allowspecialclass;
-extern ConVar hud_classautokill;
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -99,8 +98,6 @@ CSDKClassMenu::CSDKClassMenu(IViewPort *pViewPort) : CClassMenu( pViewPort )
 		m_pClassNumLabel[i] = new Label( this, VarArgs("class_%d_num", i+1), "" );
 		m_pClassFullLabel[i] = new Label( this, VarArgs("class_%d_full", i+1), "" );
 	}
-
-	m_pSuicideOption = new CheckButton( this, "suicide_option", "Sky is blue?" );
 }
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -128,9 +125,8 @@ CSDKClassMenu::CSDKClassMenu(IViewPort *pViewPort, const char *panelName) : CCla
 		m_pClassNumLabel[i] = new Label( this, VarArgs("class_%d_num", i+1), "" );
 		m_pClassFullLabel[i] = new Label( this, VarArgs("class_%d_full", i+1), "" );
 	}
-
-	m_pSuicideOption = new CheckButton( this, "suicide_option", "Sky is blue?" );
 }
+
 //Destructor
 CSDKClassMenu::~CSDKClassMenu()
 {
@@ -143,8 +139,6 @@ void CSDKClassMenu::ShowPanel( bool bShow )
 		engine->CheckPoint( "ClassMenu" );
 
 		m_iClassMenuKey = gameuifuncs->GetButtonCodeForBind( "changeclass" );
-
-		m_pSuicideOption->SetSelected( hud_classautokill.GetBool() );
 	}
 
 	for( int i = 0; i< GetChildCount(); i++ ) 
@@ -165,18 +159,6 @@ void CSDKClassMenu::ShowPanel( bool bShow )
 
 	if ( pRandom )
 		pRandom->HidePage();
-
-	// recalc position of checkbox, since it doesn't do right alignment
-	m_pSuicideOption->SizeToContents();
-
-	int x, y, wide, tall; 
-	m_pSuicideOption->GetBounds( x, y, wide, tall );
-
-	int parentW, parentH;
-	GetSize( parentW, parentH );
-
-	x = parentW / 2;	// - wide;
-	m_pSuicideOption->SetPos( x, y );
 
 	BaseClass::ShowPanel( bShow );
 }
@@ -278,10 +260,7 @@ void CSDKClassMenu::OnShowPage( const char *pagename )
 
 	UpdateNumClassLabel();
 }
-void CSDKClassMenu::OnSuicideOptionChanged( vgui::Panel *Panel )
-{
-	hud_classautokill.SetValue( m_pSuicideOption->IsSelected() );
-}
+
 //-----------------------------------------------------------------------------
 // Do things that should be done often, eg number of players in the 
 // selected class
