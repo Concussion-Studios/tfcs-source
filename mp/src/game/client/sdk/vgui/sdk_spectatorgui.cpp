@@ -55,10 +55,11 @@ CSDKSpectatorGUI::CSDKSpectatorGUI(IViewPort *pViewPort) : CSpectatorGUI(pViewPo
 	m_pBlueScore =		NULL;
 	m_pRedLabel =		NULL;
 	m_pRedScore =		NULL;
-	m_pGreenLabel =		NULL;
+	/*m_pGreenLabel =		NULL;
 	m_pGreenScore =		NULL;
 	m_pYellowLabel =	NULL;
 	m_pYellowScore =	NULL;
+	*/
 
 	m_pTimer =		NULL;
 	m_pTimerLabel =	NULL;
@@ -85,10 +86,11 @@ void CSDKSpectatorGUI::ApplySchemeSettings(vgui::IScheme *pScheme)
 	m_pBlueScore =		dynamic_cast<Label *>(FindChildByName("BlueScoreValue"));
 	m_pRedLabel =		dynamic_cast<Label *>(FindChildByName("RedScoreLabel"));
 	m_pRedScore =		dynamic_cast<Label *>(FindChildByName("RedScoreValue"));
-	m_pGreenLabel =		dynamic_cast<Label *>(FindChildByName("GreenScoreLabel"));
+	/*m_pGreenLabel =		dynamic_cast<Label *>(FindChildByName("GreenScoreLabel"));
 	m_pGreenScore =		dynamic_cast<Label *>(FindChildByName("GreenScoreValue"));
 	m_pYellowLabel =	dynamic_cast<Label *>(FindChildByName("YellowScoreLabel"));
 	m_pYellowScore =	dynamic_cast<Label *>(FindChildByName("YellowScoreValue"));
+	*/
 
 	m_pTimer =		dynamic_cast<Panel *>(FindChildByName("timerclock"));
 	m_pTimerLabel =	dynamic_cast<Label *>(FindChildByName("timerlabel"));
@@ -145,10 +147,10 @@ void CSDKSpectatorGUI::UpdateSpectatorPlayerList()
 	//m_pRedLabel->SetVisible( false );
 	//m_pRedScore->SetVisible( false );
 
-	m_pGreenLabel->SetVisible( false );
+	/*m_pGreenLabel->SetVisible( false );
 	m_pGreenScore->SetVisible( false );
 	m_pYellowLabel->SetVisible( false );
-	m_pYellowScore->SetVisible( false );
+	m_pYellowScore->SetVisible( false );*/
 
 }
 
