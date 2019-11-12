@@ -42,6 +42,8 @@ public:
 	virtual void OnTick( void );
 	virtual void OnKeyCodePressed(KeyCode code);
 	virtual void SetVisible( bool state );
+	// helper functions
+	void SetVisibleButton(const char *textEntryName, bool state);
 	virtual void ShowPanel(bool bShow);
 
 	MESSAGE_FUNC_CHARPTR( OnShowPage, "ShowPage", page );

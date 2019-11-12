@@ -211,6 +211,17 @@ void CSDKClassMenu::Update()
 		SetVisibleButton( "CancelButton", true ); 
 	}
 
+	if (mp_allowspecialclass.GetBool())
+	{
+		SetVisibleButton("blue_class10", true);
+		SetVisibleButton("red_class10", true);
+	}
+	else
+	{
+		SetVisibleButton("blue_class10", false);
+		SetVisibleButton("red_class10", false);
+	}
+
 	MoveToCenterOfScreen();
 
 }
@@ -362,6 +373,19 @@ void CSDKClassMenu::SetVisible( bool state )
 		engine->ClientCmd( "_cl_classmenuopen 0" );
 	}
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Sets the visibility of a button by name
+//-----------------------------------------------------------------------------
+void CSDKClassMenu::SetVisibleButton(const char *textEntryName, bool state)
+{
+	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
+	if (entry)
+	{
+		entry->SetVisible(state);
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Paint background with rounded corners
 //-----------------------------------------------------------------------------

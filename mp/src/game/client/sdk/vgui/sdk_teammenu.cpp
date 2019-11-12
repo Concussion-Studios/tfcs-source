@@ -68,7 +68,7 @@ void CSDKTeamMenu::Update( void )
 		}
 		else
 		{
-			SetVisibleButton("specbutton", false);
+			SetVisibleButton("specbutton", true);
 		}
 	}
 	else
