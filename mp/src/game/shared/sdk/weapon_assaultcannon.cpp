@@ -328,7 +328,7 @@ void CWeaponAC::WeaponSoundUpdate()
 	case ACT_IDLE:
 		if (m_flBarrelCurrentVelocity > 0)
 		{
-			iSound = SPECIAL2;	// wind down sound
+			iSound = SPECIAL3;	// wind down sound
 			if (m_flBarrelTargetVelocity > 0)
 			{
 				m_flBarrelTargetVelocity = 0;
