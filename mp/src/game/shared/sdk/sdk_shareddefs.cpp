@@ -10,16 +10,16 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar	tfc_classlimit_scout( "tfc_classlimit_scout", "-1", FCVAR_REPLICATED, "Class limit for Scout" );
-ConVar	tfc_classlimit_soldier( "tfc_classlimit_soldier", "-1", FCVAR_REPLICATED, "Class limit for Soldier" );
-ConVar	tfc_classlimit_pyro( "tfc_classlimit_pyro", "-1", FCVAR_REPLICATED, "Class limit for Pyro" );
-ConVar	tfc_classlimit_hwguy( "tfc_classlimit_hwguy", "-1", FCVAR_REPLICATED, "Class limit for Heavy Weapons Guy" );
-ConVar	tfc_classlimit_demoman( "tfc_classlimit_demoman", "-1", FCVAR_REPLICATED, "Class limit for Demoman" );
-ConVar	tfc_classlimit_engineer( "tfc_classlimit_engineer", "-1", FCVAR_REPLICATED, "Class limit for Engineer" );
-ConVar	tfc_classlimit_medic( "tfc_classlimit_medic", "-1", FCVAR_REPLICATED, "Class limit for Medic" );
-ConVar	tfc_classlimit_sniper( "tfc_classlimit_sniper", "-1", FCVAR_REPLICATED, "Class limit for Sniper" );
-ConVar	tfc_classlimit_spy( "tfc_classlimit_spy", "-1", FCVAR_REPLICATED, "Class limit for Spy" );
-ConVar	tfc_classlimit_civilian( "tfc_classlimit_civilian", "-1", FCVAR_REPLICATED, "Class limit for Civilian" );
+ConVar	tfc_classlimit_scout("tfc_classlimit_scout", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Scout");
+ConVar	tfc_classlimit_soldier("tfc_classlimit_soldier", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Soldier");
+ConVar	tfc_classlimit_pyro("tfc_classlimit_pyro", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Pyro");
+ConVar	tfc_classlimit_hwguy("tfc_classlimit_hwguy", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Heavy Weapons Guy");
+ConVar	tfc_classlimit_demoman("tfc_classlimit_demoman", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Demoman");
+ConVar	tfc_classlimit_engineer("tfc_classlimit_engineer", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Engineer");
+ConVar	tfc_classlimit_medic("tfc_classlimit_medic", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Medic");
+ConVar	tfc_classlimit_sniper("tfc_classlimit_sniper", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Sniper");
+ConVar	tfc_classlimit_spy("tfc_classlimit_spy", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Spy");
+ConVar	tfc_classlimit_civilian("tfc_classlimit_civilian", "-1", FCVAR_GAMEDLL | FCVAR_REPLICATED, "Class limit for Civilian");
 
 const char *pszPlayerClasses[] = 
 {
