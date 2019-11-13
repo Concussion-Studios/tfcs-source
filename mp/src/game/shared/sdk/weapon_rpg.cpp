@@ -916,13 +916,9 @@ void CWeaponRPG::DecrementAmmo( CBaseCombatCharacter *pOwner )
 	
 	// Take away our primary ammo type
 	if (UsesClipsForAmmo1())
-	{
-		pOwner->RemoveAmmo(1, m_iClip1);
-	}
+		m_iClip1--;
 	else
-	{
 		pOwner->RemoveAmmo(1, m_iPrimaryAmmoType);
-	}
 	
 }
 
@@ -1250,7 +1246,7 @@ void CWeaponRPG::NotifyRocketDied( void )
 	if (GetActivity() == ACT_VM_RELOAD_DEPLOYED)
 		return;
 
-	Reload();
+	//Reload();
 }
 
 //-----------------------------------------------------------------------------
@@ -1295,7 +1291,7 @@ void CWeaponRPG::FillClip(void)
 	{
 		if (Clip1() < GetMaxClip1())
 		{
-			m_iClip1++;
+			m_iClip1 +=1;
 			pOwner->RemoveAmmo(1, m_iPrimaryAmmoType);
 		}
 	}
