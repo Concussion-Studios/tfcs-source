@@ -117,6 +117,7 @@ static const char * s_WeaponAliasInfo[] =
 	"wrench",			// WEAPON_WRENCH
 	"ac",				// WEAPON_AC
 	"medkit", 			// WEAPON_MEDKIT
+	"rpg", 			// WEAPON_RPG
 
 	NULL,				// WEAPON_NONE
 };

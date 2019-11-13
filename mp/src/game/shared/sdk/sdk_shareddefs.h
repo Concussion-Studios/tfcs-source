@@ -115,6 +115,7 @@ typedef enum
 	WEAPON_WRENCH,
 	WEAPON_AC,
 	WEAPON_MEDKIT,
+	WEAPON_RPG,
 	
 	WEAPON_MAX,		// number of weapons weapon index
 } SDKWeaponID;
