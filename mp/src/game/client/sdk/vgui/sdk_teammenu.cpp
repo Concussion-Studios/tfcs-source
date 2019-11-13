@@ -34,10 +34,6 @@ CSDKTeamMenu::CSDKTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	// load the new scheme early!!
 	SetScheme("SourceScheme");
 
-	RichText *pMapInfo = dynamic_cast<RichText*>( FindChildByName( "MapInfo" ) );
-	if ( pMapInfo )
-		pMapInfo->MarkForDeletion();
-
 	if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
 		LoadControlSettings( "Resource/UI/4TeamsMenu.res" );
 	else
