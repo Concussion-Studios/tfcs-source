@@ -73,11 +73,11 @@ BEGIN_NETWORK_TABLE_NOBASE( CSDKGameRules, DT_SDKGameRules )
 END_NETWORK_TABLE()
 
 ConVar mp_allowrandomclass( "mp_allowrandomclass", "1", FCVAR_REPLICATED, "Allow players to select random class" );
-ConVar mp_allowspecialclass("mp_allowspecialclass", "0", FCVAR_REPLICATED, "Allow players to select civilian class");
-ConVar mp_ignorefriendlyjustheal("mp_ignorefriendlyjustheal", "0", FCVAR_REPLICATED, "Allow players to ignore if they heal a friendly");
-ConVar mp_4team("mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random.");
-ConVar mp_deathmatch("mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn.");
-ConVar mp_teamfull_spawnpoints("mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>");
+ConVar mp_allowspecialclass( "mp_allowspecialclass", "0", FCVAR_REPLICATED, "Allow players to select civilian class" );
+ConVar mp_ignorefriendlyjustheal( "mp_ignorefriendlyjustheal", "0", FCVAR_REPLICATED, "Allow players to ignore if they heal a friendly" );
+ConVar mp_4team( "mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random." );
+ConVar mp_deathmatch( "mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn." );
+ConVar mp_teamfull_spawnpoints( "mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>" );
 ConVar mp_limitteams( 
 	"mp_limitteams", 
 	"2", 
@@ -301,15 +301,6 @@ static const char *s_PreserveEnts[] =
 	"", // END Marker
 };
 
-// --------------------------------------------------------------------------------------------------- //
-// Global helper functions.
-// --------------------------------------------------------------------------------------------------- //
-
-// World.cpp calls this but we don't use it in SDK.
-void InitBodyQue()
-{
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -364,7 +355,7 @@ void CSDKGameRules::CheckGameMode()
 		}
 	}*/
 
-	if ( gEntList.FindEntityByClassname( NULL, "logic_tdm" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "tdm_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "dm_", 3 ) )
+	if ( ( gEntList.FindEntityByClassname( NULL, "logic_tdm" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "tdm_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "dm_", 3 ) ) || mp_4team.GetBool() )
 	{
 		AddGameMode( GAMEMODE_TDM );
 		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TDM gamemode config file\n" );
@@ -1328,7 +1319,7 @@ int CSDKGameRules::SelectDefaultTeam()
 	else
 	{
 		// if our cvar allows 4teams then randomize between the four else just pick between two.
-		if ( mp_4team.GetBool() )
+		if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
 			team = ( random->RandomInt( 0, 3 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED ? SDK_TEAM_YELLOW : SDK_TEAM_GREEN;
 		else
 			team = ( random->RandomInt( 0, 1 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED;

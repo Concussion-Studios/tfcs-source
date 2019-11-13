@@ -175,6 +175,15 @@ public:
 	void RemoveGameMode( int nGamemode );
 	void CheckGameMode( void );
 
+	// Gamemode return function.
+	bool IsCTFGamemode( void ) { return InGameMode( GAMEMODE_CTF ); }
+	bool IsCPGamemode( void ) { return InGameMode( GAMEMODE_CP ); }
+	bool IsTCGamemode( void ) { return InGameMode( GAMEMODE_TC ); }
+	bool IsADGamemode( void ) { return InGameMode( GAMEMODE_AD ); }
+	bool IsTDMGamemode( void ) { return InGameMode( GAMEMODE_TDM ); }
+	bool IsDOMGamemode( void ) { return InGameMode( GAMEMODE_DOM ); }
+	bool IsESCGamemode( void ) { return InGameMode( GAMEMODE_ESC ); }
+
 public:
 	float GetMapRemainingTime();	// time till end of map, -1 if timelimit is disabled
 	float GetMapElapsedTime();		// How much time has elapsed since the map started.
