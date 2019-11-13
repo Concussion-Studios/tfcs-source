@@ -43,6 +43,10 @@ IClientMode *g_pClientMode = NULL;
 STUB_WEAPON_CLASS( cycler_weapon,   WeaponCycler,   C_BaseCombatWeapon );
 STUB_WEAPON_CLASS( weapon_cubemap,  WeaponCubemap,  C_BaseCombatWeapon );
 
+// this set of convars's purpose is to shut up the console
+ConVar hud_saytext( "hud_saytext", "0", FCVAR_HIDDEN );
+ConVar spec_drawstatus( "spec_drawstatus", "0", FCVAR_HIDDEN );
+
 //-----------------------------------------------------------------------------
 // HACK: the detail sway convars are archive, and default to 0.  Existing CS:S players thus have no detail
 // prop sway.  We'll force them to DoD's default values for now.  What we really need in the long run is

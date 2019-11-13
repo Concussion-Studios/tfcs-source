@@ -35,7 +35,6 @@ public:
 	void Reset();
 	void MsgFunc_HintText( bf_read &msg );
 	void FireGameEvent( IGameEvent * event);
-	bool ShouldDraw() { return false; }
 	bool SetHintText( wchar_t *text );
 	void LocalizeAndDisplay( const char *pszHudTxtMsg, const char *szRawString );
 

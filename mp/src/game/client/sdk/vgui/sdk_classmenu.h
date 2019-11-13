@@ -24,6 +24,9 @@ public:
 	CSDKClassInfoPanel( vgui::Panel *parent, const char *panelName ) : vgui::EditablePanel( parent, panelName )	{}
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual vgui::Panel *CreateControlByName( const char *controlName );
+
+private:
+	vgui::HFont m_hFont;
 };
 
 class CSDKClassMenu : public CClassMenu
@@ -51,7 +54,6 @@ public:
 	void UpdateNumClassLabel( void );
 
 	virtual int GetTeamNumber( void ) = 0;
-
 
 private:
 	CSDKClassInfoPanel *m_pClassInfoPanel;
