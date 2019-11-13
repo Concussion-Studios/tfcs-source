@@ -28,10 +28,15 @@
 
 using namespace vgui;
 
-CSDKTeamMenu::CSDKTeamMenu(IViewPort *pViewPort) : CTeamMenu( pViewPort )
+CSDKTeamMenu::CSDKTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 {
 	// load the new scheme early!!
 	SetScheme("SourceScheme");
+
+	if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
+		LoadControlSettings( "Resource/UI/4TeamMenu.res" );
+	else
+		LoadControlSettings( "Resource/UI/TeamMenu.res" );
 }
 
 //Destructor
@@ -56,34 +61,23 @@ void CSDKTeamMenu::Update( void )
 	const ConVar *allowspecs =  cvar->FindVar( "mp_allowspectators" );
 
 	C_SDKPlayer *pPlayer = C_SDKPlayer::GetLocalSDKPlayer();
-	
 	if ( !pPlayer || !SDKGameRules() )
 		return;
 
 	if ( allowspecs && allowspecs->GetBool() )
 	{
 		if ( pPlayer->GetTeamNumber() == TEAM_UNASSIGNED || ( pPlayer && pPlayer->IsPlayerDead() ) )
-		{
 			SetVisibleButton("specbutton", true);
-		}
 		else
-		{
 			SetVisibleButton("specbutton", true);
-		}
 	}
 	else
-	{
 		SetVisibleButton("specbutton", false );
-	}
 
 	if( pPlayer->GetTeamNumber() == TEAM_UNASSIGNED ) // we aren't on a team yet
-	{
 		SetVisibleButton("CancelButton", false); 
-	}
 	else
-	{
 		SetVisibleButton("CancelButton", true); 
-	}
 
 	MoveToCenterOfScreen();
 }
@@ -99,9 +93,7 @@ void CSDKTeamMenu::SetVisible(bool state)
 	{
 		Panel *pAutoButton = FindChildByName( "autobutton" );
 		if ( pAutoButton )
-		{
 			pAutoButton->RequestFocus();
-		}
 	}
 }
 
@@ -112,10 +104,7 @@ void CSDKTeamMenu::SetVisible(bool state)
 void CSDKTeamMenu::OnCommand( const char *command )
 {
 	if ( Q_stricmp( command, "vguicancel" ) )
-	{
 		engine->ClientCmd( command );
-	}
-	
 	
 	BaseClass::OnCommand(command);
 
@@ -128,11 +117,9 @@ void CSDKTeamMenu::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 void CSDKTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 {
-	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
-	if (entry)
-	{
-		entry->SetVisible(state);
-	}
+	Button *entry = dynamic_cast<Button *>( FindChildByName( textEntryName ) );
+	if ( entry )
+		entry->SetVisible( state );
 }
 
 //-----------------------------------------------------------------------------
