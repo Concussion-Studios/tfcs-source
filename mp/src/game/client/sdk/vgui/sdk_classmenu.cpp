@@ -92,6 +92,10 @@ CSDKClassMenu::CSDKClassMenu( IViewPort *pViewPort, const char *panelName ) : CC
 	// load the new scheme early!!
 	SetScheme("SourceScheme");
 
+	Panel *pClassInfo = dynamic_cast<Panel*>( FindChildByName( "classInfo" ) );
+	if ( pClassInfo )
+		pClassInfo->MarkForDeletion();
+
 	m_mouseoverButtons.RemoveAll();
 	m_iClassMenuKey = BUTTON_CODE_INVALID;
 	m_pInitialButton = NULL;

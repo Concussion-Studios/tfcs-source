@@ -16,6 +16,7 @@
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
+#include <vgui_controls/RichText.h>
 #include "cdll_util.h"
 #include <game/client/iviewport.h>
 #include "sdk_backgroundpanel.h"
@@ -33,8 +34,12 @@ CSDKTeamMenu::CSDKTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	// load the new scheme early!!
 	SetScheme("SourceScheme");
 
+	RichText *pMapInfo = dynamic_cast<RichText*>( FindChildByName( "MapInfo" ) );
+	if ( pMapInfo )
+		pMapInfo->MarkForDeletion();
+
 	if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
-		LoadControlSettings( "Resource/UI/4TeamMenu.res" );
+		LoadControlSettings( "Resource/UI/4TeamsMenu.res" );
 	else
 		LoadControlSettings( "Resource/UI/TeamMenu.res" );
 }
