@@ -14,6 +14,9 @@
 
 #include "weapon_sdkbase_rpg.h"
 
+//-----------------------------------------------------------------------------
+// RPG
+//-----------------------------------------------------------------------------
 class CWeaponRPG : public CWeaponSDKBaseRPG
 {
 public:
@@ -28,8 +31,10 @@ public:
 	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_RPG; }
 	virtual void FireRocket( void );
 
+	CNetworkVar( bool, m_bInitialStateUpdate );
+
 private:
 	CWeaponRPG( const CWeaponRPG& );
 };
 
-// WEAPON_RPG_H
+#endif // WEAPON_RPG_H

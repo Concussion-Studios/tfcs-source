@@ -161,6 +161,8 @@ $Project "Server (TFCSOURCE)"
 				$File	"$SRCDIR\game\shared\sdk\weapon_medkit.cpp"
 				$File	"$SRCDIR\game\shared\sdk\weapon_rpg.cpp"
 				$File	"$SRCDIR\game\shared\sdk\weapon_rpg.h"
+				$File	"$SRCDIR\game\shared\sdk\tfc_projectile_rocket.cpp"
+				$File	"$SRCDIR\game\shared\sdk\tfc_projectile_rocket.h"
 			}
 
 			$Folder	"Multiplayer"
