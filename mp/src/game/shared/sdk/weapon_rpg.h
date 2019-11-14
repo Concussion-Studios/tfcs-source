@@ -7,12 +7,15 @@
 
 #ifndef WEAPON_RPG_H
 #define WEAPON_RPG_H
-#endif
 #ifdef _WIN32
 #pragma once
 #endif
 
 #include "weapon_sdkbase_rpg.h"
+
+#if defined( CLIENT_DLL )
+	#define CWeaponRPG C_WeaponRPG
+#endif
 
 //-----------------------------------------------------------------------------
 // RPG

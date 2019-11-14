@@ -8,7 +8,6 @@
 
 #if defined( CLIENT_DLL )
 	#include "c_sdk_player.h"
-	#define CWeaponRPG C_WeaponRPG
 #else
 	#include "rocket_rpg.h"
 	#include "sdk_player.h"
@@ -22,8 +21,8 @@ END_NETWORK_TABLE()
 BEGIN_PREDICTION_DATA( CWeaponRPG )
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS( weapon_bazooka, CWeaponRPG );
-PRECACHE_WEAPON_REGISTER( weapon_bazooka );
+LINK_ENTITY_TO_CLASS( weapon_rpg, CWeaponRPG );
+PRECACHE_WEAPON_REGISTER( weapon_rpg );
 
 acttable_t CWeaponRPG::m_acttable[] = 
 {
