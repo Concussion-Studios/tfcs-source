@@ -9,14 +9,14 @@
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-class C_SDKBaseRPG : public C_BaseAnimating
+class C_SDKBaseRocket : public C_BaseAnimating
 {
 public:
-	DECLARE_CLASS( C_SDKBaseRPG, C_BaseAnimating );
+	DECLARE_CLASS( C_SDKBaseRocket, C_BaseAnimating );
 	DECLARE_CLIENTCLASS();
 
-			C_SDKBaseRPG();
-	virtual ~C_SDKBaseRPG();
+			C_SDKBaseRocket();
+	virtual ~C_SDKBaseRocket();
 
 	virtual void Spawn();
 	virtual int DrawModel( int flags );
@@ -28,28 +28,28 @@ private:
 };
 
 
-IMPLEMENT_CLIENTCLASS_DT( C_SDKBaseRPG, DT_SDKBaseRPG, CSDKBaseRPG )
+IMPLEMENT_CLIENTCLASS_DT( C_SDKBaseRocket, DT_SDKBaseRocket, CSDKBaseRocket )
 	RecvPropVector( RECVINFO( m_vInitialVelocity ) )
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-C_SDKBaseRPG::C_SDKBaseRPG()
+C_SDKBaseRocket::C_SDKBaseRocket()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-C_SDKBaseRPG::~C_SDKBaseRPG()
+C_SDKBaseRocket::~C_SDKBaseRocket()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void C_SDKBaseRPG::Spawn()
+void C_SDKBaseRocket::Spawn()
 {
 	m_flSpawnTime = gpGlobals->curtime;
 	BaseClass::Spawn();
@@ -58,7 +58,7 @@ void C_SDKBaseRPG::Spawn()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void C_SDKBaseRPG::PostDataUpdate( DataUpdateType_t type )
+void C_SDKBaseRocket::PostDataUpdate( DataUpdateType_t type )
 {
 	BaseClass::PostDataUpdate( type );
 
@@ -95,7 +95,7 @@ void C_SDKBaseRPG::PostDataUpdate( DataUpdateType_t type )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int C_SDKBaseRPG::DrawModel( int flags )
+int C_SDKBaseRocket::DrawModel( int flags )
 {
 	// During the first half-second of our life, don't draw ourselves
 	if ( gpGlobals->curtime - m_flSpawnTime < 0.2 )
