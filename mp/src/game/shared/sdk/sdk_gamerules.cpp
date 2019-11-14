@@ -382,12 +382,14 @@ void CSDKGameRules::CheckGameMode()
 
 void CSDKGameRules::Activate()
 {
-	// Check what gamemode whe are.
-	CheckGameMode();
+
 }
 
 void CSDKGameRules::ServerActivate()
 {
+	// Check what gamemode whe are.
+	CheckGameMode();
+
 	//Tony; initialize the level
 	CheckLevelInitialized();
 
