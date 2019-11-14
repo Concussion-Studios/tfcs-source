@@ -2,33 +2,32 @@
 //
 // Purpose: 
 //
-// $NoKeywords: $
-//
 //=============================================================================//
-#ifndef ROCKET_RPG_H
-#define ROCKET_RPG_H
+#ifndef TFC_PROJECTILE_RPG_H
+#define TFC_PROJECTILE_RPG_H
 #ifdef _WIN32
 #pragma once
 #endif
 
 #define ROCKET_MODEL	"models/weapons/w_bazooka_rocket.mdl"
 
-#include "sdk_baserocket.h"
+#include "tfc_projectile_base_rockets.h"
 
-class CRPGRocket : public CSDKBaseRocket
+class CRPGRocket : public CTFCProjectileBaseRockets
 {
 public:
-	DECLARE_CLASS( CRPGRocket, CSDKBaseRocket );
+	DECLARE_CLASS( CRPGRocket, CTFCProjectileBaseRockets );
 
 	CRPGRocket() {}
 
 	virtual void Spawn();
 	virtual void Precache();
 	static CRPGRocket *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner );
-	virtual SDKWeaponID GetEmitterWeaponID() { return WEAPON_RPG; }
+
+	virtual SDKWeaponID GetWeaponID( void ) const {	return WEAPON_RPG; }
 
 private:
 	CRPGRocket( const CRPGRocket & );
 };
 
-#endif //ROCKET_RPG_H
+#endif //TFC_PROJECTILE_RPG_H

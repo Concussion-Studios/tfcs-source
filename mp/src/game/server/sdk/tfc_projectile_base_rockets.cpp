@@ -3,42 +3,44 @@
 // Purpose: 
 //
 //=============================================================================//
-
 #include "cbase.h"
-#include "sdk_baserocket.h"
+#include "tfc_projectile_base_rockets.h"
 #include "explode.h"
 #include "sdk_gamerules.h"
 
 ConVar mp_rocketdamage( "mp_rocketdamage", "150", FCVAR_GAMEDLL | FCVAR_CHEAT );
 ConVar mp_rocketradius( "mp_rocketradius", "200", FCVAR_GAMEDLL | FCVAR_CHEAT );
 
-BEGIN_DATADESC( CSDKBaseRocket )
+BEGIN_DATADESC( CTFCProjectileBaseRockets )
 	// Function Pointers
 	DEFINE_FUNCTION( RocketTouch ),
 	DEFINE_THINKFUNC( FlyThink ),
 END_DATADESC()
 
 
-IMPLEMENT_SERVERCLASS_ST( CSDKBaseRocket, DT_SDKBaseRocket )
+IMPLEMENT_SERVERCLASS_ST( CTFCProjectileBaseRockets, DT_TFCProjectileBaseRockets )
 	SendPropVector( SENDINFO( m_vInitialVelocity ),	20,	0, -3000, 3000 )
 END_NETWORK_TABLE()
 
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
-CSDKBaseRocket::CSDKBaseRocket()
+CTFCProjectileBaseRockets::CTFCProjectileBaseRockets()
 {
 	m_hRocketTrail = NULL;
 }
 
-CSDKBaseRocket::~CSDKBaseRocket()
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+CTFCProjectileBaseRockets::~CTFCProjectileBaseRockets()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::Precache( void )
+void CTFCProjectileBaseRockets::Precache( void )
 {
 	PrecacheScriptSound( "Weapon_RPG.Fly" );	
 }
@@ -46,7 +48,7 @@ void CSDKBaseRocket::Precache( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::Spawn( void )
+void CTFCProjectileBaseRockets::Spawn( void )
 {
 	Precache();
 
@@ -56,7 +58,7 @@ void CSDKBaseRocket::Spawn( void )
 
 	UTIL_SetSize( this, -Vector(2,2,2), Vector(2,2,2) );
 
-	SetTouch( &CSDKBaseRocket::RocketTouch );
+	SetTouch( &CTFCProjectileBaseRockets::RocketTouch );
 
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	
@@ -73,11 +75,14 @@ void CSDKBaseRocket::Spawn( void )
 	// Smoke trail.
 	CreateSmokeTrail();
 
-	SetThink( &CSDKBaseRocket::FlyThink );
+	SetThink( &CTFCProjectileBaseRockets::FlyThink );
 	SetNextThink( gpGlobals->curtime );
 }
 
-unsigned int CSDKBaseRocket::PhysicsSolidMaskForEntity( void ) const
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+unsigned int CTFCProjectileBaseRockets::PhysicsSolidMaskForEntity( void ) const
 { 
 	return BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX;
 }
@@ -85,7 +90,7 @@ unsigned int CSDKBaseRocket::PhysicsSolidMaskForEntity( void ) const
 //-----------------------------------------------------------------------------
 // Purpose: Stops any kind of tracking and shoots dumb
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::Fire( void )
+void CTFCProjectileBaseRockets::Fire( void )
 {
 	SetThink( NULL );
 	SetMoveType( MOVETYPE_FLY );
@@ -102,7 +107,7 @@ void CSDKBaseRocket::Fire( void )
 //-----------------------------------------------------------------------------
 // The actual explosion 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::DoExplosion( void )
+void CTFCProjectileBaseRockets::DoExplosion( void )
 {
 	// Explode
 	ExplosionCreate( 
@@ -120,7 +125,7 @@ void CSDKBaseRocket::DoExplosion( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::Explode( void )
+void CTFCProjectileBaseRockets::Explode( void )
 {
 	// Don't explode against the skybox. Just pretend that 
 	// the missile flies off into the distance.
@@ -152,7 +157,7 @@ void CSDKBaseRocket::Explode( void )
 // Purpose: 
 // Input  : *pOther - 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::RocketTouch( CBaseEntity *pOther )
+void CTFCProjectileBaseRockets::RocketTouch( CBaseEntity *pOther )
 {
 	Assert( pOther );
 	if ( !pOther->IsSolid() || pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS) )
@@ -169,6 +174,7 @@ void CSDKBaseRocket::RocketTouch( CBaseEntity *pOther )
 
 	if( tr.surface.flags & SURF_SKY )
 	{
+		StopSound( "Weapon_RPG.Fly" );
 		UTIL_Remove( this );
 		return;
 	}
@@ -201,7 +207,7 @@ void CSDKBaseRocket::RocketTouch( CBaseEntity *pOther )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::CreateSmokeTrail( void )
+void CTFCProjectileBaseRockets::CreateSmokeTrail( void )
 {
 	if ( m_hRocketTrail )
 		return;
@@ -228,7 +234,7 @@ void CSDKBaseRocket::CreateSmokeTrail( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::FlyThink( void )
+void CTFCProjectileBaseRockets::FlyThink( void )
 {
 	QAngle angles;
 
@@ -247,11 +253,11 @@ void CSDKBaseRocket::FlyThink( void )
 //			&vecAngles - 
 //			NULL - 
 //
-// Output : CSDKBaseRocket
+// Output : CTFCProjectileBaseRockets
 //-----------------------------------------------------------------------------
-CSDKBaseRocket *CSDKBaseRocket::Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner = NULL )
+CTFCProjectileBaseRockets *CTFCProjectileBaseRockets::Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner = NULL )
 {
-	CSDKBaseRocket *pMissile = (CSDKBaseRocket *) CBaseEntity::Create( szClassname, vecOrigin, vecAngles, pOwner );
+	CTFCProjectileBaseRockets *pMissile = (CTFCProjectileBaseRockets *) CBaseEntity::Create( szClassname, vecOrigin, vecAngles, pOwner );
 	pMissile->SetOwnerEntity( pOwner );
 	pMissile->Spawn();
 	
@@ -274,7 +280,7 @@ CSDKBaseRocket *CSDKBaseRocket::Create( const char *szClassname, const Vector &v
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKBaseRocket::SetupInitialTransmittedGrenadeVelocity( const Vector &velocity )
+void CTFCProjectileBaseRockets::SetupInitialTransmittedGrenadeVelocity( const Vector &velocity )
 {
 	m_vInitialVelocity = velocity;
 }

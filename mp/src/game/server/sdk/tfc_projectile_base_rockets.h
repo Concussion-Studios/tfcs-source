@@ -2,10 +2,9 @@
 //
 // Purpose: 
 //
-// $NoKeywords: $
 //=============================================================================//
-#ifndef SDK_BASEROCKET_H
-#define SDK_BASEROCKET_H
+#ifndef TFC_PROJECTILE_BASE_ROCKETS_H
+#define TFC_PROJECTILE_BASE_ROCKETS_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -18,15 +17,15 @@
 class RocketTrail;
  
 //================================================
-// CSDKBaseRocket	
+// CTFCProjectileBaseRockets	
 //================================================
-class CSDKBaseRocket : public CBaseAnimating
+class CTFCProjectileBaseRockets : public CBaseAnimating
 {
-	DECLARE_CLASS( CSDKBaseRocket, CBaseAnimating );
+	DECLARE_CLASS( CTFCProjectileBaseRockets, CBaseAnimating );
 
 public:
-	CSDKBaseRocket();
-	~CSDKBaseRocket();
+	CTFCProjectileBaseRockets();
+	~CTFCProjectileBaseRockets();
 	
 	void Spawn( void );
 	void Precache( void );
@@ -39,11 +38,12 @@ public:
 
 	unsigned int PhysicsSolidMaskForEntity( void ) const;
 
-	static CSDKBaseRocket *Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner );	
+	static CTFCProjectileBaseRockets *Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner );	
 
 	void SetupInitialTransmittedGrenadeVelocity( const Vector &velocity );
 
-	virtual SDKWeaponID GetEmitterWeaponID() { return WEAPON_NONE; Assert(0); }
+	//Tony; by default projectiles don't have one, so make sure derived weapons do!!
+	virtual SDKWeaponID GetWeaponID( void ) const {	return SDK_WEAPON_NONE; }
 
 protected:
 	virtual void DoExplosion();	
@@ -63,4 +63,4 @@ private:
 	DECLARE_SERVERCLASS();
 };
 
-#endif // SDK_BASEROCKET_H
+#endif // TFC_PROJECTILE_BASE_ROCKETS_H

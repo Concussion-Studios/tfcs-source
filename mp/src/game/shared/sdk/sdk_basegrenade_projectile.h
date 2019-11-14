@@ -3,9 +3,8 @@
 // Purpose: 
 //
 //=============================================================================//
-
-#ifndef BASECSGRENADE_PROJECTILE_H
-#define BASECSGRENADE_PROJECTILE_H
+#ifndef SDK_BASEGRENADE_PROJECTILE_H
+#define SDK_BASEGRENADE_PROJECTILE_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -30,7 +29,7 @@ public:
 
 public:
 	//Tony; by default projectiles don't have one, so make sure derived weapons do!!
-	virtual SDKWeaponID GetWeaponID( void ) const		{	return SDK_WEAPON_NONE; }
+	virtual SDKWeaponID GetWeaponID( void ) const {	return SDK_WEAPON_NONE; }
 
 	// This gets sent to the client and placed in the client's interpolation history
 	// so the projectile starts out moving right off the bat.
@@ -51,7 +50,7 @@ public:
 	void	SetVelocity( const Vector &velocity, const AngularImpulse &angVelocity );
 	void	VPhysicsUpdate( IPhysicsObject *pPhysics );
 
-	//Constants for all CS Grenades
+	//Constants for all SDK Grenades
 	static inline float GetGrenadeGravity() { return 0.4f; }
 	static inline const float GetGrenadeFriction() { return 0.2f; }
 	static inline const float GetGrenadeElasticity() { return 0.45f; }
@@ -84,4 +83,4 @@ private:
 };
 
 
-#endif // BASECSGRENADE_PROJECTILE_H
+#endif // SDK_BASEGRENADE_PROJECTILE_H

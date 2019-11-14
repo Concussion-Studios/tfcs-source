@@ -217,12 +217,6 @@ void CWeaponSDKBase::ItemPostFrame( void )
 				m_flNextSecondaryAttack = m_flNextEmptySoundTime = gpGlobals->curtime + 0.5;
 			}
 		}
-		/*else if (pPlayer->GetWaterLevel() == 3 && m_bAltFiresUnderwater == false)
-		{
-			// This weapon doesn't fire underwater
-			WeaponSound(EMPTY);
-			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
-		}*/
 		else
 		{
 			bFired = true;

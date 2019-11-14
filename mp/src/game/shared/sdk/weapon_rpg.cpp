@@ -9,7 +9,7 @@
 #if defined( CLIENT_DLL )
 	#include "c_sdk_player.h"
 #else
-	#include "rocket_rpg.h"
+	#include "tfc_projectile_rpg.h"
 	#include "sdk_player.h"
 #endif
 

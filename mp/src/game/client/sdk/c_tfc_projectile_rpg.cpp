@@ -9,14 +9,14 @@
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-class C_SDKBaseRocket : public C_BaseAnimating
+class C_TFCProjectileBaseRockets : public C_BaseAnimating
 {
 public:
-	DECLARE_CLASS( C_SDKBaseRocket, C_BaseAnimating );
+	DECLARE_CLASS( C_TFCProjectileBaseRockets, C_BaseAnimating );
 	DECLARE_CLIENTCLASS();
 
-			C_SDKBaseRocket();
-	virtual ~C_SDKBaseRocket();
+			C_TFCProjectileBaseRockets();
+	virtual ~C_TFCProjectileBaseRockets();
 
 	virtual void Spawn();
 	virtual int DrawModel( int flags );
@@ -28,28 +28,28 @@ private:
 };
 
 
-IMPLEMENT_CLIENTCLASS_DT( C_SDKBaseRocket, DT_SDKBaseRocket, CSDKBaseRocket )
+IMPLEMENT_CLIENTCLASS_DT( C_TFCProjectileBaseRockets, DT_TFCProjectileBaseRockets, CTFCProjectileBaseRockets )
 	RecvPropVector( RECVINFO( m_vInitialVelocity ) )
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-C_SDKBaseRocket::C_SDKBaseRocket()
+C_TFCProjectileBaseRockets::C_TFCProjectileBaseRockets()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-C_SDKBaseRocket::~C_SDKBaseRocket()
+C_TFCProjectileBaseRockets::~C_TFCProjectileBaseRockets()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void C_SDKBaseRocket::Spawn()
+void C_TFCProjectileBaseRockets::Spawn()
 {
 	m_flSpawnTime = gpGlobals->curtime;
 	BaseClass::Spawn();
@@ -58,7 +58,7 @@ void C_SDKBaseRocket::Spawn()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void C_SDKBaseRocket::PostDataUpdate( DataUpdateType_t type )
+void C_TFCProjectileBaseRockets::PostDataUpdate( DataUpdateType_t type )
 {
 	BaseClass::PostDataUpdate( type );
 
@@ -95,7 +95,7 @@ void C_SDKBaseRocket::PostDataUpdate( DataUpdateType_t type )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int C_SDKBaseRocket::DrawModel( int flags )
+int C_TFCProjectileBaseRockets::DrawModel( int flags )
 {
 	// During the first half-second of our life, don't draw ourselves
 	if ( gpGlobals->curtime - m_flSpawnTime < 0.2 )

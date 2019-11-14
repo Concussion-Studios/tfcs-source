@@ -5,10 +5,10 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include "rocket_rpg.h"
+#include "tfc_projectile_rpg.h"
 
-LINK_ENTITY_TO_CLASS( rocket_rpg, CRPGRocket );
-PRECACHE_WEAPON_REGISTER( rocket_rpg );
+LINK_ENTITY_TO_CLASS( tfc_projectile_rpg, CRPGRocket );
+PRECACHE_WEAPON_REGISTER( tfc_projectile_rpg );
 
 void CRPGRocket::Spawn( void )
 {
@@ -26,5 +26,5 @@ void CRPGRocket::Precache( void )
 
 CRPGRocket *CRPGRocket::Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner )
 {
-	return static_cast<CRPGRocket *> ( CSDKBaseRocket::Create( "rocket_rpg", vecOrigin, vecAngles, pOwner ) );
+	return static_cast<CRPGRocket *> ( CTFCProjectileBaseRockets::Create( "tfc_projectile_rpg", vecOrigin, vecAngles, pOwner ) );
 }
