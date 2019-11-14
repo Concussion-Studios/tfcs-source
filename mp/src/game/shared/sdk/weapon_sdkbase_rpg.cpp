@@ -70,13 +70,6 @@ void CWeaponSDKBaseRPG::PrimaryAttack()
 		return;
 	}
 
-	if( pPlayer->GetWaterLevel() > 2 )
-	{
-		PlayEmptySound();
-		m_flNextPrimaryAttack = gpGlobals->curtime + 1.0;
-		return;
-	}
-
 	// player "shoot" animation
 	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 

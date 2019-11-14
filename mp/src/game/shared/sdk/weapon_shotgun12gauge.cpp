@@ -430,14 +430,6 @@ void CWeapon12Gauge::ItemPostFrame(void)
 				StartReload();
 			}
 		}
-
-		// Fire underwater?
-		else if (GetOwner()->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
-		{
-			WeaponSound(EMPTY);
-			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
-			return;
-		}
 		else
 		{
 			// If the firing button was just pressed, reset the firing time
@@ -461,13 +453,6 @@ void CWeapon12Gauge::ItemPostFrame(void)
 			{
 				StartReload();
 			}
-		}
-		// Fire underwater?
-		else if (pOwner->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
-		{
-			WeaponSound(EMPTY);
-			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
-			return;
 		}
 		else
 		{
