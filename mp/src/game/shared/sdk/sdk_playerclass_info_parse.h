@@ -46,7 +46,6 @@ public:
 	char m_szLimitCvar[64];	//which cvar controls the class limit for this class
 
 	float m_flRunSpeed;
-	float m_flSprintSpeed;
 	float m_flProneSpeed;
 
 	int m_iMaxArmor;

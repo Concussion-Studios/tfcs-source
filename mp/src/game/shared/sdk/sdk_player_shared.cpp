@@ -505,7 +505,6 @@ void CSDKPlayer::InitSpeeds()
 	if ( playerclass == PLAYERCLASS_UNDEFINED )
 	{
 		m_Shared.m_flRunSpeed = SDK_DEFAULT_PLAYER_RUNSPEED;
-		m_Shared.m_flSprintSpeed = SDK_DEFAULT_PLAYER_SPRINTSPEED;
 		m_Shared.m_flProneSpeed = SDK_DEFAULT_PLAYER_PRONESPEED;
 	}
 	else
@@ -516,12 +515,11 @@ void CSDKPlayer::InitSpeeds()
 		//Assert( pClassInfo.m_iTeam == GetTeamNumber() );
 
 		m_Shared.m_flRunSpeed = pClassInfo.m_flRunSpeed;
-		m_Shared.m_flSprintSpeed = pClassInfo.m_flSprintSpeed;
 		m_Shared.m_flProneSpeed = pClassInfo.m_flProneSpeed;
 	}
 
 	// Set the absolute max to sprint speed
-	SetMaxSpeed( m_Shared.m_flSprintSpeed ); 
+	SetMaxSpeed( m_Shared.m_flRunSpeed );
 }
 
 //-----------------------------------------------------------------------------

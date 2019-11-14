@@ -161,7 +161,6 @@ struct MultiPlayerMovementData_t
 	// Set speeds to -1 if they are not used.
 	float		m_flWalkSpeed;
 	float		m_flRunSpeed;
-	float		m_flSprintSpeed;	
 	float		m_flBodyYawRate;
 };
 
@@ -195,7 +194,6 @@ public:
 
 	virtual void SetRunSpeed( float flSpeed ) { m_MovementData.m_flRunSpeed = flSpeed; }
 	virtual void SetWalkSpeed( float flSpeed ) { m_MovementData.m_flWalkSpeed = flSpeed; }
-	virtual void SetSprintSpeed( float flSpeed ) { m_MovementData.m_flSprintSpeed = flSpeed; }
 
 	// Debug
 	virtual void ShowDebugInfo( void );

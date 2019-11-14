@@ -40,7 +40,6 @@ CSDKPlayerAnimState* CreateSDKPlayerAnimState( CSDKPlayer *pPlayer )
 	movementData.m_flBodyYawRate = 720.0f;
 	movementData.m_flRunSpeed = SDK_RUN_SPEED;
 	movementData.m_flWalkSpeed = SDK_WALK_SPEED;
-	movementData.m_flSprintSpeed = -1.0f;
 
 	// Create animation state for this player.
 	CSDKPlayerAnimState *pRet = new CSDKPlayerAnimState( pPlayer, movementData );

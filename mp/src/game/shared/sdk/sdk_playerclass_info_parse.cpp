@@ -28,7 +28,6 @@ CSDKPlayerClassInfo::CSDKPlayerClassInfo()
 
 	m_szLimitCvar[0]	= '\0';
 	m_flRunSpeed		= SDK_DEFAULT_PLAYER_RUNSPEED;
-	m_flSprintSpeed		= SDK_DEFAULT_PLAYER_SPRINTSPEED;
 	m_flProneSpeed		= SDK_DEFAULT_PLAYER_PRONESPEED;
 
 	m_iArmor			= 0;
@@ -143,7 +142,6 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	Assert( Q_strlen( m_szLimitCvar ) > 0 && "Every class must specify a limitcvar" );
 
 	m_flRunSpeed		= pKeyValuesData->GetFloat( "runspeed", SDK_DEFAULT_PLAYER_RUNSPEED );
-	m_flSprintSpeed		= pKeyValuesData->GetFloat( "sprintspeed", SDK_DEFAULT_PLAYER_SPRINTSPEED );
 	m_flProneSpeed		= pKeyValuesData->GetFloat( "pronespeed", SDK_DEFAULT_PLAYER_PRONESPEED );
 
 	m_iMaxHealth		= pKeyValuesData->GetInt( "maxhealth", 100 );

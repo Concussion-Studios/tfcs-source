@@ -75,7 +75,6 @@ extern const char *pszTeamNames[];
 
 //Tony; these defines handle the default speeds for all of these - all are listed regardless of which option is enabled.
 #define SDK_DEFAULT_PLAYER_RUNSPEED			220
-#define SDK_DEFAULT_PLAYER_SPRINTSPEED		330
 #define SDK_DEFAULT_PLAYER_PRONESPEED		50
 
 #define SDK_PLAYER_INDEX_NONE			( MAX_PLAYERS + 1 )
