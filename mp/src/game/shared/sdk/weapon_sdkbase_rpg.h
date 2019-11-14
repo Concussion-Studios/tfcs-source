@@ -26,7 +26,7 @@ public:
 	DECLARE_PREDICTABLE();
 	
 	CWeaponSDKBaseRPG();
-
+	virtual bool CanWeaponBeDropped() const { return false; }
 	virtual void PrimaryAttack();
 	virtual bool Reload();
 	virtual void WeaponIdle();

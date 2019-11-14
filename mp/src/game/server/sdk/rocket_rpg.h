@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-#define ROCKET_MODEL	"models/weapons/w_missile_launch.mdl"
+#define ROCKET_MODEL	"models/weapons/w_bazooka_rocket.mdl"
 
 #include "sdk_baserocket.h"
 

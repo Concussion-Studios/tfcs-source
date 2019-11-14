@@ -43,7 +43,7 @@ bool CWeaponSDKBaseRPG::Reload( void )
 
 	Activity actReload;
 
-	actReload = ACT_VM_RELOAD;
+	actReload = ACT_VM_RELOAD_DEPLOYED;
 
 	int iResult = DefaultReload( GetMaxClip1(), GetMaxClip2(), actReload );
 	if ( !iResult )
@@ -88,8 +88,8 @@ void CWeaponSDKBaseRPG::PrimaryAttack()
 
 	m_iClip1--; 
 
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration() + 0.5;
-	m_flTimeWeaponIdle = gpGlobals->curtime + SequenceDuration() + 0.5;	//length of the fire anim!
+	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration() + GetFireRate();
+	m_flTimeWeaponIdle = gpGlobals->curtime + SequenceDuration() + GetFireRate();	//length of the fire anim!
 }
 
 void CWeaponSDKBaseRPG::FireRocket( void )
