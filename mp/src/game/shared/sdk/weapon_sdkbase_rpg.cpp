@@ -51,6 +51,8 @@ bool CWeaponSDKBaseRPG::Reload( void )
 
 	pPlayer->SetAnimation( PLAYER_RELOAD );
 
+	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
+
 	return true;
 }
 

@@ -266,6 +266,7 @@ void CWeaponAC::SharedAttack()
 
 			pPlayer->DoAnimationEvent(PLAYERANIMEVENT_ATTACK_PRIMARY);
 			m_flTimeWeaponIdle = gpGlobals->curtime + 0.2;
+			m_flNextPrimaryAttack = gpGlobals->curtime + GetFireRate();
 
 		}
 	}

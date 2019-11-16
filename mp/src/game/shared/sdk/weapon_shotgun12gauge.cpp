@@ -312,7 +312,7 @@ void CWeapon12Gauge::PrimaryAttack(void)
 	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
 
 	// Don't fire again until fire animation has completed
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
+	m_flNextPrimaryAttack = gpGlobals->curtime + GetFireRate();
 	m_iClip1 -= 1;
 
 	// player "shoot" animation
