@@ -23,6 +23,7 @@
 #include "cl_animevent.h"
 #include "soundenvelope.h"
 #include "discord_rpc.h"
+#include "in_buttons.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -1046,5 +1047,11 @@ void C_SDKPlayer::UpdateSoundEvents()
 
 			m_SoundEvents.Remove( i );
 		}
+	}
+	if (m_afButtonPressed & IN_SAVEME)
+	{
+		C_SDKPlayer *pPlayer = dynamic_cast< C_SDKPlayer* >(C_SDKPlayer::GetLocalSDKPlayer());
+		CPASAttenuationFilter filter(pPlayer, "player.medic"); // Filters
+		EmitSound(filter, pPlayer->entindex(), "player.medic"); // Play player.medic sound
 	}
 }
