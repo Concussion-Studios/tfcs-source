@@ -1048,10 +1048,10 @@ void C_SDKPlayer::UpdateSoundEvents()
 			m_SoundEvents.Remove( i );
 		}
 	}
-	if (m_afButtonPressed & IN_SAVEME)
+	if ( m_afButtonPressed & IN_SAVEME )
 	{
-		C_SDKPlayer *pPlayer = dynamic_cast< C_SDKPlayer* >(C_SDKPlayer::GetLocalSDKPlayer());
-		CPASAttenuationFilter filter(pPlayer, "player.medic"); // Filters
-		EmitSound(filter, pPlayer->entindex(), "player.medic"); // Play player.medic sound
+		C_SDKPlayer *pPlayer = ToSDKPlayer( C_SDKPlayer::GetLocalSDKPlayer() );
+		CPASAttenuationFilter filter( pPlayer, "Player.Medic" ); // Filters
+		EmitSound( filter, pPlayer->entindex(), "Player.Medic" ); // Play player.medic sound
 	}
 }
