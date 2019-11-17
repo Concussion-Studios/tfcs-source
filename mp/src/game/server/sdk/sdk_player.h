@@ -93,8 +93,6 @@ public:
 	CWeaponSDKBase* GetActiveSDKWeapon() const;
 	virtual void	CreateViewModel( int viewmodelindex = 0 );
 
-	virtual void	CheatImpulseCommands( int iImpulse );
-
 	// Armor
 	virtual void IncrementArmorValue( int nCount, int nMaxValue = -1 );
 	virtual void SetArmorValue( int value );
