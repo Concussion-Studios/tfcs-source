@@ -43,7 +43,7 @@ bool CWeaponSDKBaseRPG::Reload( void )
 
 	Activity actReload;
 
-	actReload = ACT_VM_RELOAD_DEPLOYED;
+	actReload = ACT_VM_RELOAD;
 
 	int iResult = DefaultReload( GetMaxClip1(), GetMaxClip2(), actReload );
 	if ( !iResult )
