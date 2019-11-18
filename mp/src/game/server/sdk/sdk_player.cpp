@@ -312,6 +312,9 @@ void CSDKPlayer::Precache()
 		g++;
 	}
 
+	//Precache stuff.
+	PrecacheScriptSound( "Player.Spawn" );
+	
 	BaseClass::Precache();
 }
 
@@ -360,6 +363,9 @@ void CSDKPlayer::Spawn()
 	DoAnimationEvent( PLAYERANIMEVENT_SPAWN );
 	
 	BaseClass::Spawn();
+	
+	//Player spawn sound.
+	EmitSound( "Player.Spawn" );
 
 	m_bTeamChanged	= false;
 
