@@ -86,8 +86,8 @@ void CWeaponSDKBaseRPG::PrimaryAttack()
 
 	m_iClip1--; 
 
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration() + GetFireRate();
-	m_flTimeWeaponIdle = gpGlobals->curtime + SequenceDuration() + GetFireRate();	//length of the fire anim!
+	m_flNextPrimaryAttack = gpGlobals->curtime + GetFireRate();
+	m_flTimeWeaponIdle = gpGlobals->curtime + GetFireRate();	//length of the fire anim!
 }
 
 void CWeaponSDKBaseRPG::FireRocket( void )
