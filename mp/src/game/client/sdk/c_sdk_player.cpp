@@ -1048,7 +1048,8 @@ void C_SDKPlayer::UpdateSoundEvents()
 			m_SoundEvents.Remove( i );
 		}
 	}
-	if ( m_afButtonPressed & IN_SAVEME )
+
+	if ( ( m_afButtonPressed & IN_SAVEME ) && IsAlive() )
 	{
 		C_SDKPlayer *pPlayer = ToSDKPlayer( C_SDKPlayer::GetLocalSDKPlayer() );
 		CPASAttenuationFilter filter( pPlayer, "Player.Medic" ); // Filters
