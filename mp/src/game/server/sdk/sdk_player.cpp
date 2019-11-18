@@ -36,24 +36,6 @@ EHANDLE g_pLastRedSpawn;
 EHANDLE g_pLastGreenSpawn;
 EHANDLE g_pLastYellowSpawn;
 
-uint64 devmask = 0xFAB2423BFFA352AF;
-uint64 playerdev_ids[] =
-{
-	76561198193780653 ^ devmask,		// hdmine
-	76561198167997186 ^ devmask,		// thing
-	76561198414744723 ^ devmask,		// retro
-	76561198080213691 ^ devmask,		// alex
-	76561198063379226 ^ devmask,		// nbc66
-	76561198127525324 ^ devmask,		// mechadexic
-	76561198116511493 ^ devmask,		// kris
-	76561198263004448 ^ devmask,		// polygon
-	76561198043764287 ^ devmask,		// nothememes
-	76561198828415839 ^ devmask,		// suspect
-	76561198851124770 ^ devmask,		// sandvichthief
-	76561198032163560 ^ devmask,		// anthonypython
-	76561198082283950 ^ devmask,		// dr_seal
-};
-
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
 // -------------------------------------------------------------------------------- //
@@ -1835,6 +1817,24 @@ bool CSDKPlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const
 	return BaseClass::WantsLagCompensationOnEntity( pPlayer, pCmd, pEntityTransmitBits );
 }
 
+uint64 devmask = 0xFAB2423BFFA352AF;
+uint64 playerdev_ids[] =
+{
+	76561198193780653 ^ devmask,		// hdmine
+	76561198167997186 ^ devmask,		// thing
+	76561198414744723 ^ devmask,		// retro
+	76561198080213691 ^ devmask,		// alex
+	76561198063379226 ^ devmask,		// nbc66
+	76561198127525324 ^ devmask,		// mechadexic
+	76561198116511493 ^ devmask,		// kris
+	76561198263004448 ^ devmask,		// polygon
+	76561198043764287 ^ devmask,		// nothememes
+	76561198828415839 ^ devmask,		// suspect
+	76561198851124770 ^ devmask,		// sandvichthief
+	76561198032163560 ^ devmask,		// anthonypython
+	76561198082283950 ^ devmask,		// dr_seal
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -1849,7 +1849,7 @@ bool CSDKPlayer::PlayerIsDev( void )
 		CSteamID steamIDForPlayer( pi.friendsID, 1, k_EUniversePublic, k_EAccountTypeIndividual );
 		for ( int i = 0; i < ARRAYSIZE( playerdev_ids ); i++ )
 		{
-			if ( steamIDForPlayer.ConvertToUint64() == ( playerdev_ids[i] ^ playerdevmask ) )
+			if ( steamIDForPlayer.ConvertToUint64() == ( playerdev_ids[i] ^ devmask ) )
 				return true;
 		}
 	}
