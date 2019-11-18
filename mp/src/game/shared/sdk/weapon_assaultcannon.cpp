@@ -50,6 +50,7 @@ public:
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_AC; }
 	virtual float GetWeaponSpread() { return 0.25f; }
 	virtual void PrimaryAttack();
+	virtual void SecondaryAttack();
 	virtual void WeaponIdle();
 	virtual void	UpdateOnRemove(void);
 	virtual void	ItemPreFrame(void);
@@ -126,6 +127,11 @@ void CWeaponAC::WindDown()
 void CWeaponAC::PrimaryAttack(void)
 {
 	SharedAttack();
+}
+
+void CWeaponAC::SecondaryAttack(void)
+{
+	//We do nothing here, we have no secondary attack.
 }
 
 void CWeaponAC::WeaponIdle(void)
@@ -219,7 +225,6 @@ void CWeaponAC::SharedAttack()
 			{
 				m_iWeaponState = ACT_SPINNING;
 
-				m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->curtime + 0.1;
 			}
 			break;
 		}

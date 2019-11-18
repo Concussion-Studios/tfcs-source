@@ -71,7 +71,10 @@ void CWeaponSDKBaseRPG::PrimaryAttack()
 
 		return;
 	}
-
+#ifdef CLIENT_DLL
+	// Play Firing Sound
+	WeaponSound(SINGLE);
+#endif
 	// player "shoot" animation
 	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
