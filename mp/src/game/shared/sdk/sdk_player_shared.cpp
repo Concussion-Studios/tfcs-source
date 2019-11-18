@@ -198,28 +198,11 @@ void CSDKPlayer::SharedSpawn()
 	m_Shared.SetJumping( false );
 
 	//Tony; todo; fix
-
 //	m_flMinNextStepSoundTime = gpGlobals->curtime;
-#if defined ( SDK_USE_PRONE )
-//	m_bPlayingProneMoveSound = false;
-#endif // SDK_USE_PRONE
 }
 
 bool CSDKPlayer::CanAttack( void )
 {
-#if defined ( SDK_USE_PRONE )
-	// cannot attack while prone moving.
-	if ( m_Shared.IsProne() && GetAbsVelocity().LengthSqr() > 1 )
-	{
-		return false;
-	}
-
-	if( m_Shared.IsGoingProne() || m_Shared.IsGettingUpFromProne() )
-	{
-		return false;
-	}
-#endif // SDK_USE_PRONE
-
 	return true;
 }
 
@@ -240,12 +223,6 @@ const Vector CSDKPlayer::GetPlayerMins( void ) const
 		{
 			return VEC_DUCK_HULL_MIN;
 		}
-#if defined ( SDK_USE_PRONE )
-		else if ( m_Shared.IsProne() )
-		{
-			return VEC_PRONE_HULL_MIN;
-		}
-#endif // SDK_USE_PRONE
 		else
 		{
 			return VEC_HULL_MIN;
@@ -270,12 +247,6 @@ const Vector CSDKPlayer::GetPlayerMaxs( void ) const
 		{
 			return VEC_DUCK_HULL_MAX;
 		}
-#if defined ( SDK_USE_PRONE )
-		else if ( m_Shared.IsProne() )
-		{
-			return VEC_PRONE_HULL_MAX;
-		}
-#endif // SDK_USE_PRONE
 		else
 		{
 			return VEC_HULL_MAX;
@@ -289,14 +260,6 @@ const Vector CSDKPlayer::GetPlayerMaxs( void ) const
 // --------------------------------------------------------------------------------------------------- //
 CSDKPlayerShared::CSDKPlayerShared()
 {
-#if defined( SDK_USE_PRONE )
-	m_bProne = false;
-	m_bForceProneChange = false;
-	m_flNextProneCheck = 0;
-	m_flUnProneTime = 0;
-	m_flGoProneTime = 0;
-#endif
-
 	SetDesiredPlayerClass( PLAYERCLASS_UNDEFINED );
 }
 
@@ -313,81 +276,6 @@ bool CSDKPlayerShared::IsDucking( void ) const
 {
 	return ( m_pOuter->GetFlags() & FL_DUCKING ) ? true : false;
 }
-
-#if defined ( SDK_USE_PRONE )
-bool CSDKPlayerShared::IsProne() const
-{
-	return m_bProne;
-}
-
-bool CSDKPlayerShared::IsGettingUpFromProne() const
-{
-	return ( m_flUnProneTime > 0 );
-}
-
-bool CSDKPlayerShared::IsGoingProne() const
-{
-	return ( m_flGoProneTime > 0 );
-}
-void CSDKPlayerShared::SetProne( bool bProne, bool bNoAnimation /* = false */ )
-{
-	m_bProne = bProne;
-
-	if ( bNoAnimation )
-	{
-		m_flGoProneTime = 0;
-		m_flUnProneTime = 0;
-
-		// cancel the view animation!
-		m_bForceProneChange = true;
-	}
-
-	if ( !bProne /*&& IsSniperZoomed()*/ )	// forceunzoom for going prone is in StartGoingProne
-	{
-		ForceUnzoom();
-	}
-}
-void CSDKPlayerShared::StartGoingProne( void )
-{
-	// make the prone sound
-	CPASFilter filter( m_pOuter->GetAbsOrigin() );
-	filter.UsePredictionRules();
-	m_pOuter->EmitSound( filter, m_pOuter->entindex(), "Player.GoProne" );
-
-	// slow to prone speed
-	m_flGoProneTime = gpGlobals->curtime + TIME_TO_PRONE;
-
-	m_flUnProneTime = 0.0f;	//reset
-
-	if ( IsSniperZoomed() )
-		ForceUnzoom();
-}
-
-void CSDKPlayerShared::StandUpFromProne( void )
-{	
-	// make the prone sound
-	CPASFilter filter( m_pOuter->GetAbsOrigin() );
-	filter.UsePredictionRules();
-	m_pOuter->EmitSound( filter, m_pOuter->entindex(), "Player.UnProne" );
-
-	// speed up to target speed
-	m_flUnProneTime = gpGlobals->curtime + TIME_TO_PRONE;
-
-	m_flGoProneTime = 0.0f;	//reset 
-}
-
-bool CSDKPlayerShared::CanChangePosition( void )
-{
-	if ( IsGettingUpFromProne() )
-		return false;
-
-	if ( IsGoingProne() )
-		return false;
-
-	return true;
-}
-
-#endif
 
 void CSDKPlayerShared::SetJumping( bool bJumping )
 {
@@ -477,24 +365,11 @@ void CSDKPlayerShared::ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, V
 {
 	Vector org = m_pOuter->GetAbsOrigin();
 
-#ifdef SDK_USE_PRONE
-	if ( IsProne() )
-	{
-		static Vector vecProneMin(-44, -44, 0 );
-		static Vector vecProneMax(44, 44, 24 );
+	static Vector vecMin(-32, -32, 0 );
+	static Vector vecMax(32, 32, 72 );
 
-		VectorAdd( vecProneMin, org, *pVecWorldMins );
-		VectorAdd( vecProneMax, org, *pVecWorldMaxs );
-	}
-	else
-#endif
-	{
-		static Vector vecMin(-32, -32, 0 );
-		static Vector vecMax(32, 32, 72 );
-
-		VectorAdd( vecMin, org, *pVecWorldMins );
-		VectorAdd( vecMax, org, *pVecWorldMaxs );
-	}
+	VectorAdd( vecMin, org, *pVecWorldMins );
+	VectorAdd( vecMax, org, *pVecWorldMaxs );
 }
 
 void CSDKPlayer::InitSpeeds()

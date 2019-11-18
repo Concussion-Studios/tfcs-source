@@ -89,11 +89,6 @@ CSDKPlayerAnimState::~CSDKPlayerAnimState()
 void CSDKPlayerAnimState::InitSDKAnimState( CSDKPlayer *pPlayer )
 {
 	m_pSDKPlayer = pPlayer;
-#if defined ( SDK_USE_PRONE )
-	m_iProneActivity = ACT_MP_STAND_TO_PRONE;
-	m_bProneTransition = false;
-	m_bProneTransitionFirstFrame = false;
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -101,10 +96,6 @@ void CSDKPlayerAnimState::InitSDKAnimState( CSDKPlayer *pPlayer )
 //-----------------------------------------------------------------------------
 void CSDKPlayerAnimState::ClearAnimationState( void )
 {
-#if defined ( SDK_USE_PRONE )
-	m_bProneTransition = false;
-	m_bProneTransitionFirstFrame = false;
-#endif
 	BaseClass::ClearAnimationState();
 }
 
@@ -225,13 +216,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 	case PLAYERANIMEVENT_ATTACK_PRIMARY:
 		{
 			// Weapon primary fire.
-#if defined ( SDK_USE_PRONE )
-			if ( m_pSDKPlayer->m_Shared.IsProne() )
-			{
-				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_PRONE_PRIMARYFIRE );
-			}
-			else
-#endif //SDK_USE_PRONE
 			if ( m_pSDKPlayer->GetFlags() & FL_DUCKING )
 			{
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_CROUCH_PRIMARYFIRE );
@@ -257,13 +241,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 	case PLAYERANIMEVENT_ATTACK_SECONDARY:
 		{
 			// Weapon secondary fire.
-#if defined ( SDK_USE_PRONE )
-			if ( m_pSDKPlayer->m_Shared.IsProne() )
-			{
-				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_PRONE_SECONDARYFIRE );
-			}
-			else
-#endif //SDK_USE_PRONE
 			if ( m_pSDKPlayer->GetFlags() & FL_DUCKING )
 			{
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_ATTACK_CROUCH_SECONDARYFIRE );
@@ -304,13 +281,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 	case PLAYERANIMEVENT_RELOAD:
 		{
 			// Weapon reload.
-#if defined ( SDK_USE_PRONE )
-			if ( m_pSDKPlayer->m_Shared.IsProne() )
-			{
-				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_PRONE );
-			}
-			else
-#endif //SDK_USE_PRONE
 			if ( GetBasePlayer()->GetFlags() & FL_DUCKING )
 			{
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_CROUCH );
@@ -325,13 +295,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 	case PLAYERANIMEVENT_RELOAD_LOOP:
 		{
 			// Weapon reload.
-#if defined ( SDK_USE_PRONE )
-			if ( m_pSDKPlayer->m_Shared.IsProne() )
-			{
-				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_PRONE_LOOP );
-			}
-			else
-#endif //SDK_USE_PRONE
 			if ( GetBasePlayer()->GetFlags() & FL_DUCKING )
 			{
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_CROUCH_LOOP );
@@ -346,13 +309,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 	case PLAYERANIMEVENT_RELOAD_END:
 		{
 			// Weapon reload.
-#if defined ( SDK_USE_PRONE )
-			if ( m_pSDKPlayer->m_Shared.IsProne() )
-			{
-				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_PRONE_END );
-			}
-			else
-#endif //SDK_USE_PRONE
 			if ( GetBasePlayer()->GetFlags() & FL_DUCKING )
 			{
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_CROUCH_END );
@@ -364,45 +320,6 @@ void CSDKPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 			iGestureActivity = ACT_INVALID; //TODO: fix
 			break;
 		}
-#if defined ( SDK_USE_PRONE )
-	case PLAYERANIMEVENT_STAND_TO_PRONE:
-		{
-			m_bProneTransition = true;
-			m_bProneTransitionFirstFrame = true;
-			m_iProneActivity = ACT_MP_STAND_TO_PRONE;
-			RestartMainSequence();
-			iGestureActivity = ACT_VM_IDLE; //Clear for weapon, we have no stand->prone so just idle.
-		}
-		break;
-	case PLAYERANIMEVENT_CROUCH_TO_PRONE:
-		{
-			m_bProneTransition = true;
-			m_bProneTransitionFirstFrame = true;
-			m_iProneActivity = ACT_MP_CROUCH_TO_PRONE;
-			RestartMainSequence();
-			iGestureActivity = ACT_VM_IDLE; //Clear for weapon, we have no crouch->prone so just idle.
-		}
-		break;
-	case PLAYERANIMEVENT_PRONE_TO_STAND:
-		{
-			m_bProneTransition = true;
-			m_bProneTransitionFirstFrame = true;
-			m_iProneActivity = ACT_MP_PRONE_TO_STAND;
-			RestartMainSequence();
-			iGestureActivity = ACT_VM_IDLE; //Clear for weapon, we have no prone->stand so just idle.
-		}
-		break;
-	case PLAYERANIMEVENT_PRONE_TO_CROUCH:
-		{
-			m_bProneTransition = true;
-			m_bProneTransitionFirstFrame = true;
-			m_iProneActivity = ACT_MP_PRONE_TO_CROUCH;
-			RestartMainSequence();
-			iGestureActivity = ACT_VM_IDLE; //Clear for weapon, we have no prone->crouch so just idle.
-		}
-		break;
-#endif
-
 	default:
 		{
 			BaseClass::DoAnimationEvent( event, nData );
@@ -471,55 +388,6 @@ bool CSDKPlayerAnimState::HandleDucking( Activity &idealActivity )
 	
 	return false;
 }
-#if defined ( SDK_USE_PRONE )
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *idealActivity - 
-// Output : Returns true on success, false on failure.
-//-----------------------------------------------------------------------------
-bool CSDKPlayerAnimState::HandleProne( Activity &idealActivity )
-{
-	if ( m_pSDKPlayer->m_Shared.IsProne() )
-	{
-		if ( GetOuterXYSpeed() < MOVING_MINIMUM_SPEED )
-		{
-			idealActivity = ACT_MP_PRONE_IDLE;		
-		}
-		else
-		{
-			idealActivity = ACT_MP_PRONE_CRAWL;		
-		}
-
-		return true;
-	}
-	
-	return false;
-}
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *idealActivity - 
-// Output : Returns true on success, false on failure.
-//-----------------------------------------------------------------------------
-bool CSDKPlayerAnimState::HandleProneTransition( Activity &idealActivity )
-{
-	if ( m_bProneTransition )
-	{
-		if (m_bProneTransitionFirstFrame)
-		{
-			m_bProneTransitionFirstFrame = false;
-			RestartMainSequence();	// Reset the animation.
-		}
-
-		//Tony; check the cycle, and then stop overriding
-		if ( GetBasePlayer()->GetCycle() >= 0.99 )
-			m_bProneTransition = false;
-		else
-			idealActivity = m_iProneActivity;
-	}
-
-	return m_bProneTransition;
-}
-#endif // SDK_USE_PRONE
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -601,11 +469,6 @@ Activity CSDKPlayerAnimState::CalcMainActivity()
 	Activity idealActivity = ACT_MP_STAND_IDLE;
 
 	if ( HandleJumping( idealActivity ) || 
-#if defined ( SDK_USE_PRONE )
-		//Tony; handle these before ducking !!
-		HandleProneTransition( idealActivity ) ||
-		HandleProne( idealActivity ) ||
-#endif
 		HandleDucking( idealActivity ) || 
 		HandleSwimming( idealActivity ) || 
 		HandleDying( idealActivity )

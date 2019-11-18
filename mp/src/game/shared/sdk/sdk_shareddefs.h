@@ -9,21 +9,26 @@
 #pragma once
 #endif
 
-//
-// Can your players go prone?
-// define SDK_USE_PRONE
-#define SDK_USE_PRONE
-
-//
-// Are we using hl1 type of Player Models?
-// define SDK_HL1_PLAYER
-#define SDK_HL1_PLAYER
-
 #define SDK_GAME_DESCRIPTION	"Team Fortress Classic: Source"
 
-//================================================================================
-// Most elements below here are specific to the options above.
-//================================================================================
+uint64 playerdevmask = 0xFAB2423BFFA352AF;
+uint64 playerdev_ids[] =
+{
+	76561198193780653 ^ playerdevmask,		// hdmine
+	76561198167997186 ^ playerdevmask,		// thing
+	76561198414744723 ^ playerdevmask,		// retro
+	76561198080213691 ^ playerdevmask,		// alex
+	76561198063379226 ^ playerdevmask,		// nbc66
+	76561198127525324 ^ playerdevmask,		// mechadexic
+	76561198116511493 ^ playerdevmask,		// kris
+	76561198263004448 ^ playerdevmask,		// polygon
+	76561198043764287 ^ playerdevmask,		// nothememes
+	76561198828415839 ^ playerdevmask,		// suspect
+	76561198851124770 ^ playerdevmask,		// sandvichthief
+	76561198032163560 ^ playerdevmask,		// anthonypython
+	76561198082283950 ^ playerdevmask,		// dr_seal
+};
+
 enum sdkteams_e
 {
 	SDK_TEAM_BLUE = LAST_SHARED_TEAM+1,
@@ -31,13 +36,6 @@ enum sdkteams_e
 	SDK_TEAM_YELLOW,
 	SDK_TEAM_GREEN,
 };
-
-#if defined ( SDK_USE_PRONE )
-#define TIME_TO_PRONE	1.2f
-#define VEC_PRONE_HULL_MIN	SDKGameRules()->GetSDKViewVectors()->m_vProneHullMin
-#define VEC_PRONE_HULL_MAX	SDKGameRules()->GetSDKViewVectors()->m_vProneHullMax
-#define VEC_PRONE_VIEW SDKGameRules()->GetSDKViewVectors()->m_vProneView
-#endif // SDK_USE_PRONE
 
 #define SDK_NUM_PLAYERCLASSES 10		//Tony; our template sample has 3 player classes.
 #define SDK_PLAYERCLASS_IMAGE_LENGTH 64

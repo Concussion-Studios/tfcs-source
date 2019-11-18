@@ -20,7 +20,8 @@
 #include "game.h"
 #include "tfc_projectile_base.h"
 #include "gib.h"
-
+#include "steam/steam_api.h"
+#include "cdll_int.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -104,11 +105,6 @@ BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKSharedLocalPlayerExclusive )
 END_SEND_TABLE()
 
 BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
-#if defined ( SDK_USE_PRONE )
-	SendPropBool( SENDINFO( m_bProne ) ),
-	SendPropTime( SENDINFO( m_flGoProneTime ) ),
-	SendPropTime( SENDINFO( m_flUnProneTime ) ),
-#endif
 	SendPropDataTable( "sdksharedlocaldata", 0, &REFERENCE_SEND_TABLE(DT_SDKSharedLocalPlayerExclusive), SendProxy_SendLocalDataTable ),
 END_SEND_TABLE()
 
@@ -231,6 +227,8 @@ CSDKPlayer::CSDKPlayer()
 
 	m_pCurStateInfo = NULL;	// no state yet
 
+	m_bIsPlayerADev = false;
+	m_bIsPlayerABetaTester= false;
 }
 
 
@@ -368,10 +366,6 @@ void CSDKPlayer::Spawn()
 	EmitSound( "Player.Spawn" );
 
 	m_bTeamChanged	= false;
-
-#if defined ( SDK_USE_PRONE )
-	InitProne();
-#endif
 
 	// update this counter, used to not interp players when they spawn
 	m_bSpawnInterpCounter = !m_bSpawnInterpCounter;
@@ -1452,17 +1446,6 @@ bool CSDKPlayer::IsClassMenuOpen( void )
 	return m_bIsClassMenuOpen;
 }
 
-#if defined ( SDK_USE_PRONE )
-//-----------------------------------------------------------------------------
-// Purpose: Initialize prone at spawn.
-//-----------------------------------------------------------------------------
-void CSDKPlayer::InitProne( void )
-{
-	m_Shared.SetProne( false, true );
-	m_bUnProneToDuck = false;
-}
-#endif // SDK_USE_PRONE
-
 // ------------------------------------------------------------------------------------------------ //
 // Player state management.
 // ------------------------------------------------------------------------------------------------ //
@@ -1809,11 +1792,6 @@ void CSDKPlayer::State_PreThink_ACTIVE()
 
 int CSDKPlayer::GetPlayerStance()
 {
-#if defined ( SDK_USE_PRONE )
-	if (m_Shared.IsProne() || ( m_Shared.IsGoingProne() || m_Shared.IsGettingUpFromProne() ))
-		return PINFO_STANCE_PRONE;
-#endif
-
 	if (m_Local.m_bDucking)
 		return PINFO_STANCE_DUCKING;
 	else
@@ -1837,6 +1815,50 @@ bool CSDKPlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const
 		return false;
 
 	return BaseClass::WantsLagCompensationOnEntity( pPlayer, pCmd, pEntityTransmitBits );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CSDKPlayer::PlayerIsDev( void )
+{
+	if ( !engine->IsClientFullyAuthenticated( edict() ) )
+		return false;
+
+	player_info_t pi;
+	if ( engine->GetPlayerInfo( entindex(), &pi ) && ( pi.friendsID ) )
+	{
+		CSteamID steamIDForPlayer( pi.friendsID, 1, k_EUniversePublic, k_EAccountTypeIndividual );
+		for ( int i = 0; i < ARRAYSIZE( playerdev_ids ); i++ )
+		{
+			if ( steamIDForPlayer.ConvertToUint64() == ( playerdev_ids[i] ^ playerdevmask ) )
+				return true;
+		}
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CSDKPlayer::PlayerIsBeta( void )
+{
+	if ( !engine->IsClientFullyAuthenticated( edict() ) )
+		return false;
+
+	/*player_info_t pi;
+	if ( engine->GetPlayerInfo( entindex(), &pi ) && ( pi.friendsID ) )
+	{
+		CSteamID steamIDForPlayer( pi.friendsID, 1, k_EUniversePublic, k_EAccountTypeIndividual );
+		for ( int i = 0; i < ARRAYSIZE( playerdev_ids ); i++ )
+		{
+			if ( steamIDForPlayer.ConvertToUint64() == ( playerdev_ids[i] ^ playerdevmask ) )
+				return true;
+		}
+	}*/
+
+	return false;
 }
 
 void CSDKPlayer::IncrementHealthValue( int nCount )

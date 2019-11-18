@@ -32,11 +32,28 @@
 	#undef CSDKPlayer
 #endif
 
+ConVar tfc_dev_mark( "tfc_dev_mark", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+ConVar tfc_beta_mark( "tfc_beta_mark", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
+
 ConVar sdk_max_separation_force("sdk_max_separation_force", "256", FCVAR_CHEAT | FCVAR_HIDDEN);
 
 extern ConVar cl_forwardspeed;
 extern ConVar cl_backspeed;
 extern ConVar cl_sidespeed;
+
+ConVar cl_hl1_rollspeed( "cl_hl1_rollspeed", "300.0", FCVAR_USERINFO | FCVAR_ARCHIVE ); // 300.0
+ConVar cl_hl1_rollangle( "cl_hl1_rollangle", "0.65", FCVAR_USERINFO | FCVAR_ARCHIVE ); // 0.65
+
+ConVar cl_hl1_bobcycle( "cl_hl1_bobcycle", "0.8", FCVAR_USERINFO | FCVAR_ARCHIVE );
+ConVar cl_hl1_bob( "cl_hl1_bob", "0.01", FCVAR_USERINFO | FCVAR_ARCHIVE );
+ConVar cl_hl1_bobup( "cl_hl1_bobup", "0.5", FCVAR_USERINFO | FCVAR_ARCHIVE );
+
+ConVar cl_hl1_iyaw_cycle( "cl_hl1_iyaw_cycle", "2.0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
+ConVar cl_hl1_iroll_cycle( "cl_hl1_iroll_cycle", "0.5", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
+ConVar cl_hl1_ipitch_cycle( "cl_hl1_ipitch_cycle", "1.0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
+ConVar cl_hl1_iyaw_level( "cl_hl1_iyaw_level", "0.3", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
+ConVar cl_hl1_iroll_level( "cl_hl1_iroll_level", "0.1", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
+ConVar cl_hl1_ipitch_level( "cl_hl1_ipitch_level", "0.3", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
@@ -91,11 +108,6 @@ BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKSharedLocalPlayerExclusive )
 END_RECV_TABLE()
 
 BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
-#if defined ( SDK_USE_PRONE )
-	RecvPropBool( RECVINFO( m_bProne ) ),
-	RecvPropTime( RECVINFO( m_flGoProneTime ) ),
-	RecvPropTime( RECVINFO( m_flUnProneTime ) ),
-#endif
 	RecvPropDataTable( "sdksharedlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_SDKSharedLocalPlayerExclusive) ),
 END_RECV_TABLE()
 
@@ -134,11 +146,6 @@ END_RECV_TABLE()
 // Prediction tables.
 // ------------------------------------------------------------------------------------------ //
 BEGIN_PREDICTION_DATA_NO_BASE( CSDKPlayerShared )
-#if defined( SDK_USE_PRONE )
-	DEFINE_PRED_FIELD( m_bProne, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_flGoProneTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_flUnProneTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
-#endif
 END_PREDICTION_DATA()
 
 BEGIN_PREDICTION_DATA( C_SDKPlayer )
@@ -548,10 +555,6 @@ void C_SDKPlayer::PostDataUpdate( DataUpdateType_t updateType )
 void C_SDKPlayer::LocalPlayerRespawn( void )
 {
 	ResetToneMapping(1.0);
-#if defined ( SDK_USE_PRONE )
-	m_Shared.m_bForceProneChange = true;
-	m_bUnProneToDuck = false;
-#endif
 
 	InitSpeeds(); //Tony; initialize player speeds.
 }
@@ -718,9 +721,6 @@ void C_SDKPlayer::CalcPlayerView(Vector& eyeOrigin, QAngle& eyeAngles, float& fo
 	CalcViewIdle(eyeAngles);
 }
 
-ConVar cl_hl1_rollspeed("cl_hl1_rollspeed", "300.0", FCVAR_USERINFO | FCVAR_ARCHIVE ); // 300.0
-ConVar cl_hl1_rollangle("cl_hl1_rollangle", "0.65", FCVAR_USERINFO | FCVAR_ARCHIVE ); // 0.65
-
 void C_SDKPlayer::CalcViewRoll( QAngle& eyeAngles )
 {
 	if (GetMoveType() == MOVETYPE_NOCLIP)
@@ -735,10 +735,6 @@ void C_SDKPlayer::CalcViewRoll( QAngle& eyeAngles )
 		return;
 	}
 }
-
-ConVar cl_hl1_bobcycle("cl_hl1_bobcycle", "0.8", FCVAR_USERINFO | FCVAR_ARCHIVE );
-ConVar cl_hl1_bob("cl_hl1_bob", "0.01", FCVAR_USERINFO | FCVAR_ARCHIVE );
-ConVar cl_hl1_bobup("cl_hl1_bobup", "0.5", FCVAR_USERINFO | FCVAR_ARCHIVE );
 
 void C_SDKPlayer::CalcViewBob( Vector& eyeOrigin )
 {
@@ -772,13 +768,6 @@ void C_SDKPlayer::CalcViewBob( Vector& eyeOrigin )
 
 	eyeOrigin.z += ViewBob;
 }
-
-ConVar cl_hl1_iyaw_cycle("cl_hl1_iyaw_cycle", "2.0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
-ConVar cl_hl1_iroll_cycle("cl_hl1_iroll_cycle", "0.5", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
-ConVar cl_hl1_ipitch_cycle("cl_hl1_ipitch_cycle", "1.0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
-ConVar cl_hl1_iyaw_level("cl_hl1_iyaw_level", "0.3", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
-ConVar cl_hl1_iroll_level("cl_hl1_iroll_level", "0.1", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
-ConVar cl_hl1_ipitch_level("cl_hl1_ipitch_level", "0.3", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY );
 
 void C_SDKPlayer::CalcViewIdle(QAngle& eyeAngles)
 {

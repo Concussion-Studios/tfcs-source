@@ -47,13 +47,6 @@ public:
 	virtual void FinishUnDuck( void );
 	virtual void FinishDuck( void );
 	void SetSDKDuckedEyeOffset( float duckFraction );
-#if defined ( SDK_USE_PRONE )
-	// Prone
-	void SetProneEyeOffset( float proneFraction );
-	void FinishProne( void );
-	void FinishUnProne( void );
-	bool CanUnprone();
-#endif // SDK_USE_PRONE
 
 	virtual  Vector	GetPlayerMins( void ) const; // uses local player
 	virtual  Vector	GetPlayerMaxs( void ) const; // uses local player
@@ -94,62 +87,18 @@ CSDKGameMovement::~CSDKGameMovement()
 
 void CSDKGameMovement::SetPlayerSpeed( void )
 {
-#if defined ( SDK_USE_PRONE )
-	// This check is now simplified, just use CanChangePosition because it checks the two things we need to check anyway.
-	if ( m_pSDKPlayer->m_Shared.IsProne() && m_pSDKPlayer->m_Shared.CanChangePosition() && m_pSDKPlayer->GetGroundEntity() != NULL )
+	float stamina = 100.0f;
+	float flMaxSpeed;
+
+	if ( mv->m_nButtons & IN_DUCK )
 	{
-			mv->m_flClientMaxSpeed = m_pSDKPlayer->m_Shared.m_flProneSpeed;		//Base prone speed 
+		mv->m_flClientMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//gets cut in fraction later
 	}
-	else	//not prone - standing or crouching and possibly moving
-#endif // SDK_USE_PRONE
+	else
 	{
-		float stamina = 100.0f;
-		float flMaxSpeed;
-
-		if ( mv->m_nButtons & IN_DUCK )
-		{
-			mv->m_flClientMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//gets cut in fraction later
-		}
-		else
-		{
-			flMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//jogging
-			mv->m_flClientMaxSpeed = flMaxSpeed - 100 + stamina;
-		}
+		flMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//jogging
+		mv->m_flClientMaxSpeed = flMaxSpeed - 100 + stamina;
 	}
-
-#if defined ( SDK_USE_PRONE )
-	if ( m_pSDKPlayer->GetGroundEntity() != NULL )
-	{
-		if( m_pSDKPlayer->m_Shared.IsGoingProne() )
-		{
-			float pronetime = m_pSDKPlayer->m_Shared.m_flGoProneTime - gpGlobals->curtime;
-
-			//interp to prone speed
-			float flProneFraction = SimpleSpline( pronetime / TIME_TO_PRONE );
-
-			float maxSpeed = mv->m_flClientMaxSpeed;
-
-			if ( m_pSDKPlayer->m_bUnProneToDuck )
-				maxSpeed *= 0.33;
-			
-			mv->m_flClientMaxSpeed = ( ( 1 - flProneFraction ) * m_pSDKPlayer->m_Shared.m_flProneSpeed ) + ( flProneFraction * maxSpeed );
-		}
-		else if ( m_pSDKPlayer->m_Shared.IsGettingUpFromProne() )
-		{
-			float pronetime = m_pSDKPlayer->m_Shared.m_flUnProneTime - gpGlobals->curtime;
-
-			//interp to regular speed speed
-			float flProneFraction = SimpleSpline( pronetime / TIME_TO_PRONE );
-			
-			float maxSpeed = mv->m_flClientMaxSpeed;
-
-			if ( m_pSDKPlayer->m_bUnProneToDuck )
-				maxSpeed *= 0.33;
-
-			mv->m_flClientMaxSpeed = ( flProneFraction * m_pSDKPlayer->m_Shared.m_flProneSpeed ) + ( ( 1 - flProneFraction ) * maxSpeed );
-		}
-	}	
-#endif // SDK_USE_PRONE
 }
 
 ConVar cl_show_speed( "cl_show_speed", "0", FCVAR_CHEAT | FCVAR_REPLICATED, "spam console with local player speed" );
@@ -595,15 +544,6 @@ bool CSDKGameMovement::CheckJumpButton( void )
 		mv->m_nOldButtons |= IN_JUMP ;	// don't jump again until released
 		return false;
 	}
-#if defined ( SDK_USE_PRONE )
-	if( m_pSDKPlayer->m_Shared.IsProne() ||
-		m_pSDKPlayer->m_Shared.IsGettingUpFromProne() || 
-		m_pSDKPlayer->m_Shared.IsGoingProne() )
-	{
-		mv->m_nOldButtons |= IN_JUMP;
-		return false;
-	}
-#endif
 
 	// See if we are waterjumping.  If so, decrement count and return.
 	float flWaterJumpTime = player->GetWaterJumpTime();
@@ -704,69 +644,6 @@ bool CSDKGameMovement::CheckJumpButton( void )
 
 	return true;
 }
-
-#if defined ( SDK_USE_PRONE )
-bool CSDKGameMovement::CanUnprone()
-{
-	int i;
-	trace_t trace;
-	Vector newOrigin;
-
-	VectorCopy( mv->GetAbsOrigin(), newOrigin );
-
-	Vector vecMins, vecMaxs;
-
-	if ( mv->m_nButtons & IN_DUCK )
-	{
-		vecMins = VEC_DUCK_HULL_MIN;
-		vecMaxs = VEC_DUCK_HULL_MAX;
-	}
-	else
-	{
-		vecMins = VEC_HULL_MIN;
-		vecMaxs = VEC_HULL_MAX;
-	}
-
-	if ( player->GetGroundEntity() != NULL )
-	{
-		for ( i = 0; i < 3; i++ )
-		{
-			newOrigin[i] += ( VEC_PRONE_HULL_MIN[i] - vecMins[i] );
-		}
-	}
-	else
-	{
-		// If in air an letting go of crouch, make sure we can offset origin to make
-		//  up for uncrouching
-
-		Vector hullSizeNormal = vecMaxs - vecMins;
-		Vector hullSizeProne = VEC_PRONE_HULL_MAX - VEC_PRONE_HULL_MIN;
-
-		Vector viewDelta = -0.5f * ( hullSizeNormal - hullSizeProne );
-
-		VectorAdd( newOrigin, viewDelta, newOrigin );
-	}
-
-	bool saveprone = m_pSDKPlayer->m_Shared.IsProne();
-	bool saveducked = player->m_Local.m_bDucked;
-
-	// pretend we're not prone
-	m_pSDKPlayer->m_Shared.SetProne( false );
-	if ( mv->m_nButtons & IN_DUCK )
-		player->m_Local.m_bDucked = true;
-
-	TracePlayerBBox( mv->GetAbsOrigin(), newOrigin, MASK_PLAYERSOLID, COLLISION_GROUP_PLAYER_MOVEMENT, trace );
-
-	// revert to reality
-	m_pSDKPlayer->m_Shared.SetProne( saveprone );
-	player->m_Local.m_bDucked = saveducked;
-
-	if ( trace.startsolid || ( trace.fraction != 1.0f ) )
-		return false;	
-
-	return true;
-}
-#endif // SDK_USE_PRONE
 
 //-----------------------------------------------------------------------------
 // Purpose: Stop ducking
@@ -870,59 +747,6 @@ void CSDKGameMovement::SetSDKDuckedEyeOffset( float duckFraction )
 	player->SetViewOffset( temp );
 }
 
-#if defined ( SDK_USE_PRONE )
-void CSDKGameMovement::SetProneEyeOffset( float proneFraction )
-{
-	Vector vecPropViewOffset = VEC_PRONE_VIEW;
-	Vector vecStandViewOffset = GetPlayerViewOffset( player->m_Local.m_bDucked || m_pSDKPlayer->m_bUnProneToDuck );
-
-	Vector temp = player->GetViewOffset();
-	temp.z = SimpleSplineRemapVal( proneFraction, 1.0, 0.0, vecPropViewOffset.z, vecStandViewOffset.z );
-
-	player->SetViewOffset( temp );
-}
-
-void CSDKGameMovement::FinishUnProne( void )
-{
-	m_pSDKPlayer->m_Shared.m_flUnProneTime = 0.0f;
-	
-	SetProneEyeOffset( 0.0 );
-
-	Vector vHullMin = GetPlayerMins( player->m_Local.m_bDucked );
-	Vector vHullMax = GetPlayerMaxs( player->m_Local.m_bDucked );
-
-	if ( m_pSDKPlayer->m_bUnProneToDuck )
-	{
-		FinishDuck();
-	}
-	else
-	{
-		CategorizePosition();
-
-		if ( mv->m_nButtons & IN_DUCK && !( player->GetFlags() & FL_DUCKING ) )
-		{
-			// Use 1 second so super long jump will work
-			player->m_Local.m_flDucktime = 1000;
-			player->m_Local.m_bDucking    = true;
-		}
-	}
-}
-
-void CSDKGameMovement::FinishProne( void )
-{	
-	m_pSDKPlayer->m_Shared.SetProne( true );
-	m_pSDKPlayer->m_Shared.m_flGoProneTime = 0.0f;
-
-	FinishUnDuck();	// clear ducking
-
-	SetProneEyeOffset( 1.0 );
-
-	FixPlayerCrouchStuck(true);
-
-	CategorizePosition();
-}
-#endif // SDK_USE_PRONE
-
 //-----------------------------------------------------------------------------
 // Purpose: See if duck button is pressed and do the appropriate things
 //-----------------------------------------------------------------------------
@@ -943,148 +767,15 @@ void CSDKGameMovement::Duck( void )
 
 	if ( !player->IsAlive() )
 	{
-#if defined ( SDK_USE_PRONE )
-		if( m_pSDKPlayer->m_Shared.IsProne() )
-		{
-			FinishUnProne();
-		}
-#endif // SDK_USE_PRONE
-
 		// Unduck
 		if ( player->m_Local.m_bDucking || player->m_Local.m_bDucked )
-		{
 			FinishUnDuck();
-		}
+
 		return;
 	}
 
 	static int iState = 0;
 
-#if defined ( SDK_USE_PRONE )
-	// Prone / UnProne - we don't duck if this is happening
-	if( m_pSDKPlayer->m_Shared.IsGettingUpFromProne() == true )
-	{
-		float pronetime = m_pSDKPlayer->m_Shared.m_flUnProneTime - gpGlobals->curtime;
-
-		if( pronetime < 0 )
-		{
-			FinishUnProne();
-
-			if ( !m_pSDKPlayer->m_bUnProneToDuck && ( mv->m_nButtons & IN_DUCK ) )
-			{
-				buttonsPressed |= IN_DUCK;
-				mv->m_nOldButtons &= ~IN_DUCK;
-			}
-		}
-		else
-		{
-			// Calc parametric time
-			float fraction = SimpleSpline( pronetime / TIME_TO_PRONE );
-			SetProneEyeOffset( fraction );
-
-		}
-
-		// Set these, so that as soon as we stop unproning, we don't pop to standing
-		// the information that we let go of the duck key has been lost by now.
-		if ( m_pSDKPlayer->m_bUnProneToDuck )
-		{
-			player->m_Local.m_flDucktime = 1000;
-			player->m_Local.m_bDucking    = true;
-		}
-
-		//don't deal with ducking while we're proning
-		return;
-	}
-	else if ( m_pSDKPlayer->m_Shared.IsGoingProne() == true )
-	{
-		float pronetime = m_pSDKPlayer->m_Shared.m_flGoProneTime - gpGlobals->curtime;
-
-		if( pronetime < 0 )
-		{
-			FinishProne();
-		}
-		else
-		{
-			// Calc parametric time
-			float fraction = SimpleSpline( 1.0f - ( pronetime / TIME_TO_PRONE ) );
-			SetProneEyeOffset( fraction );
-		}
-
-		//don't deal with ducking while we're proning
-		return;
-	}
-
-	if ( gpGlobals->curtime > m_pSDKPlayer->m_Shared.m_flNextProneCheck )
-	{
-		if ( buttonsPressed & IN_ALT1 && m_pSDKPlayer->m_Shared.CanChangePosition() )
-		{
-			if( m_pSDKPlayer->m_Shared.IsProne() == false &&
-				m_pSDKPlayer->m_Shared.IsGettingUpFromProne() == false )
-			{
-				m_pSDKPlayer->m_Shared.StartGoingProne();
-
-				//Tony; here is where you'd want to do an animation for first person to give the effect of going prone.
-				if ( m_pSDKPlayer->m_Shared.IsDucking() )
-					m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_CROUCH_TO_PRONE );
-				else
-					m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_STAND_TO_PRONE );
-
-			}
-			else if ( CanUnprone() )
-			{
-				m_pSDKPlayer->m_Shared.SetProne( false );
-				m_pSDKPlayer->m_Shared.StandUpFromProne();
-
-				//
-				//Tony; here is where you'd want to do an animation for first person to give the effect of getting up from prone.
-				//
-
-				m_pSDKPlayer->m_bUnProneToDuck = ( mv->m_nButtons & IN_DUCK ) > 0;
-
-				if ( m_pSDKPlayer->m_bUnProneToDuck )
-					m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_PRONE_TO_CROUCH );
-				else
-					m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_PRONE_TO_STAND );
-			}
-			
-			m_pSDKPlayer->m_Shared.m_flNextProneCheck = gpGlobals->curtime + 1.0f;
-			return;
-		}
-	}
-
-	if ( m_pSDKPlayer->m_Shared.IsProne() &&
-		m_pSDKPlayer->m_Shared.CanChangePosition() &&
-		( buttonsPressed & IN_DUCK ) && 
-		CanUnprone() )	
-	{
-		// If the player presses duck while prone,
-		// unprone them to the duck position
-		m_pSDKPlayer->m_Shared.SetProne( false );
-		m_pSDKPlayer->m_Shared.StandUpFromProne();
-
-		m_pSDKPlayer->m_bUnProneToDuck = true;
-
-		//
-		//Tony; here is where you'd want to do an animation for first person to give the effect of going to duck from prone.
-		//
-
-		m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_PRONE_TO_CROUCH );
-
-		// simulate a duck that was pressed while we were prone
-		player->AddFlag( FL_DUCKING );
-		player->m_Local.m_bDucked = true;
-		player->m_Local.m_flDucktime = 1000;
-		player->m_Local.m_bDucking    = true;
-	}
-
-	// no ducking or unducking while deployed or prone
-	if( m_pSDKPlayer->m_Shared.IsProne() ||
-		m_pSDKPlayer->m_Shared.IsGettingUpFromProne() ||
-		!m_pSDKPlayer->m_Shared.CanChangePosition() )
-	{
-		return;
-	}
-#endif // SDK_USE_PRONE
 	HandleDuckingSpeedCrop();
 
 	if ( !( player->GetFlags() & FL_DUCKING ) && ( player->m_Local.m_bDucked ) )
@@ -1215,10 +906,6 @@ Vector CSDKGameMovement::GetPlayerMins( void ) const
 	{
 		if ( player->m_Local.m_bDucked )
 			return VEC_DUCK_HULL_MIN;
-#if defined ( SDK_USE_PRONE )
-		else if ( m_pSDKPlayer->m_Shared.IsProne() )
-			return VEC_PRONE_HULL_MIN;
-#endif // SDK_USE_PRONE
 		else
 			return VEC_HULL_MIN;
 	}
@@ -1243,10 +930,6 @@ Vector CSDKGameMovement::GetPlayerMaxs( void ) const
 	{
 		if ( player->m_Local.m_bDucked )
 			return VEC_DUCK_HULL_MAX;
-#if defined ( SDK_USE_PRONE )
-		else if ( m_pSDKPlayer->m_Shared.IsProne() )
-			return VEC_PRONE_HULL_MAX;
-#endif // SDK_USE_PRONE
 		else
 			return VEC_HULL_MAX;
 	}

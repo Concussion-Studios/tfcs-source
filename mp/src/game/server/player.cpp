@@ -452,10 +452,6 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_nNumCrateHudHints, FIELD_INTEGER ),
 
-
-#ifdef SDK_HL1_PLAYER
-	// DEFINE_FIELD( m_nBodyPitchPoseParam, FIELD_INTEGER ),
-#endif // SDK_HL1_PLAYER
 	// DEFINE_ARRAY( m_StepSoundCache, StepSoundCache_t,  2  ),
 
 	// DEFINE_UTLVECTOR( m_vecPlayerCmdInfo ),
@@ -5311,11 +5307,7 @@ void CBasePlayer::OnRestore( void )
 	// Calculate this immediately
 	m_nVehicleViewSavedFrame = 0;
 
-#ifdef SDK_HL1_PLAYER
-	m_nBodyPitchPoseParam = LookupPoseParameter("XR");
-#else
 	m_nBodyPitchPoseParam = LookupPoseParameter("body_pitch");
-#endif
 }
 
 /* void CBasePlayer::SetTeamName( const char *pTeamName )
@@ -9436,11 +9428,7 @@ void CBasePlayer::SetModel( const char *szModelName )
 {
 	BaseClass::SetModel( szModelName );
 
-#ifdef SDK_HL1_PLAYER
-	m_nBodyPitchPoseParam = LookupPoseParameter( "XR" );
-#else
 	m_nBodyPitchPoseParam = LookupPoseParameter("body_pitch");
-#endif
 }
 
 void CBasePlayer::SetBodyPitch( float flPitch )

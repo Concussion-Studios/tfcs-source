@@ -131,6 +131,12 @@ public:
 	virtual	bool		ShouldCollide( int collisionGroup, int contentsMask ) const;
 	void SDKPushawayThink(void);
 
+	virtual bool PlayerIsDev();
+	virtual bool PlayerIsBeta();
+
+	virtual bool IsDeveloper() { return m_bIsPlayerADev; }
+	virtual bool IsBetaTester() { return m_bIsPlayerABetaTester; }
+
 // In shared code.
 public:
 	void FireBullet( 
@@ -215,11 +221,9 @@ private:
 	void ShowClassSelectMenu();
 	bool m_bIsClassMenuOpen;
 
-#if defined ( SDK_USE_PRONE )
-	void InitProne( void );
-#endif // SDK_USE_PRONE
 
 	void InitSpeeds( void ); //Tony; called EVERY spawn on server and client after class has been chosen (if any!)
+
 	void  HandleThrowGrenade(void);
 	void  ThrowGrenade(void);
 	void  CreateGrenade(void);
@@ -265,9 +269,9 @@ private:
 	CNetworkVarForDerived( int, m_MaxArmorValue );
 
 public:
-#if defined ( SDK_USE_PRONE )
-	bool m_bUnProneToDuck;		//Tony; GAMEMOVEMENT USED VARIABLE
-#endif // SDK_USE_PRONE
+
+	bool m_bIsPlayerADev;
+	bool m_bIsPlayerABetaTester;
 
 };
 

@@ -48,11 +48,6 @@ public:
 	bool	HandleDucking( Activity &idealActivity );
 	bool	HandleSwimming( Activity &idealActivity );
 
-#if defined ( SDK_USE_PRONE )
-	bool	HandleProne( Activity &idealActivity );
-	bool	HandleProneTransition( Activity &idealActivity );
-#endif
-
 	//Tony; overriding because the SDK Player models pose parameter is flipped the opposite direction
 	virtual void		ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr );
 
@@ -62,11 +57,6 @@ private:
 	
 	CSDKPlayer   *m_pSDKPlayer;
 	bool		m_bInAirWalk;
-#if defined ( SDK_USE_PRONE )
-	Activity	m_iProneActivity;
-	bool		m_bProneTransition;
-	bool		m_bProneTransitionFirstFrame;
-#endif
 
 	float		m_flHoldDeployedPoseUntilTime;
 };

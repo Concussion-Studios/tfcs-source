@@ -130,11 +130,6 @@ static CSDKViewVectors g_SDKViewVectors(
 	Vector( 10,  10,  10 ),		//VEC_OBS_HULL_MAX
 													
 	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT
-#if defined ( SDK_USE_PRONE )			
-	,Vector(-16, -16, 0 ),		//VEC_PRONE_HULL_MIN
-	Vector( 16,  16, 24 ),		//VEC_PRONE_HULL_MAX
-	Vector( 0,	0, 10 )			//VEC_PRONE_VIEW
-#endif
 );
 
 const CViewVectors* CSDKGameRules::GetViewVectors() const
@@ -500,6 +495,27 @@ bool CSDKGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 		return true;
 	}
 	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CSDKGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
+{
+	BaseClass::ClientSettingsChanged( pPlayer );
+
+	CSDKPlayer *pSDKPlayer = (CSDKPlayer*)pPlayer;
+
+	if ( pSDKPlayer->IsFakeClient() )
+		return;
+
+	const char *pszFov = engine->GetClientConVarValue( pPlayer->entindex(), "fov_desired" );
+	int iFov = atoi( pszFov );
+	iFov = clamp( iFov, 75, MAX_FOV );
+	pSDKPlayer->SetDefaultFOV( iFov );
+
+	pSDKPlayer->m_bIsPlayerADev = pSDKPlayer->PlayerIsDev() && ( Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "tfc_dev_mark" ) ) > 0 );
+	pSDKPlayer->m_bIsPlayerABetaTester = pSDKPlayer->PlayerIsBeta() && ( Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "tfc_beta_mark" ) ) > 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -1723,27 +1739,57 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 	if ( !pPlayer )  // dedicated server output
 		return NULL;
 
+
+	CSDKPlayer* pSDKPlayer = ToSDKPlayer( pPlayer );
 	const char *pszFormat = NULL;
 
 	if ( bTeamOnly )
 	{
-		if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
 			pszFormat = "SDK_Chat_Spec";
 		else
 		{
-			if (pPlayer->m_lifeState != LIFE_ALIVE )
+			if (pSDKPlayer->m_lifeState != LIFE_ALIVE )
 				pszFormat = "SDK_Chat_Team_Dead";
 			else
 				pszFormat = "SDK_Chat_Team";
 		}
 	}
+	else if ( pSDKPlayer->IsDeveloper() )
+	{
+		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		{
+			pszFormat = "SDK_Chat_DevSpec";
+		}
+		else
+		{
+			if ( pSDKPlayer->IsAlive() == false )
+				pszFormat = "SDK_Chat_DevDead";
+			else
+				pszFormat = "SDK_Chat_Dev";
+		}
+	}
+	else if ( pSDKPlayer->IsBetaTester() )
+	{
+		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		{
+			pszFormat = "SDK_Chat_BetaSpec";
+		}
+		else
+		{
+			if ( pSDKPlayer->IsAlive() == false )
+				pszFormat = "SDK_Chat_BetaDead";
+			else
+				pszFormat = "SDK_Chat_Beta";
+		}
+	}
 	else
 	{
-		if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR)
+		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR)
 			pszFormat = "SDK_Chat_All_Spec";
 		else
 		{
-			if (pPlayer->m_lifeState != LIFE_ALIVE )
+			if (pSDKPlayer->m_lifeState != LIFE_ALIVE )
 				pszFormat = "SDK_Chat_All_Dead";
 			else
 				pszFormat = "SDK_Chat_All";

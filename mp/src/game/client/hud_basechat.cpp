@@ -48,6 +48,10 @@ Color g_ColorDarkGreen( 64, 255, 64, 255 );
 Color g_ColorYellow( 255, 178, 0, 255 );
 Color g_ColorGrey( 204, 204, 204, 255 );
 Color g_ColorWhite( 255, 255, 255, 255 );
+#ifdef SDK_DLL
+Color g_ColorDev( 30, 144, 255, 255 );
+Color g_ColorBeta( 0, 250, 154, 255 );
+#endif // SDK_DLL
 
 
 // removes all color markup characters, so Msg can deal with the string properly
@@ -1315,6 +1319,13 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 		c = g_ColorDarkGreen;
 		break;
 
+#ifdef SDK_DLL
+	case COLOR_DEVELOPER:
+	case COLOR_BETA:
+		c = g_ColorDarkGreen;
+		break;
+#endif // SDK_DLL
+
 	case COLOR_ACHIEVEMENT:
 		{
 			vgui::IScheme *pSourceScheme = vgui::scheme()->GetIScheme( vgui::scheme()->GetScheme( "SourceScheme" ) ); 
@@ -1386,7 +1397,17 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 	wchar_t *txt = m_text;
 	int lineLen = wcslen( m_text );
 	Color colCustom;
-	if ( m_text[0] == COLOR_PLAYERNAME || m_text[0] == COLOR_LOCATION || m_text[0] == COLOR_NORMAL || m_text[0] == COLOR_ACHIEVEMENT || m_text[0] == COLOR_CUSTOM || m_text[0] == COLOR_HEXCODE || m_text[0] == COLOR_HEXCODE_ALPHA )
+	if ( m_text[0] == COLOR_PLAYERNAME || 
+		 m_text[0] == COLOR_LOCATION || 
+		 m_text[0] == COLOR_NORMAL || 
+		 m_text[0] == COLOR_ACHIEVEMENT || 
+		 m_text[0] == COLOR_CUSTOM ||
+#ifdef SDK_DLL
+		m_text[0] == COLOR_DEVELOPER ||
+		m_text[0] == COLOR_BETA ||
+#endif // SDK_DLL
+		 m_text[0] == COLOR_HEXCODE || 
+		 m_text[0] == COLOR_HEXCODE_ALPHA )
 	{
 		while ( txt && *txt )
 		{
@@ -1401,6 +1422,10 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			case COLOR_PLAYERNAME:
 			case COLOR_LOCATION:
 			case COLOR_ACHIEVEMENT:
+#ifdef SDK_DLL
+			case COLOR_DEVELOPER:
+			case COLOR_BETA:
+#endif // SDK_DLL
 			case COLOR_NORMAL:
 				{
 					// save this start

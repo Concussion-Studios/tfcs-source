@@ -24,6 +24,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+extern ConVar tfc_dev_mark;
+extern ConVar tfc_beta_mark;
+
 DECLARE_HUDELEMENT( CHudChat );
 
 DECLARE_HUD_MESSAGE( CHudChat, SayText );
@@ -31,6 +34,7 @@ DECLARE_HUD_MESSAGE( CHudChat, SayText2 );
 DECLARE_HUD_MESSAGE( CHudChat, TextMsg );
 
 using namespace vgui;
+
 //=====================
 //CHudChatLine
 //=====================
@@ -56,18 +60,14 @@ CHudChatLine::CHudChatLine( vgui::Panel *parent, const char *panelName ) : CBase
 //=====================
 //CHudChatInputLine
 //=====================
-
 void CHudChatInputLine::ApplySchemeSettings(vgui::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 }
 
-
-
 //=====================
 //CHudChat
 //=====================
-
 CHudChat::CHudChat( const char *pElementName ) : BaseClass( pElementName )
 {
 	
@@ -194,6 +194,24 @@ Color CHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 
 	case COLOR_LOCATION:
 		c = g_ColorDarkGreen;
+		break;
+
+	case COLOR_DEVELOPER:
+		{
+			if ( tfc_dev_mark.GetBool() )
+				c = g_ColorDev;
+			else
+				c = g_ColorWhite;
+		}
+		break;
+
+	case COLOR_BETA:
+		{
+			if ( tfc_beta_mark.GetBool() )
+				c = g_ColorBeta;
+			else
+				c = g_ColorWhite;
+		}
 		break;
 
 	case COLOR_ACHIEVEMENT:

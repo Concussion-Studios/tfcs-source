@@ -127,10 +127,6 @@ public:
 public: // Public Variables
 	CSDKPlayerAnimState *m_PlayerAnimState;
 
-#if defined ( SDK_USE_PRONE )
-	bool m_bUnProneToDuck;		//Tony; GAMEMOVEMENT USED VARIABLE
-#endif // SDK_USE_PRONE
-
 	QAngle	m_angEyeAngles;
 	CInterpolatedVar< QAngle >	m_iv_angEyeAngles;
 

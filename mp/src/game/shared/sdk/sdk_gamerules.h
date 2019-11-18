@@ -52,11 +52,6 @@ public:
 		Vector vObsHullMin,
 		Vector vObsHullMax,
 		Vector vDeadViewHeight
-#if defined ( SDK_USE_PRONE )
-		,Vector vProneHullMin,
-		Vector vProneHullMax,
-		Vector vProneView
-#endif
 		) :
 			CViewVectors( 
 				vView,
@@ -69,17 +64,7 @@ public:
 				vObsHullMax,
 				vDeadViewHeight )
 	{
-#if defined( SDK_USE_PRONE )
-		m_vProneHullMin = vProneHullMin;
-		m_vProneHullMax = vProneHullMax;
-		m_vProneView = vProneView;
-#endif 
 	}
-#if defined ( SDK_USE_PRONE )
-	Vector m_vProneHullMin;
-	Vector m_vProneHullMax;	
-	Vector m_vProneView;
-#endif
 };
 
 class CSDKGameRules : public CTeamplayRules
@@ -114,6 +99,7 @@ public:
 
 	virtual const char *GetGameDescription( void ) { return SDK_GAME_DESCRIPTION; } 
 	virtual bool ClientCommand( CBaseEntity *pEdict, const CCommand &args );
+	virtual void ClientSettingsChanged( CBasePlayer* pPlayer );
 	virtual void RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore );
 	virtual void Think();
 
