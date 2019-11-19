@@ -4,7 +4,6 @@
 //
 // $NoKeywords: $
 //=============================================================================//
- 
 #include "cbase.h"
 #include "in_buttons.h"
 #include "takedamageinfo.h"
@@ -18,11 +17,136 @@
 #else
 	#include "sdk_player.h"
 #endif
+
+//Crowbar/Umbrella/Wrench/Knife
+acttable_t CWeaponSDKBase::m_acttableMelee[] =
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_MELEE,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_MELEE,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_MELEE,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_MELEE,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_MELEE,			false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_MELEE,			false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_MELEE,					false },
+};
+
+// Pistol/Tranquilizer
+acttable_t CWeaponSDKBase::m_acttableHandGun[] = 
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PISTOL,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_PISTOL,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PISTOL,					false },
+};
+
+// Shotguns
+acttable_t CWeaponSDKBase::m_acttableTwoHandsGuns[] = 
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PISTOL,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_PISTOL,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PISTOL,					false },
+};
+
+// Nailgun/Assault Cannon
+acttable_t CWeaponSDKBase::m_acttableNoReload[] = 
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PHYSGUN,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_PHYSGUN,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_PHYSGUN,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_PHYSGUN,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PHYSGUN,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PHYSGUN,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PHYSGUN,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PHYSGUN,		false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PHYSGUN,					false },
+};
+
+// RPG
+acttable_t CWeaponSDKBase::m_acttableRPG[] =
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_RPG,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_RPG,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_RPG,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_RPG,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_RPG,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_RPG,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_RPG,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_RPG,		false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_RPG,					false },
+};
+
+// Grenades
+acttable_t CWeaponSDKBase::m_acttableGrenade[] =
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_GRENADE,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_GRENADE,			false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_GRENADE,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_GRENADE,			false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_GRENADE,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_GRENADE,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_GRENADE,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_GRENADE,		false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_GRENADE,					false },
+};
+
+// Tools
+acttable_t CWeaponSDKBase::m_acttableTool[] = 
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_SLAM,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_SLAM,				false },
+
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_SLAM,						false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_SLAM,				false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_SLAM,			false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_SLAM,			false },
+
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_SLAM,					false },
+};
  
 // ----------------------------------------------------------------------------- //
 // CWeaponSDKBase tables.
 // ----------------------------------------------------------------------------- //
- 
 IMPLEMENT_NETWORKCLASS_ALIASED( WeaponSDKBase, DT_WeaponSDKBase )
  
 BEGIN_NETWORK_TABLE( CWeaponSDKBase, DT_WeaponSDKBase )
@@ -400,6 +524,48 @@ bool CWeaponSDKBase::Holster( CBaseCombatWeapon *pSwitchingTo )
 	}
  
 	return true;
+}
+
+acttable_t *CWeaponSDKBase::ActivityList( int &iActivityCount )
+{
+	acttable_t *pTable;
+
+	switch( GetWeaponID() )
+	{
+	case WEAPON_PISTOL:
+		pTable = m_acttableHandGun;
+		iActivityCount = ARRAYSIZE( m_acttableHandGun );
+		break;
+	case WEAPON_SHOTGUN:
+	case WEAPON_12GAUGE:
+	case WEAPON_MP5:
+		pTable = m_acttableTwoHandsGuns;
+		iActivityCount = ARRAYSIZE( m_acttableTwoHandsGuns );
+		break;
+	case WEAPON_CROWBAR:
+	case WEAPON_UMBRELLA:
+	case WEAPON_KNIFE:
+	case WEAPON_WRENCH:
+		pTable = m_acttableMelee;
+		iActivityCount = ARRAYSIZE( m_acttableMelee );
+		break;
+	case WEAPON_AC:
+	case WEAPON_NAILGUN:
+	case WEAPON_SUPERNAILGUN:
+		pTable = m_acttableNoReload;
+		iActivityCount = ARRAYSIZE( m_acttableNoReload );
+		break;
+	case WEAPON_GRENADE:
+		pTable = m_acttableGrenade;
+		iActivityCount = ARRAYSIZE( m_acttableGrenade );
+		break;
+	case WEAPON_MEDKIT:
+		pTable = m_acttableTool;
+		iActivityCount = ARRAYSIZE( m_acttableTool );
+		break;
+	}
+
+	return pTable;
 }
  
 #ifdef GAME_DLL

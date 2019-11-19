@@ -28,7 +28,6 @@ public:
 	DECLARE_CLASS( CWeaponGrenade, CBaseSDKGrenade );
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
-	DECLARE_ACTTABLE();
 
 	CWeaponGrenade() {}
 

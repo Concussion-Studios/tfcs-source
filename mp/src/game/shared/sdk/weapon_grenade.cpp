@@ -115,23 +115,3 @@ void CWeaponGrenade::EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel
 }
 	
 #endif
-
-//Tony; todo; add ACT_MP_PRONE* activities, so we have them.
-acttable_t CWeaponGrenade::m_acttable[] = 
-{
-	{ ACT_MP_STAND_IDLE,					ACT_DOD_STAND_AIM_GREN_FRAG,				false },
-	{ ACT_MP_CROUCH_IDLE,					ACT_DOD_CROUCH_AIM_GREN_FRAG,				false },
-	{ ACT_MP_PRONE_IDLE,					ACT_DOD_PRONE_AIM_GREN_FRAG,				false },
-
-	{ ACT_MP_RUN,							ACT_DOD_RUN_AIM_GREN_FRAG,					false },
-	{ ACT_MP_WALK,							ACT_DOD_WALK_AIM_GREN_FRAG,					false },
-	{ ACT_MP_CROUCHWALK,					ACT_DOD_CROUCHWALK_AIM_GREN_FRAG,			false },
-	{ ACT_MP_PRONE_CRAWL,					ACT_DOD_PRONEWALK_AIM_GREN_FRAG,			false },
-	{ ACT_SPRINT,							ACT_DOD_SPRINT_AIM_GREN_FRAG,				false },
-
-	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,		ACT_DOD_PRIMARYATTACK_GREN_FRAG,			false },
-	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,		ACT_DOD_PRIMARYATTACK_GREN_FRAG,			false },
-	{ ACT_MP_ATTACK_PRONE_PRIMARYFIRE,		ACT_DOD_PRIMARYATTACK_PRONE_GREN_FRAG,		false },
-};
-
-IMPLEMENT_ACTTABLE( CWeaponGrenade );

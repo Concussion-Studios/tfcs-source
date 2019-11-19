@@ -62,8 +62,6 @@ public:
 
 	virtual float GetFireRate( void ) { return 0.7; };
 
-	DECLARE_ACTTABLE();
-
 	CWeapon12Gauge( void );
 
 private:

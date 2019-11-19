@@ -94,6 +94,16 @@ public:
 #endif
  
 	virtual bool CanWeaponBeDropped() const { return true; }
+
+	virtual acttable_t *ActivityList( int &iActivityCount );
+
+	static acttable_t m_acttableTwoHandsGuns[];
+	static acttable_t m_acttableHandGun[];
+	static acttable_t m_acttableNoReload[];
+	static acttable_t m_acttableMelee[];
+	static acttable_t m_acttableRPG[];
+	static acttable_t m_acttableGrenade[];
+	static acttable_t m_acttableTool[];
 private:
  
 	CNetworkVar(float, m_flDecreaseShotsFired);
