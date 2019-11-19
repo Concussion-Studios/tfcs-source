@@ -723,7 +723,7 @@ void C_SDKPlayer::CalcPlayerView(Vector& eyeOrigin, QAngle& eyeAngles, float& fo
 
 void C_SDKPlayer::CalcViewRoll( QAngle& eyeAngles )
 {
-	if (GetMoveType() == MOVETYPE_NOCLIP)
+	if ( GetMoveType() == MOVETYPE_NOCLIP )
 		return;
 
 	float Side = CalcRoll(GetAbsAngles(), GetAbsVelocity(), cl_hl1_rollangle.GetFloat(), cl_hl1_rollspeed.GetFloat()) * 4.0;
@@ -738,6 +738,9 @@ void C_SDKPlayer::CalcViewRoll( QAngle& eyeAngles )
 
 void C_SDKPlayer::CalcViewBob( Vector& eyeOrigin )
 {
+	if ( !IsAlive() )
+		return;
+
 	float Cycle;
 	Vector Velocity;
 
@@ -771,6 +774,9 @@ void C_SDKPlayer::CalcViewBob( Vector& eyeOrigin )
 
 void C_SDKPlayer::CalcViewIdle(QAngle& eyeAngles)
 {
+	if ( !IsAlive() )
+		return;
+
 	eyeAngles[ROLL] += IdleScale * sin(gpGlobals->curtime * cl_hl1_iroll_cycle.GetFloat()) * cl_hl1_iroll_level.GetFloat();
 	eyeAngles[PITCH] += IdleScale * sin(gpGlobals->curtime * cl_hl1_ipitch_cycle.GetFloat()) * cl_hl1_ipitch_level.GetFloat();
 	eyeAngles[YAW] += IdleScale * sin(gpGlobals->curtime * cl_hl1_iyaw_cycle.GetFloat()) * cl_hl1_iyaw_level.GetFloat();

@@ -351,7 +351,13 @@ void CSDKPlayer::Spawn()
 
 	//Tony; if we're spawning in active state, equip the suit so the hud works. -- Gotta love base code !
 	if ( State_Get() == STATE_ACTIVE )
-		EquipSuit( false );
+	{
+		EquipSuit( false );	
+
+		//Player spawn sound.
+		EmitSound( "Player.Spawn" );
+
+	}
 
 	m_hRagdoll = NULL;
 	
@@ -362,8 +368,7 @@ void CSDKPlayer::Spawn()
 	
 	BaseClass::Spawn();
 	
-	//Player spawn sound.
-	EmitSound( "Player.Spawn" );
+
 
 	m_bTeamChanged	= false;
 
