@@ -57,22 +57,22 @@ acttable_t CWeaponSDKBase::m_acttableHandGun[] =
 // Shotguns
 acttable_t CWeaponSDKBase::m_acttableTwoHandsGuns[] = 
 {
-	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PISTOL,					false },
-	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
+	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_SHOTGUN,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_SHOTGUN,			false },
 
-	{ ACT_MP_RUN,						ACT_HL2MP_RUN_PISTOL,					false },
-	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_SHOTGUN,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_SHOTGUN,			false },
 
-	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
-	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
 
-	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
-	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_SHOTGUN,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_SHOTGUN,		false },
 
-	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PISTOL,					false },
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_SHOTGUN,					false },
 };
 
-// Nailgun/Assault Cannon
+// Nailgun
 acttable_t CWeaponSDKBase::m_acttableNoReload[] = 
 {
 	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PHYSGUN,					false },
@@ -88,6 +88,42 @@ acttable_t CWeaponSDKBase::m_acttableNoReload[] =
 	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PHYSGUN,		false },
 
 	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PHYSGUN,					false },
+};
+
+// Assault Cannon
+acttable_t CWeaponSDKBase::m_acttableAC[] =
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2AC_IDLE_GATLING,						false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2AC_CROUCH_GATLING,					false },
+
+	{ ACT_MP_RUN,						ACT_HL2AC_RUN_GATLING,						false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2AC_WALK_CROUCH_GATLING,				false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2AC_GESTURE_RANGE_ATTACK01_GATLING,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2AC_GESTURE_RANGE_ATTACK01_GATLING,	false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PHYSGUN,			false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PHYSGUN,			false },
+
+	{ ACT_MP_JUMP,						ACT_HL2AC_JUMP_GATLING,						false },
+};
+
+// Sniper Rifle
+acttable_t CWeaponSDKBase::m_acttableSniper[] =
+{
+	{ ACT_MP_STAND_IDLE,				ACT_HL2AC_IDLE_SNIPER,						false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2AC_CROUCH_GATLING,					false },
+
+	{ ACT_MP_RUN,						ACT_HL2AC_RUN_SNIPER,						false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2AC_WALK_CROUCH_SNIPER,					false },
+
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2AC_GESTURE_RANGE_ATTACK_SNIPER,		false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2AC_GESTURE_RANGE_ATTACK_SNIPER,		false },
+
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_SMG1,				false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_SMG1,				false },
+
+	{ ACT_MP_JUMP,						ACT_HL2AC_JUMP_SNIPER,						false },
 };
 
 // RPG
@@ -551,6 +587,9 @@ acttable_t *CWeaponSDKBase::ActivityList( int &iActivityCount )
 		iActivityCount = ARRAYSIZE( m_acttableMelee );
 		break;
 	case WEAPON_AC:
+		pTable = m_acttableAC;
+		iActivityCount = ARRAYSIZE( m_acttableAC );
+		break;
 	case WEAPON_NAILGUN:
 	case WEAPON_SUPERNAILGUN:
 		pTable = m_acttableNoReload;
@@ -560,6 +599,9 @@ acttable_t *CWeaponSDKBase::ActivityList( int &iActivityCount )
 		pTable = m_acttableGrenade;
 		iActivityCount = ARRAYSIZE( m_acttableGrenade );
 		break;
+	case WEAPON_RPG:
+		pTable = m_acttableRPG;
+		iActivityCount = ARRAYSIZE( m_acttableRPG );
 	case WEAPON_MEDKIT:
 		pTable = m_acttableTool;
 		iActivityCount = ARRAYSIZE( m_acttableTool );
