@@ -478,6 +478,15 @@ void C_SDKPlayer::UpdateClientSideAnimation()
 	m_PlayerAnimState->Update( EyeAngles()[YAW], EyeAngles()[PITCH] );
 	BaseClass::UpdateClientSideAnimation();
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Should this object cast shadows?
+//-----------------------------------------------------------------------------
+ShadowType_t C_SDKPlayer::ShadowCastType()
+{
+	return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------

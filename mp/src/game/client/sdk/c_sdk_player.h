@@ -37,11 +37,11 @@ public:
 	virtual void PostDataUpdate( DataUpdateType_t updateType );
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
-	virtual void CalcVehicleView(IClientVehicle* pVehicle, Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, float& zFar, float& fov);
-	virtual void CalcPlayerView(Vector& eyeOrigin, QAngle& eyeAngles, float& fov);
-	virtual void CalcViewRoll(QAngle& eyeAngles);
-	virtual void CalcViewBob(Vector& eyeOrigin);
-	virtual void CalcViewIdle(QAngle& eyeAngles);
+	virtual void CalcVehicleView( IClientVehicle* pVehicle, Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, float& zFar, float& fov);
+	virtual void CalcPlayerView( Vector& eyeOrigin, QAngle& eyeAngles, float& fov);
+	virtual void CalcViewRoll( QAngle& eyeAngles );
+	virtual void CalcViewBob( Vector& eyeOrigin );
+	virtual void CalcViewIdle( QAngle& eyeAngles );
 
 	float ViewBob;
 	double BobTime;
@@ -60,6 +60,8 @@ public:
 	void PlayReloadEffect();
 
 	virtual bool ShouldResetSequenceOnNewModel( void ) { return false; }
+
+	virtual ShadowType_t ShadowCastType();
 
 // Called by shared code.
 public:

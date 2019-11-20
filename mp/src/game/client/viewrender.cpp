@@ -59,7 +59,7 @@
 #include "portal_render_targets.h"
 #include "PortalRender.h"
 #endif
-#if defined( HL2_CLIENT_DLL ) || defined( CSTRIKE_DLL )
+#if defined( HL2_CLIENT_DLL ) || defined( CSTRIKE_DLL )  || defined( SDK_DLL )
 #define USE_MONITORS
 #endif
 #include "rendertexture.h"
@@ -146,9 +146,9 @@ static ConVar fog_maxdensity( "fog_maxdensity", "-1", FCVAR_CHEAT );
 //-----------------------------------------------------------------------------
 static ConVar r_debugcheapwater( "r_debugcheapwater", "0", FCVAR_CHEAT );
 #ifndef _X360
-static ConVar r_waterforceexpensive( "r_waterforceexpensive", "0", FCVAR_ARCHIVE );
+static ConVar r_waterforceexpensive( "r_waterforceexpensive", "1", FCVAR_ARCHIVE );
 #endif
-static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "0" );
+static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "1" );
 static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", "1", 0, "Enable water refraction" );
 static ConVar r_WaterDrawReflection( "r_WaterDrawReflection", "1", 0, "Enable water reflection" );
 static ConVar r_ForceWaterLeaf( "r_ForceWaterLeaf", "1", 0, "Enable for optimization to water - considers view in leaf under water for purposes of culling" );
@@ -5305,13 +5305,18 @@ void CBaseWorldView::DrawSetup( float waterHeight, int nSetupFlags, float waterZ
 		render->PopView( GetFrustum() );
 	}
 
-#ifdef TF_CLIENT_DLL
+/*#ifdef TF_CLIENT_DLL
 	bool bVisionOverride = ( localplayer_visionflags.GetInt() & ( 0x01 ) ); // Pyro-vision Goggles
 
 	if ( savedViewID == VIEW_MAIN && bVisionOverride && pyro_dof.GetBool() )
 	{
 		SSAO_DepthPass();
 	}
+#endif*/
+
+#ifdef SDK_DLL
+	if ( savedViewID == VIEW_MAIN /*&& mat_dof.GetBool()*/ )
+		SSAO_DepthPass();
 #endif
 
 	g_CurrentViewID = savedViewID;
@@ -5451,7 +5456,12 @@ void CBaseWorldView::SSAO_DepthPass()
 	int savedViewID = g_CurrentViewID;
 	g_CurrentViewID = VIEW_SSAO;
 
+#ifdef SDK_DLL
+	ITexture *pSSAO = materials->FindTexture( "_rt_ResolvedFullFrameDepth_TFC", TEXTURE_GROUP_RENDER_TARGET );
+	Assert( !IsErrorTexture( pSSAO ) );
+#else
 	ITexture *pSSAO = materials->FindTexture( "_rt_ResolvedFullFrameDepth", TEXTURE_GROUP_RENDER_TARGET );
+#endif
 
 	CMatRenderContextPtr pRenderContext( materials );
 
@@ -5493,12 +5503,16 @@ void CBaseWorldView::SSAO_DepthPass()
 		DrawOpaqueRenderables( DEPTH_MODE_SSA0 );
 	}
 
-#if 0
-	if ( m_bRenderFlashlightDepthTranslucents || r_flashlightdepth_drawtranslucents.GetBool() )
+//#if 0
+//	if ( m_bRenderFlashlightDepthTranslucents || r_flashlightdepth_drawtranslucents.GetBool() )
 	{
 		VPROF_BUDGET( "DrawTranslucentRenderables", VPROF_BUDGETGROUP_SHADOW_DEPTH_TEXTURING );
 		DrawTranslucentRenderables( false, true );
 	}
+//#endif
+
+#ifdef SDK_DLL
+	m_pMainView->DrawViewModels( *m_pMainView->GetViewSetup(), true );
 #endif
 
 	modelrender->ForcedMaterialOverride( 0 );
