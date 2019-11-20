@@ -528,7 +528,7 @@ bool CWeaponSDKBase::Holster( CBaseCombatWeapon *pSwitchingTo )
 
 acttable_t *CWeaponSDKBase::ActivityList( int &iActivityCount )
 {
-	acttable_t *pTable;
+	acttable_t *pTable = NULL;
 
 	switch( GetWeaponID() )
 	{
@@ -546,6 +546,7 @@ acttable_t *CWeaponSDKBase::ActivityList( int &iActivityCount )
 	case WEAPON_UMBRELLA:
 	case WEAPON_KNIFE:
 	case WEAPON_WRENCH:
+	default:
 		pTable = m_acttableMelee;
 		iActivityCount = ARRAYSIZE( m_acttableMelee );
 		break;
