@@ -137,6 +137,8 @@ public:
 	virtual bool IsDeveloper() { return m_bIsPlayerADev; }
 	virtual bool IsBetaTester() { return m_bIsPlayerABetaTester; }
 
+	Vector m_vecTotalBulletForce;	//Accumulator for bullet force in a single frame
+
 // In shared code.
 public:
 	void FireBullet( 

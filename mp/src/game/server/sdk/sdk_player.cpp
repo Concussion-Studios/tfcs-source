@@ -260,6 +260,9 @@ void CSDKPlayer::PreThink(void)
 {
 	State_PreThink();
 
+	//Reset bullet force accumulator, only lasts one frame
+	m_vecTotalBulletForce = vec3_origin;
+
 	// Riding a vehicle?
 	if ( IsInAVehicle() )	
 	{
@@ -616,6 +619,8 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 
 		AddDamagerToHistory( pAttacker );
 
+		m_vecTotalBulletForce += inputInfo.GetDamageForce();
+
 		// keep track of amount of damage last sustained
 		m_lastDamageAmount = flDamage;
 
@@ -757,6 +762,10 @@ int CSDKPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 {
+	//update damage info with our accumulated physics force
+	CTakeDamageInfo subinfo = info;
+	subinfo.SetDamageForce( m_vecTotalBulletForce );
+
 	ThrowActiveWeapon();
 
 	FlashlightTurnOff();
@@ -795,6 +804,22 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 
 
 	BaseClass::Event_Killed( info );
+
+	if ( info.GetDamageType() & DMG_DISSOLVE )
+	{
+		if ( m_hRagdoll )
+			m_hRagdoll->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
+	}
+
+	if( info.GetDamageType() & ( DMG_BLAST|DMG_BURN|DMG_PLASMA ) )
+	{
+		if( m_hRagdoll )
+		{
+			CBaseAnimating *pRagdoll = (CBaseAnimating *)CBaseEntity::Instance( m_hRagdoll );
+			if( info.GetDamageType() & ( DMG_BURN|DMG_BLAST|DMG_PLASMA ) )
+				pRagdoll->Ignite( 45, false, 10 );
+		}
+	}
 
 }
 
@@ -949,7 +974,7 @@ void CSDKPlayer::CreateRagdollEntity()
 		pRagdoll->m_vecRagdollVelocity = GetAbsVelocity();
 		pRagdoll->m_nModelIndex = m_nModelIndex;
 		pRagdoll->m_nForceBone = m_nForceBone;
-		pRagdoll->m_vecForce = Vector( 0, 0, 0 );
+		pRagdoll->m_vecForce = m_vecTotalBulletForce;
 		pRagdoll->SetAbsOrigin( GetAbsOrigin() );
 
 		switch ( GetTeamNumber() )
