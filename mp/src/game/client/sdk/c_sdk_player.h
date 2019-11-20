@@ -37,6 +37,8 @@ public:
 	virtual void PostDataUpdate( DataUpdateType_t updateType );
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
+	virtual void ProcessMuzzleFlashEvent();
+
 	virtual void CalcVehicleView( IClientVehicle* pVehicle, Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, float& zFar, float& fov);
 	virtual void CalcPlayerView( Vector& eyeOrigin, QAngle& eyeAngles, float& fov);
 	virtual void CalcViewRoll( QAngle& eyeAngles );

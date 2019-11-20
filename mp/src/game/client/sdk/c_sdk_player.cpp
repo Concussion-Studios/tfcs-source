@@ -24,6 +24,8 @@
 #include "soundenvelope.h"
 #include "discord_rpc.h"
 #include "in_buttons.h"
+#include "r_efx.h"
+#include "dlight.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -472,6 +474,51 @@ const QAngle& C_SDKPlayer::GetRenderAngles()
 	}
 }
 
+void C_SDKPlayer::ProcessMuzzleFlashEvent()
+{
+	if ( this != C_BasePlayer::GetLocalPlayer() )
+	{
+		Vector vAttachment;
+		QAngle dummyAngles;
+		
+		C_WeaponSDKBase *pWeapon = m_Shared.GetActiveSDKWeapon();		
+		if ( pWeapon )
+		{
+			int iAttachment = pWeapon->LookupAttachment( "muzzle_flash" );
+			if ( iAttachment > 0 )
+			{
+				float flScale = 1;
+				pWeapon->GetAttachment( iAttachment, vAttachment, dummyAngles );
+				
+				// The way the models are setup, the up vector points along the barrel.
+				Vector vForward, vRight, vUp;
+				AngleVectors( dummyAngles, &vForward, &vRight, &vUp );
+				VectorAngles( vUp, dummyAngles );
+
+				FX_MuzzleEffect( vAttachment, dummyAngles, flScale, INVALID_EHANDLE_INDEX, NULL, true );
+			}
+		}
+	}
+
+	Vector vAttachment;
+	QAngle dummyAngles;
+	
+	bool bFoundAttachment = GetAttachment( 1, vAttachment, dummyAngles );
+
+	// If we have an attachment, then stick a light on it.
+	if ( bFoundAttachment )
+	{
+		dlight_t *el = effects->CL_AllocDlight( LIGHT_INDEX_MUZZLEFLASH + index );
+		el->origin = vAttachment;
+		el->radius = 24; 
+		el->decay = el->radius / 0.05f;
+		el->die = gpGlobals->curtime + 0.05f;
+		el->color.r = 255;
+		el->color.g = 192;
+		el->color.b = 64;
+		el->color.exponent = 5;
+	}
+}
 
 void C_SDKPlayer::UpdateClientSideAnimation()
 {
