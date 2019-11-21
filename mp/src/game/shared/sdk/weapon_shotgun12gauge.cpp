@@ -493,9 +493,9 @@ CWeapon12Gauge::CWeapon12Gauge(void)
 	m_bDelayedFire2 = false;
 
 	m_fMinRange1 = 0.0;
-	m_fMaxRange1 = 500;
+	m_fMaxRange1 = 0.0;
 	m_fMinRange2 = 0.0;
-	m_fMaxRange2 = 200;
+	m_fMaxRange2 = 0.0;
 }
 
 //-----------------------------------------------------------------------------
