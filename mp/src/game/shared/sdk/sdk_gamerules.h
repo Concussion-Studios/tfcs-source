@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-#include "teamplayroundbased_gamerules.h"
+#include "teamplay_gamerules.h"
 #include "convar.h"
 #include "gamevars_shared.h"
 #include "weapon_sdkbase.h"
@@ -32,10 +32,10 @@
 	#define CSDKGameRulesProxy C_SDKGameRulesProxy
 #endif
 
-class CSDKGameRulesProxy : public CTeamplayRoundBasedRulesProxy
+class CSDKGameRulesProxy : public CGameRulesProxy
 {
 public:
-	DECLARE_CLASS( CSDKGameRulesProxy, CTeamplayRoundBasedRulesProxy );
+	DECLARE_CLASS( CSDKGameRulesProxy, CGameRulesProxy );
 	DECLARE_NETWORKCLASS();
 };
 
@@ -67,10 +67,10 @@ public:
 	}
 };
 
-class CSDKGameRules : public CTeamplayRoundBasedRules
+class CSDKGameRules : public CTeamplayRules
 {
 public:
-	DECLARE_CLASS( CSDKGameRules, CTeamplayRoundBasedRules );
+	DECLARE_CLASS( CSDKGameRules, CTeamplayRules );
 
 			CSDKGameRules();
 	virtual ~CSDKGameRules();
