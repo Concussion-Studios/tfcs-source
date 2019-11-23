@@ -26,6 +26,8 @@
 
 using namespace vgui;
 
+#pragma warning( disable : 4355 )
+
 //-----------------------------------------------------------------------------
 // Purpose: A simple passthrough panel to render the border onto the HTML widget
 //-----------------------------------------------------------------------------
