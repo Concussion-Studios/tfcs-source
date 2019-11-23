@@ -1,51 +1,49 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
-// $NoKeywords: $
-//
-//=====================================================================================//
-
+//=============================================================================//
 #include "cbase.h"
-#include "hud.h"
 #include "hudelement.h"
-#include "hud_macros.h"
+#include <vgui_controls/Panel.h>
+#include <vgui/isurface.h>
+#include <vgui/ISystem.h>
 #include "hud_numericdisplay.h"
-#include "iclientmode.h"
-
-#include "vgui_controls/AnimationController.h"
-#include "vgui/ILocalize.h"
-
 #include "c_sdk_player.h"
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
 
-#define INIT_ARMOR	-1
+using namespace vgui;
 
 //-----------------------------------------------------------------------------
-// Purpose: Displays suit power (armor) on hud
+// Purpose: Armor panel
 //-----------------------------------------------------------------------------
-class CSDKHudArmor : public CHudElement, public CHudNumericDisplay
+class CHudArmor : public CHudElement, public CHudNumericDisplay
 {
-	DECLARE_CLASS_SIMPLE( CSDKHudArmor, CHudNumericDisplay );
-
 public:
-	CSDKHudArmor( const char *pElementName );
-	void Init( void );
-	void Reset( void );
-	void VidInit( void );
-	void OnThink( void );
-	
+	DECLARE_CLASS_SIMPLE( CHudArmor, CHudNumericDisplay );
+
+	CHudArmor( const char *name );
+
+	virtual void Paint();
+	virtual void Init() {}
+	virtual void ApplySchemeSettings( IScheme *scheme );
+
 private:
-	int		m_iArmor;	
+	CHudTexture *m_pArmorIcon;
+
+	CPanelAnimationVarAliasType( float, icon_xpos, "icon_xpos", "0", "proportional_float" );
+	CPanelAnimationVarAliasType( float, icon_ypos, "icon_ypos", "2", "proportional_float" );
+
+	float icon_wide;
+	float icon_tall;
 };
 
-DECLARE_HUDELEMENT( CSDKHudArmor );
+
+DECLARE_HUDELEMENT( CHudArmor );
 
 //-----------------------------------------------------------------------------
-// Purpose: Constructor
+// Purpose: 
 //-----------------------------------------------------------------------------
-CSDKHudArmor::CSDKHudArmor( const char *pElementName ) : CHudElement( pElementName ), CHudNumericDisplay(NULL, "HudArmor")
+CHudArmor::CHudArmor( const char *pName ) : CHudNumericDisplay( NULL, "HudArmor" ), CHudElement( pName )
 {
 	SetHiddenBits( HIDEHUD_HEALTH | HIDEHUD_PLAYERDEAD | HIDEHUD_NEEDSUIT );
 }
@@ -53,76 +51,36 @@ CSDKHudArmor::CSDKHudArmor( const char *pElementName ) : CHudElement( pElementNa
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKHudArmor::Init( void )
+void CHudArmor::ApplySchemeSettings( IScheme *scheme )
 {
-	Reset();
-	m_iArmor		= INIT_ARMOR;
+	BaseClass::ApplySchemeSettings( scheme );
+
+	if( !m_pArmorIcon )
+		m_pArmorIcon = gHUD.GetIcon( "item_battery" );
+
+	if( m_pArmorIcon )
+	{
+		icon_tall = GetTall() - YRES(2);
+		float scale = icon_tall / (float)m_pArmorIcon->Height();
+		icon_wide = ( scale ) * (float)m_pArmorIcon->Width();
+	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKHudArmor::Reset( void )
+void CHudArmor::Paint()
 {
-	SetLabelText(L"Armor");
+	// Update the time.
+	auto *pPlayer = C_SDKPlayer::GetLocalSDKPlayer();
+	if ( pPlayer )
+	{
+		if( m_pArmorIcon )
+			m_pArmorIcon->DrawSelf( icon_xpos, icon_ypos, icon_wide, icon_tall, GetFgColor() );
+
+		SetDisplayValue( (int)pPlayer->GetArmorValue() );
+		SetShouldDisplayValue( true );
+		BaseClass::Paint();
+	}
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CSDKHudArmor::VidInit( void )
-{
-	Reset();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CSDKHudArmor::OnThink( void )
-{
-	int newArmor = 0;
-	C_SDKPlayer *local = C_SDKPlayer::GetLocalSDKPlayer();
-	if ( local )
-	{
-		// Never below zero
-		newArmor = max( local->GetArmorValue(), 0 );
-	}
-	if ( m_iArmor == newArmor )
-		return;
-
-	if ( !newArmor )
-	{
-	 	g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ArmorZero");
-	}
-	else if ( newArmor < m_iArmor )
-	{
-		// battery power has decreased, so play the damaged animation
-		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ArmorDamageTaken");
-
-		// play an extra animation if we're super low
-		if ( newArmor < 20 )
-		{
-			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ArmorLow");
-		}
-	}
-	else
-	{
-		// battery power has increased (if we had no previous armor, or if we just loaded the game, don't use alert state)
-		if ( m_iArmor == INIT_ARMOR || m_iArmor == 0 || newArmor >= 20)
-		{
-			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ArmorIncreasedAbove20");
-		}
-		else
-		{
-			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ArmorIncreasedBelow20");
-		}
-	}
-
-	m_iArmor = newArmor;
-
-	//Tony; moved down to fix localization crash at load, update the label name and armor value when it changes.
-	SetLabelText(g_pVGuiLocalize->Find("#SDK_HudArmor"));
-	SetDisplayValue(m_iArmor);
-}
-
 
