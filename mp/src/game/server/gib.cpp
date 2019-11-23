@@ -15,6 +15,9 @@
 #include "vstdlib/random.h"
 #include "ai_utils.h"
 #include "EntityFlame.h"
+#ifdef SDK_DLL
+#include "particle_parse.h"
+#endif // SDK_DLL
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -260,6 +263,20 @@ void CGib::InitGib( CBaseEntity *pVictim, float fMinVelocity, float fMaxVelocity
 	LimitVelocity();
 }
 
+#ifdef SDK_DLL
+static const char* pBloodParticles[] = 
+{
+	"blood_advisor_pierce_spray",
+	"blood_advisor_pierce_spray_b",
+	"blood_advisor_pierce_spray_c",
+	"blood_advisor_puncture_withdraw",
+	"blood_antlionguard_injured_heavy_tiny",
+	"blood_zombie_split_spray",
+	"blood_zombie_split_spray_tiny",
+	"blood_zombie_split_spray_tiny2",
+};
+#endif // SDK_DLL
+
 //------------------------------------------------------------------------------
 // Purpose : Given an .mdl file with gibs and the number of gibs in the file
 //			 spawns them in pVictim's bounding box
@@ -281,16 +298,21 @@ void CGib::SpawnSpecificGibs(CBaseEntity*	pVictim,
 		pGib->InitGib(pVictim, vMinVelocity, vMaxVelocity);
 		pGib->m_lifeTime = flLifetime;
 
+
 		if (pVictim != NULL)
 		{
 			pGib->SetOwnerEntity(pVictim);
 		}
 
 		//If pVictim is on fire, ignite pVictim's gibs as well.
-		if (pVictim->GetFlags() & FL_ONFIRE)
+		if ( pVictim->GetFlags() & FL_ONFIRE )
 		{
-			pGib->Ignite((flLifetime - 1), false);
+			pGib->Ignite( ( flLifetime - 1 ), false );
 		}
+
+#ifdef SDK_DLL
+		DispatchParticleEffect( pBloodParticles[ random->RandomInt( 0, ARRAYSIZE( pBloodParticles ) - 1 ) ], PATTACH_POINT_FOLLOW, pVictim, pGib->LookupAttachment( "eyes" ), true );
+#endif // SDK_DLL
 	}
 }
 
@@ -368,6 +390,10 @@ void CGib::WaitTillLand ( void )
 				//Adrian - Why am I doing this? Check InitPointGib for the answer!
 				if ( m_lifeTime == 0 )
 					m_lifeTime = random->RandomFloat( 1, 3 );
+
+#ifdef SDK_DLL
+				StopParticleEffects( this );
+#endif // SDK_DLL
 
 				pSprite->FadeAndDie( m_lifeTime );
 			}
@@ -614,7 +640,7 @@ void CGib::Spawn( const char *szGibModel )
 	m_lifeTime = 25;
 	SetTouch ( &CGib::BounceGibTouch );
 
-    m_bForceRemove = false;
+	m_bForceRemove = false;
 
 	m_material = matNone;
 	m_cBloodDecals = 5;// how many blood decals this gib can place (1 per bounce until none remain). 
