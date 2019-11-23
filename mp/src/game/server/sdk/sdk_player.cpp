@@ -312,9 +312,6 @@ void CSDKPlayer::Precache()
 		PrecacheModel(pszPossibleGibModels[g]);
 		g++;
 	}
-
-	//Precache stuff.
-	PrecacheScriptSound( "Player.Spawn" );
 	
 	BaseClass::Precache();
 }
