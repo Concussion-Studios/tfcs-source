@@ -32,8 +32,10 @@
 #include "weapon_sdkbase.h"
 #include "c_sdk_player.h"
 #include "c_weapon__stubs.h"		//Tony; add stubs
+#include "hud_vote.h"
 
 class CHudChat;
+class CHudVote;
 
 ConVar default_fov( "default_fov", "90", FCVAR_CHEAT );
 
@@ -78,6 +80,9 @@ IVModeManager *modemanager = ( IVModeManager * )&g_ModeManager;
 
 #define SCREEN_FILE		"scripts/vgui_screens.txt"
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CSDKModeManager::Init()
 {
 	g_pClientMode = GetClientModeNormal();
@@ -85,6 +90,9 @@ void CSDKModeManager::Init()
 	PanelMetaClassMgr()->LoadMetaClassDefinitionFile( SCREEN_FILE );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CSDKModeManager::LevelInit( const char *newmap )
 {
 	g_pClientMode->LevelInit( newmap );
@@ -102,6 +110,9 @@ void CSDKModeManager::LevelInit( const char *newmap )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CSDKModeManager::LevelShutdown( void )
 {
 	g_pClientMode->LevelShutdown();
@@ -121,11 +132,17 @@ ClientModeSDKNormal::~ClientModeSDKNormal()
 {
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void ClientModeSDKNormal::Init()
 {
 	BaseClass::Init();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void ClientModeSDKNormal::InitViewport()
 {
 	m_pViewport = new SDKViewport();
@@ -134,12 +151,17 @@ void ClientModeSDKNormal::InitViewport()
 
 ClientModeSDKNormal g_ClientModeNormal;
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 IClientMode *GetClientModeNormal()
 {
 	return &g_ClientModeNormal;
 }
 
-
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 ClientModeSDKNormal* GetClientModeSDKNormal()
 {
 	Assert( dynamic_cast< ClientModeSDKNormal* >( GetClientModeNormal() ) );
@@ -147,40 +169,63 @@ ClientModeSDKNormal* GetClientModeSDKNormal()
 	return static_cast< ClientModeSDKNormal* >( GetClientModeNormal() );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 float ClientModeSDKNormal::GetViewModelFOV( void )
 {
 	//Tony; retrieve the fov from the view model script, if it overrides it.
 	float viewFov = 74.0;
 
-	C_WeaponSDKBase *pWeapon = (C_WeaponSDKBase*)GetActiveWeapon();
+	auto *pWeapon = (C_WeaponSDKBase*)GetActiveWeapon();
 	if ( pWeapon )
-	{
 		viewFov = pWeapon->GetWeaponFOV();
-	}
+
 	return viewFov;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 int ClientModeSDKNormal::GetDeathMessageStartHeight( void )
 {
 	return m_pViewport->GetDeathMessageStartHeight();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void ClientModeSDKNormal::PostRenderVGui()
 {
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 bool ClientModeSDKNormal::CanRecordDemo( char *errorMsg, int length ) const
 {
-	C_SDKPlayer *player = C_SDKPlayer::GetLocalSDKPlayer();
+	auto *player = C_SDKPlayer::GetLocalSDKPlayer();
 	if ( !player )
-	{
 		return true;
-	}
 
 	if ( !player->IsAlive() )
-	{
 		return true;
-	}
 
 	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: We've received a keypress from the engine. Return 1 if the engine is allowed to handle it.
+//-----------------------------------------------------------------------------
+int	ClientModeSDKNormal::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
+{
+	// If we're voting...
+	CHudVote *pHudVote = GET_HUDELEMENT( CHudVote );
+	if ( pHudVote && pHudVote->IsVisible() )
+	{
+		if ( !pHudVote->KeyInput( down, keynum, pszCurrentBinding ) )
+			return 0;
+	}
+
+	return BaseClass::KeyInput( down, keynum, pszCurrentBinding );
 }

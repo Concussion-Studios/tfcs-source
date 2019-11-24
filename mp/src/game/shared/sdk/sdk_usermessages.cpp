@@ -50,8 +50,11 @@ void RegisterUserMessages()
 
 	usermessages->Register( "UpdateRadar", -1 );
 
-	// Used to send a sample HUD message
-	usermessages->Register( "GameMessage", -1 );
+	usermessages->Register( "CallVoteFailed", -1 );
+	usermessages->Register( "VoteStart", -1 );
+	usermessages->Register( "VotePass", -1 );
+	usermessages->Register( "VoteFailed", 2 );
+	usermessages->Register( "VoteSetup", -1 );
 	
 #ifndef _X360
 	// NVNT register haptic user messages

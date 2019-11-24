@@ -29,22 +29,13 @@ public:
 	virtual void	InitViewport();
 
 	virtual float	GetViewModelFOV( void );
-
-	int				GetDeathMessageStartHeight( void );
-
+	virtual int		GetDeathMessageStartHeight( void );
 	virtual void	PostRenderVGui();
-
 	virtual bool	CanRecordDemo( char *errorMsg, int length ) const;
-
-private:
-	
-	//	void	UpdateSpectatorMode( void );
-
+	virtual int		KeyInput( int down, ButtonCode_t keynum, const char* pszCurrentBinding );
 };
-
 
 extern IClientMode *GetClientModeNormal();
 extern ClientModeSDKNormal* GetClientModeSDKNormal();
-
 
 #endif // SDK_CLIENTMODE_H

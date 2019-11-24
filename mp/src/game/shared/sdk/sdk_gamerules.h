@@ -129,7 +129,6 @@ public:
 	int SelectDefaultTeam( void );
 
 	virtual void ServerActivate();
-	virtual void Activate();
 
 protected:
 	void CheckPlayerPositions( void );
@@ -154,6 +153,8 @@ public:
 	CBasePlayer* GetAssister( CBasePlayer *pVictim, CBasePlayer *pScorer, CBaseEntity *pInflictor );
 	CSDKPlayer* GetRecentDamager( CSDKPlayer *pVictim, int iDamager, float flMaxElapsed );
 
+	const CUtlVector< char* >& GetMapList() const { return m_MapList; }
+
 #endif
 	// changes, restor our gamemode based on the map/logic ent.
 	bool InGameMode( int nGamemode );
@@ -177,6 +178,11 @@ public:
 private:
 	CNetworkVar( float, m_flGameStartTime );
 	CNetworkVar( int, m_nGamemode ); // Type of game mode this map is ( CTF, CP )
+
+#ifndef CLIENT_DLL
+	bool m_bChangelevelDone;
+	bool m_bNextMapVoteDone;
+#endif
 };
 
 //-----------------------------------------------------------------------------

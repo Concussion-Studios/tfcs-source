@@ -24,6 +24,7 @@
 	#include "player_resource.h"
 	#include "mapentities.h"
 	#include "sdk_basegrenade_projectile.h"
+	#include "vote_controller.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -53,11 +54,270 @@ BEGIN_DATADESC(CSpawnPoint)
 
 END_DATADESC();
 
-	LINK_ENTITY_TO_CLASS( info_player_deathmatch, CSpawnPoint );
-	LINK_ENTITY_TO_CLASS( info_player_blue, CSpawnPoint );
-	LINK_ENTITY_TO_CLASS( info_player_red, CSpawnPoint );
-	LINK_ENTITY_TO_CLASS( info_player_yellow, CSpawnPoint );
-	LINK_ENTITY_TO_CLASS( info_player_green, CSpawnPoint );
+LINK_ENTITY_TO_CLASS( info_player_deathmatch, CSpawnPoint );
+LINK_ENTITY_TO_CLASS( info_player_blue, CSpawnPoint );
+LINK_ENTITY_TO_CLASS( info_player_red, CSpawnPoint );
+LINK_ENTITY_TO_CLASS( info_player_yellow, CSpawnPoint );
+LINK_ENTITY_TO_CLASS( info_player_green, CSpawnPoint );
+
+#ifndef CLIENT_DLL
+ConVar tfc_vote_kick_plurality( "tfc_vote_kick_plurality", "0.7", FCVAR_GAMEDLL, "What percentage of players is required to vote yes for a kick vote to pass?" );
+
+class CTFCIssue : public CBaseIssue
+{
+public:
+	CTFCIssue(const char* pszName) : CBaseIssue(pszName) {}
+
+public:
+	virtual void OnVoteFailed( int iEntityHoldingVote )
+	{
+		CBaseIssue::OnVoteFailed( iEntityHoldingVote );
+	}
+
+	virtual void ExecuteCommand( void )
+	{
+		const char* pszDetails = m_szDetailsString;
+		if ( FStrEq( m_szTypeString, "kick" ) )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByUserId( atoi( pszDetails ) );
+			if (!pPlayer)
+				return;
+
+			CSteamID id;
+			pPlayer->GetSteamID( &id );
+
+			if ( pPlayer->IsBot() )
+				pszDetails = UTIL_VarArgs( "%s (BOT)", pPlayer->GetPlayerName() );
+			else
+				pszDetails = UTIL_VarArgs( "%s (Account id: %d)", pPlayer->GetPlayerName(), (int)id.GetAccountID() );
+		}
+	}
+};
+
+class C4TeamsModeVoteIssue : public CTFCIssue
+{
+public:
+	C4TeamsModeVoteIssue() : CTFCIssue("4teams_mode") {}
+
+public:
+	virtual bool IsEnabled( void ) { return true; }
+	virtual const char *GetDisplayString( void ) { return "#TFC_VoteIssue_4Teamps_Display"; }
+	virtual const char *GetVotePassedString( void ) { return "#TFC_VoteIssue_4Teams_Passed"; }
+
+	virtual void ExecuteCommand( void )
+	{
+		CTFCIssue::ExecuteCommand();
+
+		ConVarRef mp_4team( "mp_4team" );
+		mp_4team.SetValue( !mp_4team.GetBool() );
+
+		ConVarRef nextlevel( "nextlevel" );
+		nextlevel.SetValue( STRING( gpGlobals->mapname ) );
+
+		SDKGameRules()->ChangeLevel();
+	}
+
+	virtual void ListIssueDetails( CBasePlayer *pForWhom )
+	{
+		AssertMsg( false, "Unimplemented" );
+		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
+	}
+};
+
+class CNextMapVoteIssue : public CTFCIssue
+{
+public:
+	CNextMapVoteIssue()	: CTFCIssue("nextlevel" )	{}
+
+public:
+	virtual bool IsEnabled( void ) { return false; }
+	virtual bool IsYesNoVote( void ) { return false; }
+	virtual const char *GetDisplayString( void ) { return "#TFC_VoteIssue_NextLevel_Display "; }
+	virtual const char *GetVotePassedString( void ) { return "#TFC_VoteIssue_NextLevel_Passed"; }
+
+	virtual bool GetVoteOptions( CUtlVector <const char*> &vecNames )
+	{
+		CUtlVector<char*> apszMapList;
+		apszMapList.AddVectorToTail( SDKGameRules()->GetMapList() );
+
+		static char szNextMap[MAX_MAP_NAME];
+		SDKGameRules()->GetNextLevelName( szNextMap, sizeof( szNextMap ) );
+		vecNames.AddToTail( szNextMap );
+
+		while ( vecNames.Count() < 5 )
+		{
+			if ( !apszMapList.Count() )
+				break;
+
+			int iRandom = RandomInt( 0, apszMapList.Count() - 1 );
+
+			if ( FStrEq( apszMapList[iRandom], szNextMap ) )
+			{
+				apszMapList.Remove( iRandom );
+				continue;
+			}
+
+			vecNames.AddToTail( apszMapList[iRandom] );
+			apszMapList.Remove( iRandom );
+		}
+
+		return true;
+	}
+
+	virtual void ExecuteCommand( void )
+	{
+		CTFCIssue::ExecuteCommand();
+
+		ConVarRef nextlevel( "nextlevel" );
+		nextlevel.SetValue( m_szDetailsString );
+	}
+
+	virtual void ListIssueDetails( CBasePlayer *pForWhom )
+	{
+		AssertMsg( false, "Unimplemented" );
+		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
+	}
+};
+
+class CChangelevelVoteIssue : public CTFCIssue
+{
+public:
+	CChangelevelVoteIssue()	: CTFCIssue("changelevel") { }
+
+public:
+	virtual bool IsEnabled( void ) { return true; }
+	virtual const char *GetDisplayString( void ) { return "#TFC_VoteIssue_ChangeLevel_Display"; }
+	virtual const char *GetVotePassedString( void ) { return "#TFC_VoteIssue_ChangeLevel_Passed"; }
+
+	virtual void ExecuteCommand( void )
+	{
+		CTFCIssue::ExecuteCommand();
+
+		ConVarRef nextlevel( "nextlevel" );
+		nextlevel.SetValue( m_szDetailsString );
+		SDKGameRules()->ChangeLevel();
+	}
+
+	virtual void ListIssueDetails( CBasePlayer *pForWhom )
+	{
+		AssertMsg( false, "Unimplemented" );
+		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
+	}
+};
+
+class CKickPlayerVoteIssue : public CTFCIssue
+{
+private:
+	CUtlString networkIDString;
+
+public:
+	CKickPlayerVoteIssue() : CTFCIssue("kick") {}
+
+public:
+	virtual bool IsEnabled( void ) { return true; }
+	virtual const char *GetDisplayString( void ) { return "#TFC_VoteIssue_Kick_Display"; }
+	virtual const char *GetVotePassedString( void ) { return "#TFC_VoteIssue_Kick_Passed"; }
+	virtual float GetRequiredPlurality() { return tfc_vote_kick_plurality.GetFloat(); }
+
+	virtual bool GetVoteOptions( CUtlVector <const char*> &vecNames )
+	{
+		if ( !CTFCIssue::GetVoteOptions( vecNames ) )
+			return false;
+
+		vecNames.AddToTail( "Abstain" );
+
+		return true;
+	}
+
+	virtual void ExecuteCommand( void )
+	{
+		CTFCIssue::ExecuteCommand();
+
+		/*int iUserID = atoi( GetDetailsString() );
+		CBasePlayer* pPlayer = UTIL_PlayerByUserId( iUserID );
+		if ( pPlayer && pPlayer->IsBot() )
+		{
+			ConVarRef bot_quota("bot_quota");
+			bot_quota.SetValue( bot_quota.GetInt()-1 );
+			return;
+		}*/
+
+		engine->ServerCommand( UTIL_VarArgs( "banid 30 %s kick\n", networkIDString.String() ) );
+		engine->ServerCommand( "writeip\n" );
+		engine->ServerCommand( "writeid\n" );
+	}
+
+	virtual void ListIssueDetails( CBasePlayer *pForWhom )
+	{
+		AssertMsg( false, "Unimplemented" );
+		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
+	}
+
+	virtual bool CanCallVote( int nEntIndex, const char *pszDetails, vote_create_failed_t &nFailCode, int &nTime )
+	{
+		int iUserID = atoi( pszDetails );
+		CBasePlayer* pPlayer = UTIL_PlayerByUserId( iUserID );
+		if (!pPlayer)
+			return false;
+
+		return CTFCIssue::CanCallVote(nEntIndex, pszDetails, nFailCode, nTime);
+	}
+
+	virtual void SetIssueDetails( const char *pszDetails )
+	{
+		CTFCIssue::SetIssueDetails( pszDetails );
+
+		int iUserID = atoi( pszDetails );
+		CBasePlayer* pPlayer = UTIL_PlayerByUserId( iUserID );
+
+		// We already check this in CanCallVote, but let's check it again, just to be safe...
+		if ( !pPlayer )
+			return;
+
+		networkIDString = pPlayer->GetNetworkIDString();
+	}
+};
+
+/*class CAddBotVoteIssue : public CTFCIssue
+{
+public:
+	CAddBotVoteIssue()
+		: CTFCIssue("addbot")
+	{
+	}
+
+public:
+	virtual bool		IsEnabled( void ) { return true; }
+	virtual const char *GetDisplayString( void ) { return "#TFC_VoteIssue_AddBot_Display"; }
+	virtual const char *GetVotePassedString( void ) { return "#TFC_VoteIssue_AddBot_Passed"; }
+
+	virtual void		ExecuteCommand( void )
+	{
+		CTFCIssue::ExecuteCommand();
+
+		ConVarRef bot_quota("bot_quota");
+		bot_quota.SetValue(bot_quota.GetInt()+1);
+	}
+
+	virtual void ListIssueDetails( CBasePlayer *pForWhom )
+	{
+		AssertMsg( false, "Unimplemented");
+		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
+	}
+};*/
+
+void RegisterVoteIssues()
+{
+	CVoteController* pController = (CVoteController*)CreateEntityByName( "vote_controller" );
+	pController->Spawn();
+
+	new C4TeamsModeVoteIssue();
+	new CNextMapVoteIssue();
+	new CChangelevelVoteIssue();
+	new CKickPlayerVoteIssue();
+	//new CAddBotVoteIssue();
+}
+#endif
 #endif
 
 REGISTER_GAMERULES_CLASS( CSDKGameRules );
@@ -155,6 +415,9 @@ CSDKGameRules::CSDKGameRules()
 	InitDefaultAIRelationships();
 
 	m_bLevelInitialized = false;
+
+	m_bChangelevelDone = false;
+	m_bNextMapVoteDone = false;
 
 	m_iSpawnPointCount_Blue = 0;
 	m_iSpawnPointCount_Red = 0;
@@ -375,11 +638,6 @@ void CSDKGameRules::CheckGameMode()
 	}
 }
 
-void CSDKGameRules::Activate()
-{
-
-}
-
 void CSDKGameRules::ServerActivate()
 {
 	// Check what gamemode whe are.
@@ -395,6 +653,11 @@ void CSDKGameRules::ServerActivate()
 		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Trying to set a NaN game start time!\n" );
 		m_flGameStartTime.GetForModify() = 0.0f;
 	}
+
+#ifndef CLIENT_DLL
+	extern void RegisterVoteIssues();
+	RegisterVoteIssues();
+#endif
 }
 
 void CSDKGameRules::CheckLevelInitialized()
@@ -521,7 +784,6 @@ void CSDKGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 // Purpose: Player has just spawned. Equip them.
 //-----------------------------------------------------------------------------
-
 void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore )
 {
 	RadiusDamage( info, vecSrcIn, flRadius, iClassIgnore, false );
@@ -640,6 +902,38 @@ void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vec
 void CSDKGameRules::Think()
 {
 	BaseClass::Think();
+
+	if ( g_fGameOver )   // someone else quit the game already
+	{
+		// Check to see if the intermission time is over
+		if ( m_flIntermissionEndTime >= gpGlobals->curtime )
+			return;
+
+		// Check to see if there is still a vote running
+		if ( g_voteController->IsVoteActive() )
+			return;
+
+		// Did we already change the level?
+		if ( m_bChangelevelDone )
+			return;
+
+		ChangeLevel(); // intermission is over
+		m_bChangelevelDone = true;
+
+		return;
+	}
+
+	if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
+	{
+		if (g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", "" ) )
+			m_bNextMapVoteDone = true;
+	}
+
+	if ( GetMapRemainingTime() < 0 )
+	{
+		GoToIntermission();
+		return;
+	}
 }
 
 Vector DropToGround( 

@@ -343,8 +343,8 @@ void ClientModeShared::Init()
 	m_pViewport->LoadControlSettings( "scripts/HudLayout.res", NULL, NULL, pConditions );
 
 #if defined( REPLAY_ENABLED )
- 	m_pReplayReminderPanel = GET_HUDELEMENT( CReplayReminderPanel );
- 	Assert( m_pReplayReminderPanel );
+	m_pReplayReminderPanel = GET_HUDELEMENT( CReplayReminderPanel );
+	Assert( m_pReplayReminderPanel );
 #endif
 
 	ListenForGameEvent( "player_connect_client" );
@@ -868,7 +868,7 @@ void ClientModeShared::LevelShutdown( void )
 	if ( s_hVGuiContext != DEFAULT_VGUI_CONTEXT )
 	{
 		vgui::ivgui()->DestroyContext( s_hVGuiContext );
- 		s_hVGuiContext = DEFAULT_VGUI_CONTEXT;
+		s_hVGuiContext = DEFAULT_VGUI_CONTEXT;
 	}
 
 	// Reset any player explosion/shock effects

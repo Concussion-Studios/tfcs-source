@@ -39,6 +39,8 @@
 #include "tf_gamerules.h"
 #include "c_playerresource.h"
 #include "c_tf_objective_resource.h"
+#else
+#include "ienginevgui.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -48,7 +50,6 @@ ConVar cl_vote_ui_active_after_voting( "cl_vote_ui_active_after_voting", "0" );
 ConVar cl_vote_ui_show_notification( "cl_vote_ui_show_notification", "0" );
 
 #ifdef TF_CLIENT_DLL
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -109,7 +110,6 @@ public:
 	wchar_t m_wszPlayerName[MAX_PLAYER_NAME_LENGTH];
 };
 #endif	// TF_CLIENT_DLL
-
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -199,12 +199,8 @@ CVoteSetupDialog::CVoteSetupDialog( vgui::Panel *parent ) : BaseClass( parent, "
 	m_pComboBox = new ComboBox( this, "ComboBox", 5, false );
 	m_pImageList = NULL;
 
-#ifdef TF_CLIENT_DLL
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "ClientScheme");
-	SetScheme(scheme);
-#else
-	SetScheme( "ClientScheme" );
-#endif
+	SetScheme( scheme );
 }
 
 //-----------------------------------------------------------------------------
@@ -689,7 +685,6 @@ void CVoteSetupDialog::OnItemSelected( vgui::Panel *panel )
 					}
 				}
 
-#ifdef TF_CLIENT_DLL
 				SetDialogVariable( "combo_label", g_pVGuiLocalize->Find( "#TF_VoteKickReason" ) );
 				m_pComboBox->AddItem( g_pVGuiLocalize->Find( "TF_VoteKickReason_Other" ), new KeyValues( "other" ) );
 				m_pComboBox->AddItem( g_pVGuiLocalize->Find( "TF_VoteKickReason_Cheating" ), new KeyValues( "cheating" ) );
@@ -697,7 +692,7 @@ void CVoteSetupDialog::OnItemSelected( vgui::Panel *panel )
 				m_pComboBox->AddItem( g_pVGuiLocalize->Find( "TF_VoteKickReason_Scamming" ), new KeyValues( "scamming" ) );
 				m_pComboBox->SilentActivateItemByRow( 0 );
 				m_pComboBox->SetVisible( true );
-#endif
+
 			}
 #ifdef TF_CLIENT_DLL
 			// CHANGE POP FILE
@@ -844,7 +839,7 @@ void CVoteSetupDialog::RefreshIssueParameters()
 void CVoteSetupDialog::ResetData()
 {
 	m_bVoteButtonEnabled = false;
- 	m_pVoteSetupList->RemoveAll();
+	m_pVoteSetupList->RemoveAll();
 	m_pVoteParameterList->RemoveAll();
 	m_pComboBox->RemoveAll();
 }
@@ -867,16 +862,13 @@ CHudVote::CHudVote( const char *pElementName ) : CHudElement( pElementName ), Ba
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
 
-#ifdef TF_CLIENT_DLL
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "ClientScheme");
 	SetScheme(scheme);
-#endif
 
 	SetHiddenBits( 0 );
 	for( int index = 0; index < MAX_VOTE_OPTIONS; index++ )
-	{
 		m_nVoteOptionCount[index] = 0;
-	}
+
 	m_pVoteActive = new EditablePanel( this, "VoteActive" );
 	m_voteBar = new VoteBarPanel( m_pVoteActive, "VoteBar" );
 	m_pVoteFailed = new EditablePanel( this, "VoteFailed" );
@@ -951,8 +943,8 @@ int	CHudVote::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBin
 	if ( !m_bVotingActive )
 		return 1;
 
- 	if ( m_bPlayerVoted )
- 		return 1;
+	if ( m_bPlayerVoted )
+		return 1;
 
 	if ( !m_bShowVoteActivePanel )
 		return 1;
