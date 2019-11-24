@@ -305,18 +305,6 @@ public:
 		ClientPrint( pForWhom, HUD_PRINTCONSOLE, "Nothing here.\n" );
 	}
 };*/
-
-void RegisterVoteIssues()
-{
-	CVoteController* pController = (CVoteController*)CreateEntityByName( "vote_controller" );
-	pController->Spawn();
-
-	new C4TeamsModeVoteIssue();
-	new CNextMapVoteIssue();
-	new CChangelevelVoteIssue();
-	new CKickPlayerVoteIssue();
-	//new CAddBotVoteIssue();
-}
 #endif
 #endif
 
@@ -522,6 +510,7 @@ static const char *s_PreserveEnts[] =
 	"soundent",
 	"ai_network",
 	"ai_hint",
+	"vote_controller",
 	"sdk_gamerules",
 	"sdk_team_manager",
 	"sdk_team_unassigned",
@@ -653,11 +642,6 @@ void CSDKGameRules::ServerActivate()
 		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Trying to set a NaN game start time!\n" );
 		m_flGameStartTime.GetForModify() = 0.0f;
 	}
-
-#ifndef CLIENT_DLL
-	extern void RegisterVoteIssues();
-	RegisterVoteIssues();
-#endif
 }
 
 void CSDKGameRules::CheckLevelInitialized()
@@ -925,8 +909,11 @@ void CSDKGameRules::Think()
 
 	if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
 	{
-		if (g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", "" ) )
-			m_bNextMapVoteDone = true;
+		DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
+		m_bNextMapVoteDone = true;
+		char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
+		szEmptyDetails[0] = '\0';
+		g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
 	}
 
 	if ( GetMapRemainingTime() < 0 )
@@ -1573,6 +1560,14 @@ void CSDKGameRules::CreateStandardEntities()
 #endif
 		CBaseEntity::Create( "sdk_gamerules", vec3_origin, vec3_angle );
 	Assert( pEnt );
+
+	CBaseEntity::Create( "vote_controller", vec3_origin, vec3_angle );
+
+	new C4TeamsModeVoteIssue();
+	new CNextMapVoteIssue();
+	new CChangelevelVoteIssue();
+	new CKickPlayerVoteIssue();
+	//new CAddBotVoteIssue();
 }
 
 int CSDKGameRules::SelectDefaultTeam()
