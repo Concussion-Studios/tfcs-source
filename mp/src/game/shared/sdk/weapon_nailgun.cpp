@@ -227,17 +227,6 @@ void CWeaponNailGun::PrimaryAttack(void)
  
 	pPlayer->IncreaseShotsFired();
  
-	float flSpread = GetWeaponSpread();
- 
-	FX_FireBullets(
-		pPlayer->entindex(),
-		pPlayer->Weapon_ShootPosition(),
-		pPlayer->EyeAngles() + pPlayer->GetPunchAngle(),
-		GetWeaponID(),
-		0, //Tony; fire mode - this is unused at the moment, left over from CSS when SDK* was created in the first place.
-		CBaseEntity::GetPredictionRandomSeed() & 255,
-		flSpread
-		);
  
  
 	//Add our view kick in
