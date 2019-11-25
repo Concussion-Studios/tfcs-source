@@ -21,6 +21,7 @@ class CDialogTabChangeLog : public vgui::PropertyPage
 	DECLARE_CLASS_SIMPLE( CDialogTabChangeLog, vgui::PropertyPage );
 
 public:
+
 	CDialogTabChangeLog( vgui::Panel *parent );
 	~CDialogTabChangeLog( void );
 

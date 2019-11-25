@@ -9,14 +9,16 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+using namespace vgui;
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CDialogTabCredits::CDialogTabCredits( vgui::Panel *parent, const char *name ) :  PropertyPage( parent, NULL )
+CDialogTabCredits::CDialogTabCredits( Panel *parent ) : BaseClass( parent, NULL )
 {
 	LoadControlSettings( "Resource/UI/TabCredits.res" );
 
-	m_RichText = dynamic_cast< vgui::RichText* >( FindChildByName( "Credits" ) );
+	m_RichText = dynamic_cast< RichText* >( FindChildByName( "Credits" ) );
 }
 
 //-----------------------------------------------------------------------------
