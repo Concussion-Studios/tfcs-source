@@ -62,6 +62,16 @@ $Project "Client (TFCSOURCE)"
 
 			$Folder	"GUI"
 			{
+				$Folder	"Dialogs"
+				{
+					$File	"sdk\vgui\DialogNews.cpp"
+					$File	"sdk\vgui\DialogNews.h"
+					$File	"sdk\vgui\DialogTabChangeLog.cpp"
+					$File	"sdk\vgui\DialogTabChangeLog.h"
+					$File	"sdk\vgui\DialogTabCredits.cpp"
+					$File	"sdk\vgui\DialogTabCredits.h"
+				}
+
 				$File	"sdk\sdk_backgroundpanel.cpp"
 				$File	"sdk\sdk_backgroundpanel.h"
 				$File	"sdk\vgui\sdk_classmenu.cpp"
