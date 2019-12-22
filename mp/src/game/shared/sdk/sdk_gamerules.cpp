@@ -1967,7 +1967,7 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 			pszFormat = "SDK_Chat_Spec";
 		else
 		{
-			if (pSDKPlayer->m_lifeState != LIFE_ALIVE )
+			if ( pSDKPlayer->m_lifeState != LIFE_ALIVE )
 				pszFormat = "SDK_Chat_Team_Dead";
 			else
 				pszFormat = "SDK_Chat_Team";
@@ -1975,11 +1975,11 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 	}
 	else
 	{
-		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR)
+		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
 			pszFormat = "SDK_Chat_All_Spec";
 		else
 		{
-			if (pSDKPlayer->m_lifeState != LIFE_ALIVE )
+			if ( pSDKPlayer->m_lifeState != LIFE_ALIVE )
 				pszFormat = "SDK_Chat_All_Dead";
 			else
 				pszFormat = "SDK_Chat_All";

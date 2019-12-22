@@ -250,11 +250,7 @@ CSDKPlayer::CSDKPlayer()
 	m_angEyeAngles.Init();
 
 	m_pCurStateInfo = NULL;	// no state yet
-
-	m_bIsPlayerADev = false;
-	m_bIsPlayerABetaTester= false;
 }
-
 
 CSDKPlayer::~CSDKPlayer()
 {
