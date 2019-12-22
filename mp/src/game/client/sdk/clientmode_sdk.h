@@ -27,10 +27,12 @@ public:
 
 	virtual void	Init();
 	virtual void	InitViewport();
-
+	virtual void	FireGameEvent( IGameEvent *event );
+	virtual void	OverrideView( CViewSetup *pSetup );
+	virtual bool	DoPostScreenSpaceEffects( const CViewSetup *pSetup );
 	virtual float	GetViewModelFOV( void );
 	virtual int		GetDeathMessageStartHeight( void );
-	virtual void	PostRenderVGui();
+	virtual void	PostRenderVGui() {}
 	virtual bool	CanRecordDemo( char *errorMsg, int length ) const;
 	virtual int		KeyInput( int down, ButtonCode_t keynum, const char* pszCurrentBinding );
 };

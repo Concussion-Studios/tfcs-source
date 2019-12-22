@@ -26,6 +26,10 @@
 #include "c_portal_player.h"
 #endif // PORTAL
 
+#ifdef SDK_DLL
+#include "cam_thirdperson.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -68,7 +72,7 @@ void CHudCrosshair::ApplySchemeSettings( IScheme *scheme )
 	m_pDefaultCrosshair = gHUD.GetIcon("crosshair_default");
 	SetPaintBackgroundEnabled( false );
 
-    SetSize( ScreenWidth(), ScreenHeight() );
+	SetSize( ScreenWidth(), ScreenHeight() );
 
 	SetForceStereoRenderToFrameBuffer( true );
 }
@@ -179,7 +183,7 @@ void CHudCrosshair::GetDrawPosition ( float *pX, float *pY, bool *pbBehindCamera
 
 #ifdef SIXENSE
 		// TODO: actually test this Sixsense code interaction with things like HMDs & stereo.
-        if ( g_pSixenseInput->IsEnabled() && !UseVR() )
+		if ( g_pSixenseInput->IsEnabled() && !UseVR() )
 		{
 			// Never autoaim a predicted weapon (for now)
 			vecStart = pPlayer->Weapon_ShootPosition();
@@ -187,6 +191,17 @@ void CHudCrosshair::GetDrawPosition ( float *pX, float *pY, bool *pbBehindCamera
 			AngleVectors( CurrentViewAngles() - g_pSixenseInput->GetViewAngleOffset(), &aimVector );
 			// calculate where the bullet would go so we can draw the cross appropriately
 			vecEnd = vecStart + aimVector * MAX_TRACE_LENGTH;
+			bUseOffset = true;
+		}
+#endif
+
+#ifdef SDK_DLL
+		if ( g_ThirdPersonManager.WantToUseGameThirdPerson() )
+		{
+			vecStart = pPlayer->Weapon_ShootPosition();
+			Vector vecDir;
+			pPlayer->EyeVectors( &vecDir );
+			vecEnd = vecStart + vecDir * MAX_TRACE_LENGTH;
 			bUseOffset = true;
 		}
 #endif

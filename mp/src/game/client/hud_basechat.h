@@ -45,10 +45,6 @@ extern Color g_ColorDarkGreen;
 extern Color g_ColorYellow;
 extern Color g_ColorGrey;
 extern Color g_ColorWhite;
-#ifdef SDK_DLL
-extern Color g_ColorDev;
-extern Color g_ColorBeta;
-#endif // SDK_DLL
 
 extern ConVar cl_showtextmsg;
 
@@ -60,16 +56,16 @@ enum ChatFilters
 	CHAT_FILTER_PUBLICCHAT	= 0x000004,
 	CHAT_FILTER_SERVERMSG	= 0x000008,
 	CHAT_FILTER_TEAMCHANGE	= 0x000010,
-    //=============================================================================
-    // HPE_BEGIN:
-    // [tj]Added a filter for achievement announce
-    //=============================================================================
-     
-    CHAT_FILTER_ACHIEVEMENT	= 0x000020,
-     
-    //=============================================================================
-    // HPE_END
-    //=============================================================================
+	//=============================================================================
+	// HPE_BEGIN:
+	// [tj]Added a filter for achievement announce
+	//=============================================================================
+	 
+	CHAT_FILTER_ACHIEVEMENT	= 0x000020,
+	 
+	//=============================================================================
+	// HPE_END
+	//=============================================================================
 };
 
 
@@ -84,10 +80,6 @@ enum TextColor
 	COLOR_CUSTOM = 6,		// Will use the most recently SetCustomColor()
 	COLOR_HEXCODE = 7,		// Reads the color from the next six characters
 	COLOR_HEXCODE_ALPHA = 8,// Reads the color and alpha from the next eight characters
-#ifdef SDK_DLL
-	COLOR_DEVELOPER = 9,
-	COLOR_BETA = 10,
-#endif // SDK_DLL
 	COLOR_MAX
 };
 

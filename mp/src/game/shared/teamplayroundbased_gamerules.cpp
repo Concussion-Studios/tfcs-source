@@ -317,7 +317,7 @@ CON_COMMAND_F( mp_forcewin, "Forces team to win", FCVAR_CHEAT )
 		if ( args.ArgC() == 1 )
 		{
 			// if no team specified, use player 1's team
-			iTeam = UTIL_PlayerByIndex( 1 )->GetTeamNumber();	
+			iTeam = UTIL_GetLocalPlayer()->GetTeamNumber();
 		}
 		else if ( args.ArgC() == 2 )
 		{

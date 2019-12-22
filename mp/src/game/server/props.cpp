@@ -567,7 +567,7 @@ void CPhysicsProp::HandleAnyCollisionInteractions( int index, gamevcollisioneven
 		if ( GetPropDataAngles( "impale_forward", angImpaleForward ) )
 		{
 			Vector vecImpaleForward;
- 			AngleVectors( angImpaleForward, &vecImpaleForward );
+			AngleVectors( angImpaleForward, &vecImpaleForward );
 			VectorRotate( vecImpaleForward, EntityToWorldTransform(), forward );
 		}
 		else
@@ -835,7 +835,7 @@ void CBreakableProp::Spawn()
 	
 	//jmd: I am guessing that the call to Spawn will set any flags that should be set anyway; this
 	//clears flags we don't want (specifically the FL_ONFIRE for explosive barrels in HL2MP)]
-#ifdef HL2MP
+#if defined ( HL2MP ) || defined ( SDK_DLL )
 	ClearFlags();
 #endif 
 
@@ -866,12 +866,12 @@ void CBreakableProp::Spawn()
 
 	// Setup takedamage based upon the health we parsed earlier, and our interactions
 	if ( ( m_iHealth == 0 ) ||
-        ( !m_iNumBreakableChunks && 
-		    !HasInteraction( PROPINTER_PHYSGUN_BREAK_EXPLODE ) &&
-		    !HasInteraction( PROPINTER_PHYSGUN_FIRST_BREAK ) &&
-		    !HasInteraction( PROPINTER_FIRE_FLAMMABLE ) &&
-		    !HasInteraction( PROPINTER_FIRE_IGNITE_HALFHEALTH ) &&
-		    !HasInteraction( PROPINTER_FIRE_EXPLOSIVE_RESIST ) ) )
+		( !m_iNumBreakableChunks && 
+			!HasInteraction( PROPINTER_PHYSGUN_BREAK_EXPLODE ) &&
+			!HasInteraction( PROPINTER_PHYSGUN_FIRST_BREAK ) &&
+			!HasInteraction( PROPINTER_FIRE_FLAMMABLE ) &&
+			!HasInteraction( PROPINTER_FIRE_IGNITE_HALFHEALTH ) &&
+			!HasInteraction( PROPINTER_FIRE_EXPLOSIVE_RESIST ) ) )
 	{
 		m_iHealth = 0;
 		m_takedamage = DAMAGE_EVENTS_ONLY;
@@ -899,7 +899,7 @@ void CBreakableProp::Spawn()
 		m_impactEnergyScale = 0.1f;
 	}
 
- 	m_preferredCarryAngles = QAngle( -5, 0, 0 );
+	m_preferredCarryAngles = QAngle( -5, 0, 0 );
 
 	// The presence of this activity causes us to have to detach it before it can be grabbed.
 	if ( SelectWeightedSequence( ACT_PHYSCANNON_ANIMATE ) != ACTIVITY_NOT_AVAILABLE )
@@ -1038,7 +1038,7 @@ int CBreakableProp::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	CTakeDamageInfo info = inputInfo;
 
 	// If attacker can't do at least the min required damage to us, don't take any damage from them
- 	if ( info.GetDamage() < m_iMinHealthDmg )
+	if ( info.GetDamage() < m_iMinHealthDmg )
 		return 0;
 
 	if (!PassesDamageFilter( info ))
@@ -1298,7 +1298,7 @@ bool CBreakableProp::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunP
 			m_OnPhysCannonAnimatePullStarted.FireOutput( NULL,this );
 		}
 
- 		ResetSequence( iSequence );
+		ResetSequence( iSequence );
 		SetPlaybackRate( 1.0f );
 		ResetClientsideFrame();
 	}
@@ -1315,7 +1315,7 @@ bool CBreakableProp::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunP
 			return false;
 
 		StudioFrameAdvanceManual( gpGlobals->frametime );
- 		DispatchAnimEvents( this );
+		DispatchAnimEvents( this );
 
 		if ( IsActivityFinished() )
 		{
@@ -1733,7 +1733,9 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		MessageEnd();
 
 #ifndef HL2MP
+#ifndef SDK_DLL
 		UTIL_Remove( this );
+#endif
 #endif
 		return;
 	}
@@ -1799,7 +1801,9 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 	}
 
 #ifndef HL2MP
+#ifndef SDK_DLL
 	UTIL_Remove( this );
+#endif
 #endif
 }
 
@@ -5782,6 +5786,12 @@ void CPhysicsPropRespawnable::Materialize( void )
 	}
 
 	RemoveEffects( EF_NODRAW );
+
+#ifdef SDK_DLL
+	// changing from invisible state to visible.
+	EmitSound( "BaseCombatWeapon.WeaponMaterialize" );
+#endif // SDK_DLL
+
 	Spawn();
 }
 
@@ -5915,11 +5925,11 @@ CPhysicsProp* CreatePhysicsProp( const char *pModelName, const Vector &vTraceSta
 	trace_t tr;
 	UTIL_TraceHull( vTraceStart, vTraceEnd,
 		vecSweepMins, vecSweepMaxs, MASK_NPCSOLID, pTraceIgnore, COLLISION_GROUP_NONE, &tr );
-		    
+			
 	// No hit? We're done.
 	if ( (tr.fraction == 1.0 && (vTraceEnd-vTraceStart).Length() > 0.01) || tr.allsolid )
 		return NULL;
-		    
+			
 	VectorMA( tr.endpos, 1.0f, tr.plane.normal, tr.endpos );
 
 	bool bAllowPrecache = CBaseEntity::IsPrecacheAllowed();

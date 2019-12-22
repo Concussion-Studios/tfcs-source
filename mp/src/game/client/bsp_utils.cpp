@@ -16,8 +16,8 @@
 #include "tier0/memdbgon.h"
 
 bool BSP_SyncRepack( const char *pszInputMapFile,
-                     const char *pszOutputMapFile,
-                     IBSPPack::eRepackBSPFlags eRepackFlags )
+					 const char *pszOutputMapFile,
+					 IBSPPack::eRepackBSPFlags eRepackFlags )
 {
 	// load the bsppack dll
 	IBSPPack *libBSPPack = NULL;
@@ -62,15 +62,15 @@ bool BSP_SyncRepack( const char *pszInputMapFile,
 	g_pFullFileSystem->WriteFile( pszOutputMapFile, NULL, outputBuffer );
 
 	Msg( "Successfully repacked %s as %s -- %u -> %u bytes\n",
-	     pszInputMapFile, pszOutputMapFile, inputBuffer.TellPut(), outputBuffer.TellPut() );
+		 pszInputMapFile, pszOutputMapFile, inputBuffer.TellPut(), outputBuffer.TellPut() );
 
 	return true;
 }
 
 // Helper to create a thread that calls SyncCompressMap, and clean it up when it exists
 void BSP_BackgroundRepack( const char *pszInputMapFile,
-                           const char *pszOutputMapFile,
-                           IBSPPack::eRepackBSPFlags eRepackFlags )
+						   const char *pszOutputMapFile,
+						   IBSPPack::eRepackBSPFlags eRepackFlags )
 {
 	// Make this a gamesystem and thread, so it can check for completion each frame and clean itself up. Run() is the
 	// background thread, Update() is the main thread tick.
@@ -112,7 +112,7 @@ void BSP_BackgroundRepack( const char *pszInputMapFile,
 
 		#ifdef CLIENT_DLL
 		virtual void Update( float frametime ) OVERRIDE { CheckFinished(); }
-        #else // GAME DLL
+		#else // GAME DLL
 		virtual void FrameUpdatePostEntityThink() OVERRIDE { CheckFinished(); }
 		#endif
 	private:

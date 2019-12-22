@@ -27,7 +27,7 @@ public:
 	
 	CWeaponSDKBaseRPG();
 
-	virtual bool CanWeaponBeDropped() const { return false; }
+	virtual const char	*GetDeploySound( void ) { return "Deploy.WeaponRPG"; }
 	virtual bool CanDrop( void ) { return false; }
 	virtual void PrimaryAttack();
 	virtual bool Reload();

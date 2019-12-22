@@ -105,7 +105,7 @@ void CMessage::InputShowMessage( inputdata_t &inputdata )
 		}
 		else
 		{
-			pPlayer = (gpGlobals->maxClients > 1) ? NULL : UTIL_GetLocalPlayer();
+			pPlayer = UTIL_GetLocalPlayer(); // just show it to the host, if there is one 
 		}
 
 		if ( pPlayer && pPlayer->IsPlayer() )
@@ -219,12 +219,10 @@ void CCredits::RollOutroCredits()
 {
 	sv_unlockedchapters.SetValue( "15" );
 	
-	CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-
-	CSingleUserRecipientFilter user( pPlayer );
-	user.MakeReliable();
-
-	UserMessageBegin( user, "CreditsMsg" );
+	CRecipientFilter filter;
+	filter.AddAllPlayers();
+	filter.MakeReliable();
+	UserMessageBegin(filter, "CreditsMsg");
 		WRITE_BYTE( 3 );
 	MessageEnd();
 }

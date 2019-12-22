@@ -46,20 +46,21 @@ public:
 
 	CNetworkVar(ACState_t, m_iWeaponState);
 
+	virtual const char	*GetDeploySound( void ) { return "Deploy.WeaponAC"; }
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_AC; }
-	virtual float GetWeaponSpread() { return 0.25f; }
+
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void WeaponIdle();
-	virtual void	UpdateOnRemove(void);
-	virtual void	ItemPreFrame(void);
+	virtual void UpdateOnRemove(void);
+	virtual void ItemPreFrame(void);
+
 	void WeaponReset();
 	void SharedAttack();
 	void WindUp();
 	void WindDown();
 	void WeaponSoundUpdate();
 	void UpdateBarrelMovement();
-	virtual bool CanWeaponBeDropped() const				{ return false; }
 
 private:
 

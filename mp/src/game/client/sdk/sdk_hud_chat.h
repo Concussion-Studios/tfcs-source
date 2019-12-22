@@ -64,4 +64,6 @@ public:
 
 };
 
+CHudChat* GetTFCChatHud( void );
+
 #endif	//SDK_HUD_CHAT_H

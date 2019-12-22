@@ -3,15 +3,11 @@
 // Purpose: 
 //
 //=============================================================================//
-
 #include "cbase.h"
-
 #include "sdk_gamerules.h"
-
-#include "takedamageinfo.h"
-
 #include "effect_dispatch_data.h"
 #include "weapon_sdkbase.h"
+#include "weapon_sdkbase_sniper.h"
 #include "movevars_shared.h"
 #include "gamevars_shared.h"
 #include "engine/IEngineSound.h"
@@ -19,12 +15,10 @@
 #include "engine/ivdebugoverlay.h"
 #include "obstacle_pushaway.h"
 #include "props_shared.h"
-
 #include "decals.h"
 #include "util_shared.h"
 
 #ifdef CLIENT_DLL
-	
 	#include "c_sdk_player.h"
 	#include "c_sdk_team.h"
 	#include "prediction.h"
@@ -36,6 +30,7 @@
 	#include "sdk_player.h"
 	#include "sdk_team.h"
 #endif
+
 ConVar sv_showimpacts("sv_showimpacts", "0", FCVAR_REPLICATED, "Shows client (red) and server (blue) bullet impact point" );
 
 void DispatchEffect( const char *pName, const CEffectData &data );
@@ -177,12 +172,9 @@ void CSDKPlayer::FireBullet(
 }
 bool CSDKPlayer::CanMove( void ) const
 {
-	bool bValidMoveState = (State_Get() == STATE_ACTIVE || State_Get() == STATE_OBSERVER_MODE);
-			
+	bool bValidMoveState = (State_Get() == STATE_ACTIVE || State_Get() == STATE_OBSERVER_MODE);		
 	if ( !bValidMoveState )
-	{
 		return false;
-	}
 
 	return true;
 }
@@ -194,11 +186,7 @@ void CSDKPlayer::SharedSpawn()
 
 	// Reset the animation state or we will animate to standing
 	// when we spawn
-
 	m_Shared.SetJumping( false );
-
-	//Tony; todo; fix
-//	m_flMinNextStepSoundTime = gpGlobals->curtime;
 }
 
 bool CSDKPlayer::CanAttack( void )
@@ -214,19 +202,13 @@ bool CSDKPlayer::CanAttack( void )
 const Vector CSDKPlayer::GetPlayerMins( void ) const
 {
 	if ( IsObserver() )
-	{
 		return VEC_OBS_HULL_MIN;	
-	}
 	else
 	{
 		if ( GetFlags() & FL_DUCKING )
-		{
 			return VEC_DUCK_HULL_MIN;
-		}
 		else
-		{
 			return VEC_HULL_MIN;
-		}
 	}
 }
 
@@ -238,19 +220,13 @@ const Vector CSDKPlayer::GetPlayerMins( void ) const
 const Vector CSDKPlayer::GetPlayerMaxs( void ) const
 {	
 	if ( IsObserver() )
-	{
 		return VEC_OBS_HULL_MAX;	
-	}
 	else
 	{
 		if ( GetFlags() & FL_DUCKING )
-		{
 			return VEC_DUCK_HULL_MAX;
-		}
 		else
-		{
 			return VEC_HULL_MAX;
-		}
 	}
 }
 
@@ -282,16 +258,15 @@ void CSDKPlayerShared::SetJumping( bool bJumping )
 	m_bJumping = bJumping;
 	
 	if ( IsSniperZoomed() )
-	{
 		ForceUnzoom();
-	}
 }
 
+//-----------------------------------------------------------------------------
 // Consider the weapon's built-in accuracy, this character's proficiency with
 // the weapon, and the status of the target. Use this information to determine
 // how accurately to shoot at the target.
 //-----------------------------------------------------------------------------
-Vector CSDKPlayerShared::GetAttackSpread(CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget)
+Vector CSDKPlayerShared::GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget )
 {
 	if (pWeapon)
 		return pWeapon->GetBulletSpread(WEAPON_PROFICIENCY_PERFECT);
@@ -301,27 +276,24 @@ Vector CSDKPlayerShared::GetAttackSpread(CBaseCombatWeapon *pWeapon, CBaseEntity
 
 void CSDKPlayerShared::ForceUnzoom( void )
 {
-//	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
-//	if( pWeapon && ( pWeapon->GetSDKWpnData().m_WeaponType & WPN_MASK_GUN ) )
-//	{
-//		CSDKSniperWeapon *pSniper = dynamic_cast<CSDKSniperWeapon *>(pWeapon);
-//
-//		if ( pSniper )
-//		{
-//			pSniper->ZoomOut();
-//		}
-//	}
+	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
+	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
+	{
+		CWeaponSDKBaseSniper *pSniper = dynamic_cast<CWeaponSDKBaseSniper *>( pWeapon );
+		if ( pSniper )
+			pSniper->ExitScope();
+	}
 }
 
 bool CSDKPlayerShared::IsSniperZoomed( void ) const
 {
-//	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
-//	if( pWeapon && ( pWeapon->GetSDKWpnData().m_WeaponType & WPN_MASK_GUN ) )
-//	{
-//		CWeaponSDKBaseGun *pGun = (CWeaponSDKBaseGun *)pWeapon;
-//		Assert( pGun );
-//		return pGun->IsSniperZoomed();
-//	}
+	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
+	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
+	{
+		CWeaponSDKBaseSniper *pSniper = (CWeaponSDKBaseSniper *)pWeapon;
+		Assert( pSniper );
+		return pSniper->IsScoped();
+	}
 
 	return false;
 }
@@ -361,6 +333,22 @@ CWeaponSDKBase* CSDKPlayerShared::GetActiveSDKWeapon() const
 	}
 }
 
+CWeaponSDKBase *CSDKPlayer::GetWeaponOwnerID( int iID )
+{
+	for (int i = 0;i < WeaponCount(); i++) 
+	{
+		CWeaponSDKBase *pWpn = ( CWeaponSDKBase *)GetWeapon( i );
+
+		if ( pWpn == NULL )
+			continue;
+
+		if ( pWpn->GetWeaponID() == iID )
+			return pWpn;
+	}
+
+	return NULL;
+}
+
 void CSDKPlayerShared::ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs )
 {
 	Vector org = m_pOuter->GetAbsOrigin();
@@ -379,22 +367,18 @@ void CSDKPlayer::InitSpeeds()
 	//Tony; error checkings.
 	if ( playerclass == PLAYERCLASS_UNDEFINED )
 	{
-		m_Shared.m_flRunSpeed = SDK_DEFAULT_PLAYER_RUNSPEED;
-		m_Shared.m_flProneSpeed = SDK_DEFAULT_PLAYER_PRONESPEED;
+		m_Shared.m_flMaxSpeed = SDK_DEFAULT_PLAYER_RUNSPEED;
 	}
 	else
-		{
+	{
 		CSDKTeam *pTeam = GetGlobalSDKTeam( GetTeamNumber() );
 		const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( playerclass );
 
-		//Assert( pClassInfo.m_iTeam == GetTeamNumber() );
-
-		m_Shared.m_flRunSpeed = pClassInfo.m_flRunSpeed;
-		m_Shared.m_flProneSpeed = pClassInfo.m_flProneSpeed;
+		m_Shared.m_flMaxSpeed = pClassInfo.m_flMaxSpeed;
 	}
 
-	// Set the absolute max to sprint speed
-	SetMaxSpeed( m_Shared.m_flRunSpeed );
+	// Set the absolute max speed
+	SetMaxSpeed( m_Shared.m_flMaxSpeed );
 }
 
 //-----------------------------------------------------------------------------
@@ -409,18 +393,39 @@ bool CSDKPlayer::ShouldCollide( int collisionGroup, int contentsMask ) const
 	{
 		switch( GetTeamNumber() )
 		{
-		case SDK_TEAM_BLUE:
-			if ( !( contentsMask & CONTENTS_TEAM2 ) )
+		case SDK_TEAM_RED:
+			if ( !( contentsMask & CONTENTS_REDTEAM ) )
 				return false;
 			break;
 
-		case SDK_TEAM_RED:
-			if ( !( contentsMask & CONTENTS_TEAM1 ) )
+		case SDK_TEAM_BLUE:
+			if ( !( contentsMask & CONTENTS_BLUETEAM ) )
+				return false;
+			break;
+
+		case SDK_TEAM_GREEN:
+			if ( !(contentsMask & CONTENTS_GREENTEAM ) )
+				return false;
+			break;
+
+		case SDK_TEAM_YELLOW:
+			if ( !(contentsMask & CONTENTS_YELLOWTEAM ) )
 				return false;
 			break;
 		}
 	}
-
 	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
 }
 
+//-----------------------------------------------------------------------------
+// Consider the weapon's built-in accuracy, this character's proficiency with
+// the weapon, and the status of the target. Use this information to determine
+// how accurately to shoot at the target.
+//-----------------------------------------------------------------------------
+Vector CSDKPlayer::GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget )
+{
+	if ( pWeapon )
+		return pWeapon->GetBulletSpread() * pWeapon->GetAccuracyModifier();
+	
+	return VECTOR_CONE_15DEGREES; // TODO: Class Base Accuracy
+}
