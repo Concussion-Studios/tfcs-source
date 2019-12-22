@@ -11,19 +11,11 @@
 #include "engine/IEngineSound.h"
 #include "weapon_grenade.h"
 
-
-#ifdef CLIENT_DLL
-	
-#else
-
+#ifndef CLIENT_DLL
 	#include "sdk_player.h"
 	#include "items.h"
 	#include "sdk_basegrenade_projectile.h"
-
 #endif
-
-
-#define GRENADE_TIMER	3.0f //Seconds
 
 IMPLEMENT_NETWORKCLASS_ALIASED( WeaponGrenade, DT_WeaponGrenade )
 
@@ -38,9 +30,6 @@ PRECACHE_WEAPON_REGISTER( weapon_grenade );
 
 
 #ifdef GAME_DLL
-
-#define GRENADE_MODEL "models/Weapons/w_eq_fraggrenade_thrown.mdl"
-
 class CGrenadeProjectile : public CBaseGrenadeProjectile
 {
 public:
@@ -53,14 +42,7 @@ public:
 public:
 	virtual void Spawn()
 	{
-		SetModel( GRENADE_MODEL );
 		BaseClass::Spawn();
-	}
-
-	virtual void Precache()
-	{
-		PrecacheModel( GRENADE_MODEL );
-		BaseClass::Precache();
 	}
 
 	// Grenade stuff.
@@ -111,7 +93,7 @@ END_DATADESC()
 
 void CWeaponGrenade::EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon )
 {
-	CGrenadeProjectile::Create( vecSrc, vecAngles, vecVel, angImpulse, pPlayer, pWeapon, GRENADE_TIMER );
+	CGrenadeProjectile::Create( vecSrc, vecAngles, vecVel, angImpulse, pPlayer, pWeapon, DEFAULT_GRENADE_TIMER );
 }
 	
 #endif

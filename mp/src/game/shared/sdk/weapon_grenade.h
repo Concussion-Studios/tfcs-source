@@ -31,8 +31,7 @@ public:
 
 	CWeaponGrenade() {}
 
-	virtual SDKWeaponID GetWeaponID( void ) const		{ return WEAPON_GRENADE; }
-	virtual bool CanWeaponBeDropped() const				{ return false; }
+	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_GRENADE; }
 
 #ifdef CLIENT_DLL
 

@@ -31,7 +31,6 @@ public:
 
 	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_CROWBAR; }
 	virtual float	GetRange( void ) { return	64.0f; }	//Tony; let the crowbar swing further.
-	virtual bool CanWeaponBeDropped() const { return false; }
 
 private:
 

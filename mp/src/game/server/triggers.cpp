@@ -1604,7 +1604,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 
 	m_bTouched = true;
 
-	CBaseEntity *pPlayer = (pActivator && pActivator->IsPlayer()) ? pActivator : UTIL_GetLocalPlayer();
+	CBaseEntity *pPlayer = (pActivator && pActivator->IsPlayer()) ? pActivator : UTIL_GetNearestPlayer(GetAbsOrigin()); 
 
 	int transitionState = InTransitionVolume(pPlayer, m_szLandmarkName);
 	if ( transitionState == TRANSITION_VOLUME_SCREENED_OUT )
@@ -2613,7 +2613,7 @@ void CTriggerSave::Touch( CBaseEntity *pOther )
 		if ( g_ServerGameDLL.m_fAutoSaveDangerousTime != 0.0f && g_ServerGameDLL.m_fAutoSaveDangerousTime >= gpGlobals->curtime )
 		{
 			// A previous dangerous auto save was waiting to become safe
-			CBasePlayer *pPlayer = UTIL_PlayerByIndex( 1 );
+			CBasePlayer *pPlayer = UTIL_GetNearestPlayer(GetAbsOrigin()); 
 
 			if ( pPlayer->GetDeathTime() == 0.0f || pPlayer->GetDeathTime() > gpGlobals->curtime )
 			{
@@ -2633,7 +2633,7 @@ void CTriggerSave::Touch( CBaseEntity *pOther )
 	if ( m_fDangerousTimer != 0.0f )
 	{
 		// There's a dangerous timer. Save if we have enough hitpoints.
-		CBasePlayer *pPlayer = UTIL_PlayerByIndex( 1 );
+		CBasePlayer *pPlayer = UTIL_GetNearestPlayer(GetAbsOrigin()); 
 
 		if (pPlayer && pPlayer->GetHealth() >= m_minHitPoints)
 		{
@@ -3038,7 +3038,7 @@ void CTriggerCamera::Enable( void )
 
 	if ( !m_hPlayer || !m_hPlayer->IsPlayer() )
 	{
-		m_hPlayer = UTIL_GetLocalPlayer();
+		m_hPlayer = UTIL_GetNearestPlayer(GetAbsOrigin()); 
 	}
 
 	if ( !m_hPlayer )
@@ -3510,7 +3510,7 @@ static void PlayCDTrack( int iTrack )
 	// manually find the single player. 
 	pClient = engine->PEntityOfEntIndex( 1 );
 
-	Assert(gpGlobals->maxClients == 1);
+	//Assert(gpGlobals->maxClients == 1); 
 	
 	// Can't play if the client is not connected!
 	if ( !pClient )

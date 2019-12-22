@@ -14,10 +14,12 @@
 #include "sdk_playeranimstate.h"
 #include "sdk_player_shared.h"
 #include "sdk_basegrenade_projectile.h"
+#include "vphysics/player_controller.h"
 
 #define MAX_DAMAGER_HISTORY 2
 
 #define SDK_PUSHAWAY_THINK_CONTEXT	"SDKPushawayThink"
+#define SDK_PHYSDAMAGE_SCALE 4.0f
 
 // Function table for each player state.
 class CSDKPlayerStateInfo
@@ -65,6 +67,7 @@ public:
 
 	// This passes the event to the client's and server's CPlayerAnimState.
 	void DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
+	virtual void SetupBones( matrix3x4_t *pBoneToWorld, int boneMask );
 
 	virtual void FlashlightTurnOn( void );
 	virtual void FlashlightTurnOff( void );
@@ -79,23 +82,39 @@ public:
 	void SetAnimation( PLAYER_ANIM playerAnim ) { return; }
 
 	virtual void Precache();
+	virtual void Splash( void );
+
+	virtual void OnDamagedByExplosion( const CTakeDamageInfo &info );
 	virtual int	 OnTakeDamage( const CTakeDamageInfo &inputInfo );
 	virtual int	 OnTakeDamage_Alive( const CTakeDamageInfo &info );
 	virtual void Event_Killed( const CTakeDamageInfo &info );
 	virtual void BecomeAGibs( const CTakeDamageInfo &info );
 	virtual void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator );
+
 	virtual void LeaveVehicle( const Vector &vecExitPoint, const QAngle &vecExitAngles );
+
+	virtual void FireBullets( const FireBulletsInfo_t& info );
 	
 	void AddDamagerToHistory(EHANDLE hDamager);
 	void ClearDamagerHistory();
 	DamagerHistory_t &GetDamagerHistory(int i) { return m_DamagerHistory[i]; }
+
+	Class_T Classify( void );
 	
 	CWeaponSDKBase* GetActiveSDKWeapon() const;
+	CWeaponSDKBase* GetWeaponOwnerID( int iID );
+
 	virtual void	CreateViewModel( int viewmodelindex = 0 );
+
+	virtual bool BumpWeapon( CBaseCombatWeapon *pWeapon );
+
+	// custom player functions
+	virtual void CheatImpulseCommands( int iImpulse );
 
 	// Armor
 	virtual void IncrementArmorValue( int nCount, int nMaxValue = -1 );
 	virtual void SetArmorValue( int value );
+	virtual void AdjustArmor( int Armorvalue );
 	virtual void SetMaxArmorValue( int MaxArmorValue );
 	virtual int GetArmorValue()	{ return m_ArmorValue; }
 	virtual int GetMaxArmorValue() { return m_MaxArmorValue; }
@@ -103,6 +122,7 @@ public:
 	// Health
 	virtual void SetHealth( int value );
 	virtual void SetMaxHealth( int MaxValue );
+	virtual void AdjustHealth( int Healthvalue );
 	virtual int GetHealth() { return m_iHealth; }
 	virtual int GetMaxHealth()	{ return m_iMaxHealth;	}
 	virtual void IncrementHealthValue( int nCount );
@@ -117,11 +137,6 @@ public:
 	void SetClassMenuOpen( bool bIsOpen );
 	bool IsClassMenuOpen( void );
 
-	float timeholster;
-	float timethrow;
-	float timedeploy;
-	bool WantThrow;
-
 	void PhysObjectSleep();
 	void PhysObjectWake();
 
@@ -130,6 +145,7 @@ public:
 	// Player avoidance
 	virtual	bool		ShouldCollide( int collisionGroup, int contentsMask ) const;
 	void SDKPushawayThink(void);
+	void InitVCollision( const Vector& vecAbsOrigin, const Vector& vecAbsVelocity );
 
 	virtual bool PlayerIsDev();
 	virtual bool PlayerIsBeta();
@@ -153,8 +169,10 @@ public:
 		float y );
 
 	CNetworkVarEmbedded( CSDKPlayerShared, m_Shared );
-	virtual void			PlayerDeathThink( void );
-	virtual bool		ClientCommand( const CCommand &args );
+	virtual void PlayerDeathThink( void );
+	virtual bool ClientCommand( const CCommand &args );
+
+	Vector GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget = NULL );
 
 	void IncreaseShotsFired() { m_iShotsFired++; if (m_iShotsFired > 16) m_iShotsFired = 16; }
 	void DecreaseShotsFired() { m_iShotsFired--; if (m_iShotsFired < 0) m_iShotsFired = 0; }
@@ -225,10 +243,6 @@ private:
 
 
 	void InitSpeeds( void ); //Tony; called EVERY spawn on server and client after class has been chosen (if any!)
-
-	void  HandleThrowGrenade(void);
-	void  ThrowGrenade(void);
-	void  CreateGrenade(void);
 
 	// from CBasePlayer
 	void			SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize );

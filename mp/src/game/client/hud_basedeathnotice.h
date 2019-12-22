@@ -18,9 +18,12 @@ struct DeathNoticePlayer
 	{
 		szName[0] = 0;
 		iTeam = TEAM_UNASSIGNED;
+		iPlayerID = 0;
 	}
+
 	char		szName[MAX_PLAYER_NAME_LENGTH*2];	// big enough for player name and additional information
 	int			iTeam;								// team #	
+	int			iPlayerID;
 };
 
 // Contents of each entry in our list of death notices
@@ -32,8 +35,10 @@ struct DeathNoticeItem
 		wzInfoText[0]=0;
 		wzInfoTextEnd[0]=0;
 		iconDeath = NULL;
+		iconCritDeath = NULL;
 		bSelfInflicted = false;
 		bLocalPlayerInvolved = false;
+		bCrit = false;
 		flCreationTime = 0;
 		iCount = 0;
 		iWeaponID = -1;
@@ -50,10 +55,13 @@ struct DeathNoticeItem
 
 	DeathNoticePlayer	Killer;
 	DeathNoticePlayer   Victim;
+	DeathNoticePlayer   Assister;
+
 	char		szIcon[32];		// name of icon to display
 	wchar_t		wzInfoText[32];	// any additional text to display next to icon
 	wchar_t		wzInfoTextEnd[32];	// any additional text to display next to victim name
 	CHudTexture *iconDeath;
+	CHudTexture *iconCritDeath;	// crit background icon
 
 	CHudTexture *iconPreKillerName;
 
@@ -64,6 +72,7 @@ struct DeathNoticeItem
 
 	bool		bSelfInflicted;
 	bool		bLocalPlayerInvolved;
+	bool		bCrit;
 	float		flCreationTime;
 	int			iWeaponID;
 	int			iKillerID;
@@ -114,6 +123,7 @@ protected:
 
 	virtual int UseExistingNotice( IGameEvent *event ) { return -1; }
 
+	void GetLocalizedControlPointName( IGameEvent *event, char *namebuf, int namelen );
 	virtual Color GetInfoTextColor( int iDeathNoticeMsg ){ return Color( 255, 255, 255, 255 ); }
 	virtual Color GetBackgroundColor ( int iDeathNoticeMsg ) { return m_DeathNotices[iDeathNoticeMsg].bLocalPlayerInvolved ? m_clrLocalBGColor : m_clrBaseBGColor; }
 
@@ -126,6 +136,7 @@ protected:
 	CPanelAnimationVar( Color, m_clrIcon, "IconColor", "255 80 0 255" );
 	CPanelAnimationVar( Color, m_clrBaseBGColor, "BaseBackgroundColor", "46 43 42 220" );
 	CPanelAnimationVar( Color, m_clrLocalBGColor, "LocalBackgroundColor", "245 229 196 200" );
+	CPanelAnimationVar( Color, m_clrKillStreakBg, "KillStreakBackgroundColor", "224 223 219 200" );
 
 	CUtlVector<DeathNoticeItem> m_DeathNotices;
 

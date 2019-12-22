@@ -12,10 +12,11 @@
 #pragma once
 #endif
 
-#include "teamplay_gamerules.h"
+#include "teamplayroundbased_gamerules.h"
 #include "convar.h"
 #include "gamevars_shared.h"
 #include "weapon_sdkbase.h"
+#include "GameEventListener.h"
 
 #ifdef CLIENT_DLL
 	#include "c_baseplayer.h"
@@ -25,7 +26,6 @@
 	#include "utlqueue.h"
 	#include "playerclass_info_parse.h"
 #endif
-
 
 #ifdef CLIENT_DLL
 	#define CSDKGameRules C_SDKGameRules
@@ -78,7 +78,7 @@ public:
 	virtual bool	ShouldCollide( int collisionGroup0, int collisionGroup1 );
 
 	virtual int	PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
-	virtual bool	IsTeamplay( void ) { return true; }
+	virtual bool IsTeamplay( void ) { return true; }
 
 	// Get the view vectors for this mod.
 	virtual const CViewVectors* GetViewVectors() const;
@@ -91,6 +91,13 @@ public:
 	const char *GetPlayerClassName( int cls, int team );
 
 	virtual bool IsConnectedUserInfoChangeAllowed( CBasePlayer *pPlayer ) { return true; }
+
+	virtual bool AllowThirdPersonCamera( void ) { return true; }
+
+	virtual float FlWeaponRespawnTime( CBaseCombatWeapon *pWeapon );
+	virtual float FlWeaponTryRespawn( CBaseCombatWeapon *pWeapon );
+	virtual Vector VecWeaponRespawnSpot( CBaseCombatWeapon *pWeapon );
+	virtual int WeaponShouldRespawn( CBaseCombatWeapon *pWeapon );
 
 #ifdef CLIENT_DLL
 	DECLARE_CLIENTCLASS_NOBASE(); // This makes datatables able to access our private vars.
@@ -110,12 +117,18 @@ public:
 	virtual void InitDefaultAIRelationships( void );
 	virtual const char*	AIClassText(int classType);
 
+	// Let the game rules specify if fall death should fade screen to black
+	virtual bool  FlPlayerFallDeathDoesScreenFade( CBasePlayer *pl ) { return FALSE; }
+
 	virtual const char *GetChatPrefix( bool bTeamOnly, CBasePlayer *pPlayer );
 	virtual const char *GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer );
 
 	CBaseEntity *GetPlayerSpawnSpot( CBasePlayer *pPlayer );
 	bool IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer );
 	virtual void PlayerSpawn( CBasePlayer *pPlayer );
+
+	// Whether props that are on fire should get a DLIGHT.
+	virtual bool ShouldBurningPropsEmitLight() { return true; }
 
 	bool IsPlayerClassOnTeam( int cls, int team );
 	bool CanPlayerJoinClass( CSDKPlayer *pPlayer, int cls );
@@ -129,6 +142,13 @@ public:
 	int SelectDefaultTeam( void );
 
 	virtual void ServerActivate();
+
+	virtual Vector VecItemRespawnSpot( CItem *pItem );
+	virtual QAngle VecItemRespawnAngles( CItem *pItem );
+	virtual float FlItemRespawnTime( CItem *pItem );
+	void AddLevelDesignerPlacedObject( CBaseEntity *pEntity );
+	void RemoveLevelDesignerPlacedObject( CBaseEntity *pEntity );
+	void ManageObjectRelocation( void );
 
 protected:
 	void CheckPlayerPositions( void );
@@ -178,6 +198,8 @@ public:
 private:
 	CNetworkVar( float, m_flGameStartTime );
 	CNetworkVar( int, m_nGamemode ); // Type of game mode this map is ( CTF, CP )
+
+	CUtlVector<EHANDLE> m_hRespawnableItemsAndWeapons;
 
 #ifndef CLIENT_DLL
 	bool m_bChangelevelDone;

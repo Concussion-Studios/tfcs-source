@@ -18,6 +18,10 @@
 #include "hl2mp_gamerules.h"
 #endif
 
+#ifdef SDK_DLL
+#include "sdk_gamerules.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -98,7 +102,7 @@ BEGIN_DATADESC( CItem )
 	DEFINE_THINKFUNC( Materialize ),
 	DEFINE_THINKFUNC( ComeToRest ),
 
-#if defined( HL2MP ) || defined( TF_DLL )
+#if defined( HL2MP ) || defined( TF_DLL ) || defined ( SDK_DLL )
 	DEFINE_FIELD( m_flNextResetCheckTime, FIELD_TIME ),
 	DEFINE_THINKFUNC( FallThink ),
 #endif
@@ -202,7 +206,7 @@ void CItem::Spawn( void )
 	}
 #endif //CLIENT_DLL
 
-#if defined( HL2MP ) || defined( TF_DLL )
+#if defined( HL2MP ) || defined( TF_DLL ) || defined ( SDK_DLL )
 	SetThink( &CItem::FallThink );
 	SetNextThink( gpGlobals->curtime + 0.1f );
 #endif
@@ -272,7 +276,7 @@ void CItem::ComeToRest( void )
 	}
 }
 
-#if defined( HL2MP ) || defined( TF_DLL )
+#if defined( HL2MP ) || defined( TF_DLL ) || defined ( SDK_DLL )
 
 //-----------------------------------------------------------------------------
 // Purpose: Items that have just spawned run this think to catch them when 
@@ -328,9 +332,28 @@ void CItem::FallThink ( void )
 		SetThink( &CItem::ComeToRest );
 	}
 #endif // TF
+
+#ifdef SDK_DLL
+	bool shouldMaterialize = false;
+	IPhysicsObject *pPhysics = VPhysicsGetObject();
+	if ( pPhysics )
+		shouldMaterialize = pPhysics->IsAsleep();
+	else
+		shouldMaterialize = (GetFlags() & FL_ONGROUND) ? true : false;
+
+	if ( shouldMaterialize )
+	{
+		SetThink ( NULL );
+
+		m_vOriginalSpawnOrigin = GetAbsOrigin();
+		m_vOriginalSpawnAngles = GetAbsAngles();
+
+		SDKGameRules()->AddLevelDesignerPlacedObject( this );
+	}
+#endif // SDK_DLL
 }
 
-#endif // HL2MP, TF
+#endif // HL2MP, TF SDK_DLL
 
 //-----------------------------------------------------------------------------
 // Purpose: Used to tell whether an item may be picked up by the player.  This
@@ -449,6 +472,10 @@ void CItem::ItemTouch( CBaseEntity *pOther )
 
 #ifdef HL2MP
 			HL2MPRules()->RemoveLevelDesignerPlacedObject( this );
+#endif
+
+#ifdef SDK_DLL
+			SDKGameRules()->RemoveLevelDesignerPlacedObject( this );
 #endif
 		}
 	}

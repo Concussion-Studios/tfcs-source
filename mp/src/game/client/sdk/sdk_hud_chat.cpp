@@ -24,9 +24,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-extern ConVar tfc_dev_mark;
-extern ConVar tfc_beta_mark;
-
 DECLARE_HUDELEMENT( CHudChat );
 
 DECLARE_HUD_MESSAGE( CHudChat, SayText );
@@ -35,10 +32,12 @@ DECLARE_HUD_MESSAGE( CHudChat, TextMsg );
 
 using namespace vgui;
 
+static CHudChat *g_pTFCChatHud = NULL;
+CHudChat *GetTFCChatHud( void ) { return g_pTFCChatHud; }
+
 //=====================
 //CHudChatLine
 //=====================
-
 void CHudChatLine::ApplySchemeSettings(vgui::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings( pScheme );
@@ -56,7 +55,6 @@ CHudChatLine::CHudChatLine( vgui::Panel *parent, const char *panelName ) : CBase
 	m_text = NULL;
 }
 
-
 //=====================
 //CHudChatInputLine
 //=====================
@@ -70,7 +68,7 @@ void CHudChatInputLine::ApplySchemeSettings(vgui::IScheme *pScheme)
 //=====================
 CHudChat::CHudChat( const char *pElementName ) : BaseClass( pElementName )
 {
-	
+	g_pTFCChatHud = this;
 }
 
 void CHudChat::CreateChatInputLine( void )
@@ -118,13 +116,9 @@ void CHudChat::Reset( void )
 int CHudChat::GetChatInputOffset( void )
 {
 	if ( m_pChatInput->IsVisible() )
-	{
 		return m_iFontHeight;
-	}
 	else
-	{
 		return 0;
-	}
 }
 
 int CHudChat::GetFilterForString( const char *pString )
@@ -134,9 +128,7 @@ int CHudChat::GetFilterForString( const char *pString )
 	if ( iFilter == CHAT_FILTER_NONE )
 	{
 		if ( !Q_stricmp( pString, "#HL_Name_Change" ) ) 
-		{
 			return CHAT_FILTER_NAMECHANGE;
-		}
 	}
 
 	return iFilter;
@@ -156,13 +148,19 @@ Color CHudChat::GetClientColor( int clientIndex )
 	}
 	else if( g_PR )
 	{
-		int iTeam = g_PR->GetTeam( clientIndex );
-
-		C_SDK_PlayerResource *sdk_PR = dynamic_cast<C_SDK_PlayerResource *>(g_PR);
-		if ( !sdk_PR )
-			return g_ColorWhite;
-
-		return sdk_PR->GetTeamColor( iTeam );
+		switch ( g_PR->GetTeam( clientIndex ) )
+		{
+			case SDK_TEAM_BLUE: 
+				return g_ColorBlue;
+			case SDK_TEAM_RED: 
+				return g_ColorRed;
+			case SDK_TEAM_GREEN:
+				return g_ColorGreen;
+			case SDK_TEAM_YELLOW:
+				return g_ColorYellow;
+			default	: 
+				return g_ColorWhite;
+		}
 	}
 
 	return g_ColorWhite;
@@ -196,35 +194,13 @@ Color CHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 		c = g_ColorDarkGreen;
 		break;
 
-	case COLOR_DEVELOPER:
-		{
-			if ( tfc_dev_mark.GetBool() )
-				c = g_ColorDev;
-			else
-				c = g_ColorWhite;
-		}
-		break;
-
-	case COLOR_BETA:
-		{
-			if ( tfc_beta_mark.GetBool() )
-				c = g_ColorBeta;
-			else
-				c = g_ColorWhite;
-		}
-		break;
-
 	case COLOR_ACHIEVEMENT:
 		{
 			IScheme *pSourceScheme = scheme()->GetIScheme( scheme()->GetScheme( "SourceScheme" ) ); 
 			if ( pSourceScheme )
-			{
 				c = pSourceScheme->GetColor( "SteamLightGreen", GetBgColor() );
-			}
 			else
-			{
 				c = g_ColorWhite;
-			}
 		}
 		break;
 	default:

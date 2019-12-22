@@ -205,6 +205,12 @@ void C_BaseExplosionEffect::CreateCore( void )
 	Vector	offset;
 	int		i;
 
+#ifdef SDK_DLL
+	QAngle vecAngles;
+	DispatchParticleEffect( "grenade_explosion_01", m_vecOrigin, vecAngles );
+	DispatchParticleEffect( "rock_impact_stalactite", m_vecOrigin, vecAngles );
+#endif // SDK_DLL
+
 	//Spread constricts as force rises
 	float force = m_flForce;
 

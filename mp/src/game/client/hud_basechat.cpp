@@ -48,11 +48,6 @@ Color g_ColorDarkGreen( 64, 255, 64, 255 );
 Color g_ColorYellow( 255, 178, 0, 255 );
 Color g_ColorGrey( 204, 204, 204, 255 );
 Color g_ColorWhite( 255, 255, 255, 255 );
-#ifdef SDK_DLL
-Color g_ColorDev( 30, 144, 255, 255 );
-Color g_ColorBeta( 0, 250, 154, 255 );
-#endif // SDK_DLL
-
 
 // removes all color markup characters, so Msg can deal with the string properly
 // returns a pointer to str
@@ -493,18 +488,18 @@ CHudChatFilterPanel::CHudChatFilterPanel( vgui::Panel *pParent, const char *pNam
 	new CHudChatFilterCheckButton( this, "publicchat_button", "Sky is blue?", CHAT_FILTER_PUBLICCHAT );
 	new CHudChatFilterCheckButton( this, "servermsg_button", "Sky is blue?", CHAT_FILTER_SERVERMSG );
 	new CHudChatFilterCheckButton( this, "teamchange_button", "Sky is blue?", CHAT_FILTER_TEAMCHANGE );
-    //=============================================================================
-    // HPE_BEGIN:
-    // [tj]Added a new filter checkbox for achievement announces.
-    //     Also. Yes. Sky is blue.
-    //=============================================================================
-     
-    new CHudChatFilterCheckButton( this, "achivement_button", "Sky is blue?", CHAT_FILTER_ACHIEVEMENT);
-     
-    //=============================================================================
-    // HPE_END
-    //=============================================================================
-    
+	//=============================================================================
+	// HPE_BEGIN:
+	// [tj]Added a new filter checkbox for achievement announces.
+	//     Also. Yes. Sky is blue.
+	//=============================================================================
+	 
+	new CHudChatFilterCheckButton( this, "achivement_button", "Sky is blue?", CHAT_FILTER_ACHIEVEMENT);
+	 
+	//=============================================================================
+	// HPE_END
+	//=============================================================================
+	
 }
 
 void CHudChatFilterPanel::ApplySchemeSettings(vgui::IScheme *pScheme)
@@ -1319,13 +1314,6 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 		c = g_ColorDarkGreen;
 		break;
 
-#ifdef SDK_DLL
-	case COLOR_DEVELOPER:
-	case COLOR_BETA:
-		c = g_ColorDarkGreen;
-		break;
-#endif // SDK_DLL
-
 	case COLOR_ACHIEVEMENT:
 		{
 			vgui::IScheme *pSourceScheme = vgui::scheme()->GetIScheme( vgui::scheme()->GetScheme( "SourceScheme" ) ); 
@@ -1402,10 +1390,6 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 		 m_text[0] == COLOR_NORMAL || 
 		 m_text[0] == COLOR_ACHIEVEMENT || 
 		 m_text[0] == COLOR_CUSTOM ||
-#ifdef SDK_DLL
-		m_text[0] == COLOR_DEVELOPER ||
-		m_text[0] == COLOR_BETA ||
-#endif // SDK_DLL
 		 m_text[0] == COLOR_HEXCODE || 
 		 m_text[0] == COLOR_HEXCODE_ALPHA )
 	{
@@ -1422,10 +1406,6 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			case COLOR_PLAYERNAME:
 			case COLOR_LOCATION:
 			case COLOR_ACHIEVEMENT:
-#ifdef SDK_DLL
-			case COLOR_DEVELOPER:
-			case COLOR_BETA:
-#endif // SDK_DLL
 			case COLOR_NORMAL:
 				{
 					// save this start

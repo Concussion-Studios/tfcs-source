@@ -46,8 +46,6 @@ extern IXboxSystem				*xboxsystem; // 360 only
 extern CSteamAPIContext			*steamapicontext; // available on game clients
 extern CSteamGameServerAPIContext *steamgameserverapicontext; //available on game servers
 
-
-
 //-----------------------------------------------------------------------------
 // Precaches a material
 //-----------------------------------------------------------------------------

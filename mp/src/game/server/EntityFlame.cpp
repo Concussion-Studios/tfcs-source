@@ -285,8 +285,8 @@ void CEntityFlame::FlameThink( void )
 		// Notify anything we're attached to
 		if ( m_hEntAttached )
 		{
-			CBaseCombatCharacter *pAttachedCC = m_hEntAttached->MyCombatCharacterPointer();
-
+			CBaseEntity *temp = m_hEntAttached;
+			CBaseCombatCharacter *pAttachedCC = (CBaseCombatCharacter *)temp;
 			if( pAttachedCC )
 			{
 				// Notify the NPC that it's no longer burning!

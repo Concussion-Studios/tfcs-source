@@ -24,9 +24,6 @@ public:
 	CDialogTabCredits( vgui::Panel *parent );
 	~CDialogTabCredits( void );
 
-	virtual void OnCommand( const char *command );
-	virtual void OnClose( void );
-
 private:
 
 	vgui::RichText* m_RichText;

@@ -15,9 +15,22 @@
 #include "c_baseplayer.h"
 #include "baseparticleentity.h"
 #include "sdk_player_shared.h"
+#include "beamdraw.h"
+#include "flashlighteffect.h"
 
 #define SDK_AVOID_MAX_RADIUS_SQR		5184.0f			// Based on player extents and max buildable extents.
 #define SDK_OO_AVOID_MAX_RADIUS_SQR		0.00029f
+#define FLASHLIGHT_DISTANCE 1000
+
+//Tony; m_pFlashlightEffect is private, so just subclass. We may want to do some more stuff with it later anyway.
+class CSDKFlashlightEffect : public CFlashlightEffect
+{
+public:
+	CSDKFlashlightEffect(int nIndex = 0) : CFlashlightEffect( nIndex  ) {}
+	~CSDKFlashlightEffect() {};
+
+	virtual void UpdateLight( const Vector &vecPos, const Vector &vecDir, const Vector &vecRight, const Vector &vecUp, int nDistance );
+};
 
 class C_SDKPlayer : public C_BasePlayer
 {
@@ -38,6 +51,11 @@ public:
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
 	virtual void ProcessMuzzleFlashEvent();
+	virtual void AddEntity( void );
+	virtual void ItemPreFrame( void );
+	virtual void ItemPostFrame( void );
+	virtual void NotifyShouldTransmit( ShouldTransmitState_t state );
+	virtual void CreateLightEffects( void ) {}
 
 	virtual void CalcVehicleView( IClientVehicle* pVehicle, Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, float& zFar, float& fov);
 	virtual void CalcPlayerView( Vector& eyeOrigin, QAngle& eyeAngles, float& fov);
@@ -45,10 +63,17 @@ public:
 	virtual void CalcViewBob( Vector& eyeOrigin );
 	virtual void CalcViewIdle( QAngle& eyeAngles );
 
+	virtual void ThirdPersonSwitch( bool bThirdperson );
+
+	virtual void TeamChange( int iNewTeam ) OVERRIDE;
+	static void TeamChangeStatic( int iNewTeam );
+
 	float ViewBob;
 	double BobTime;
 	float BobLastTime;
 	float IdleScale;
+
+	virtual void DoImpactEffect( trace_t &tr, int nDamageType );
 	
 	// Player avoidance
 	bool ShouldCollide( int collisionGroup, int contentsMask ) const;
@@ -58,24 +83,31 @@ public:
 	virtual void ClientThink();
 	virtual const QAngle& EyeAngles( void );
 
+	virtual Vector GetAutoaimVector( float flDelta );
+
 	// Have this player play the sounds from his view model's reload animation.
 	void PlayReloadEffect();
 
 	virtual bool ShouldResetSequenceOnNewModel( void ) { return false; }
 
 	virtual ShadowType_t ShadowCastType();
+	virtual bool ShouldReceiveProjectedTextures( int flags );
 
 // Called by shared code.
 public:
 	SDKPlayerState State_Get() const;
 	
 	void DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
+	virtual void CalculateIKLocks( float currentTime );
 	virtual bool ShouldDraw();
 
 	CWeaponSDKBase *GetActiveSDKWeapon() const;
+	CWeaponSDKBase* GetWeaponOwnerID( int iID );
 
-	virtual C_BaseAnimating * BecomeRagdollOnClient();
+	virtual C_BaseAnimating *BecomeRagdollOnClient();
 	virtual IRagdoll* GetRepresentativeRagdoll() const;
+
+	Vector GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget = NULL );
 
 	void FireBullet( 
 		Vector vecSrc, 
@@ -96,9 +128,6 @@ public:
 	virtual void SharedSpawn();
 	
 	void InitSpeeds( void ); //Tony; called EVERY spawn on server and client after class has been chosen (if any!)
-
-//Tony; pronetodo!
-//	void CheckProneMoveSound( int groundspeed, bool onground );
 
 	// Returns true if the player is allowed to move.
 	bool CanMove() const;
@@ -166,6 +195,12 @@ private:
 	CNetworkVar( SDKPlayerState, m_iPlayerState );
 
 	C_SDKPlayer( const C_SDKPlayer & );
+
+	virtual void UpdateFlashlight( void ); //Tony; override.
+	void ReleaseFlashlight( void );
+	Beam_t	*m_pFlashlightBeam;
+
+	CSDKFlashlightEffect *m_pSDKFlashLightEffect;
 
 	int m_ArmorValue, m_MaxArmorValue;
 

@@ -100,7 +100,7 @@ class CBoxShellRounds : public CEntityAmmo
 public:
 	DECLARE_CLASS( CBoxShellRounds, CEntityAmmo );
 
-	const char* WorldModel() { return "models/items/boxmrounds.mdl"; }
+	const char* WorldModel() { return "models/items/BoxBuckshot.mdl"; }
 	const char* AmmoName() { return "shell"; }
 	float AmmoSize() { return SIZE_AMMO_SHELL_LARGE; }
 };
@@ -108,14 +108,14 @@ public:
 LINK_ENTITY_TO_CLASS( item_ammo_shells, CBoxShellRounds );
 
 // ========================================================================
-//	>> CBoxShellRounds
+//	>> CBoxCellRounds
 // ========================================================================
 class CBoxCellRounds : public CEntityAmmo
 {
 public:
 	DECLARE_CLASS( CBoxCellRounds, CEntityAmmo );
 
-	const char* WorldModel() { return "models/items/boxmrounds.mdl"; }
+	const char* WorldModel() { return "models/items/BoxMRounds.mdl"; }
 	const char* AmmoName() { return "cell"; }
 	float AmmoSize() { return SIZE_AMMO_CELL_LARGE; }
 };
@@ -123,14 +123,14 @@ public:
 LINK_ENTITY_TO_CLASS( item_ammo_cells, CBoxShellRounds );
 
 // ========================================================================
-//	>> CBoxShellRounds
+//	>> CBoxNailRounds
 // ========================================================================
 class CBoxNailRounds : public CEntityAmmo
 {
 public:
 	DECLARE_CLASS( CBoxNailRounds, CEntityAmmo );
 
-	const char* WorldModel() { return "models/items/boxmrounds.mdl"; }
+	const char* WorldModel() { return "models/items/boxsrounds.mdl"; }
 	const char* AmmoName() { return "nail"; }
 	float AmmoSize() { return SIZE_AMMO_NAIL_LARGE; }
 };
@@ -138,14 +138,14 @@ public:
 LINK_ENTITY_TO_CLASS( item_ammo_nails, CBoxShellRounds );
 
 // ========================================================================
-//	>> CBoxShellRounds
+//	>> CBoxExplosiveRounds
 // ========================================================================
 class CBoxExplosiveRounds : public CEntityAmmo
 {
 public:
 	DECLARE_CLASS( CBoxExplosiveRounds, CEntityAmmo );
 
-	const char* WorldModel() { return "models/items/boxmrounds.mdl"; }
+	const char* WorldModel() { return "models/weapons/w_missile_closed.mdl"; }
 	const char* AmmoName() { return "explosive"; }
 	float AmmoSize() { return SIZE_AMMO_EXPLOSIVE_LARGE; }
 };

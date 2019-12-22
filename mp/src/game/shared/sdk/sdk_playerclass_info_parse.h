@@ -22,10 +22,13 @@ public:
 	
 	virtual void Parse( ::KeyValues *pKeyValuesData, const char *szWeaponName );
 
-	int m_iPrimaryWeapon;
-	int m_iSecondaryWeapon;
-	int m_iMeleeWeapon;
+	char m_szLimitCvar[64];	//which cvar controls the class limit for this class
 
+	float m_flMaxSpeed;
+	int m_iMaxArmor;
+	int m_iMaxHealth;
+
+	//Weapons
 	int m_iWeapon1;
 	int m_iWeapon2;
 	int m_iWeapon3;
@@ -37,22 +40,11 @@ public:
 	int m_iWeapon9;
 	int m_iWeapon10;
 
+	// Grenades
 	int m_iNumGrensType1;
 	int m_iGrenType1;
-
 	int m_iNumGrensType2;
 	int m_iGrenType2;
-
-	char m_szLimitCvar[64];	//which cvar controls the class limit for this class
-
-	float m_flRunSpeed;
-	float m_flProneSpeed;
-
-	int m_iMaxArmor;
-	int m_iMaxHealth;
-
-	int m_iArmor;
-	int m_iHealth;
 };
 
 #endif // SDK_PLAYERCLASS_INFO_PARSE_H
