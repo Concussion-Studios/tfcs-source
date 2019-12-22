@@ -574,13 +574,13 @@ void CSDKPlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_ic" );
 		GiveNamedItem( "weapon_ac" );
 		GiveNamedItem( "weapon_grenade" );
-		GiveNamedItem( "weapon_grenade_concussion" );
-		GiveNamedItem( "weapon_grenade_napalm" );
-		GiveNamedItem( "weapon_grenade_emp" );
-		GiveNamedItem( "weapon_grenade_nail" );
-		GiveNamedItem( "weapon_grenade_mirv" );
-		GiveNamedItem( "weapon_grenade_hallucination" );
-		GiveNamedItem( "weapon_grenade_caltrop" );
+		//GiveNamedItem( "weapon_grenade_concussion" );
+		//GiveNamedItem( "weapon_grenade_napalm" );
+		//GiveNamedItem( "weapon_grenade_emp" );
+		//GiveNamedItem( "weapon_grenade_nail" );
+		//GiveNamedItem( "weapon_grenade_mirv" );
+		//GiveNamedItem( "weapon_grenade_hallucination" );
+		//GiveNamedItem( "weapon_grenade_caltrop" );
 
 		if ( GetHealth() < 100 )
 			TakeHealth( 25, DMG_GENERIC );
