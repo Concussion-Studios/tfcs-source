@@ -89,7 +89,7 @@ void CEnvHudHint::InputShowHudHint( inputdata_t &inputdata )
 		}
 		else
 		{
-			pPlayer = UTIL_GetNearestPlayer(GetAbsOrigin());
+			pPlayer = UTIL_GetLocalPlayer();
 		}
 
 		if ( !pPlayer || !pPlayer->IsNetClient() )
@@ -126,7 +126,7 @@ void CEnvHudHint::InputHideHudHint( inputdata_t &inputdata )
 		}
 		else
 		{
-			pPlayer = UTIL_GetNearestPlayer(GetAbsOrigin());
+			pPlayer = UTIL_GetLocalPlayer();
 		}
 
 		if ( !pPlayer || !pPlayer->IsNetClient() )

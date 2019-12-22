@@ -29,10 +29,14 @@ public:
 	DECLARE_PREDICTABLE();
 
 	virtual SDKWeaponID GetWeaponID( void ) const { return WEAPON_SHOTGUN; }
+	virtual bool CanWeaponBeDropped() const { return false; }
+
+	virtual float GetWeaponSpread() { return 0.04362f; }
 
 private:
 	CNetworkVar( bool, m_bNeedPump );		// When emptied completely
-	CNetworkVar( bool, m_bDelayedFire );	// Fire primary when finished reloading
+	CNetworkVar( bool, m_bDelayedFire1 );	// Fire primary when finished reloading
+	CNetworkVar( bool, m_bDelayedFire2 );	// Fire secondary when finished reloading
 	CNetworkVar( bool, m_bDelayedReload );	// Reload when finished pump
 
 public:
@@ -55,6 +59,7 @@ public:
 	void ItemPostFrame( void );
 	void PrimaryAttack( void );
 	void DryFire( void );
+	virtual float GetFireRate(void) { return 0.7; };
 
 	CWeaponShotgun( void );
 
@@ -67,11 +72,13 @@ IMPLEMENT_NETWORKCLASS_ALIASED( WeaponShotgun, DT_WeaponShotgun )
 BEGIN_NETWORK_TABLE( CWeaponShotgun, DT_WeaponShotgun )
 #ifdef CLIENT_DLL
 	RecvPropBool( RECVINFO( m_bNeedPump ) ),
-	RecvPropBool( RECVINFO( m_bDelayedFire ) ),
+	RecvPropBool( RECVINFO( m_bDelayedFire1 ) ),
+	RecvPropBool( RECVINFO( m_bDelayedFire2 ) ),
 	RecvPropBool( RECVINFO( m_bDelayedReload ) ),
 #else
 	SendPropBool( SENDINFO( m_bNeedPump ) ),
-	SendPropBool( SENDINFO( m_bDelayedFire ) ),
+	SendPropBool( SENDINFO( m_bDelayedFire1 ) ),
+	SendPropBool( SENDINFO( m_bDelayedFire2 ) ),
 	SendPropBool( SENDINFO( m_bDelayedReload ) ),
 #endif
 END_NETWORK_TABLE()
@@ -79,7 +86,8 @@ END_NETWORK_TABLE()
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA( CWeaponShotgun )
 	DEFINE_PRED_FIELD( m_bNeedPump, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_bDelayedFire, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bDelayedFire1, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bDelayedFire2, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bDelayedReload, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 #endif
@@ -207,8 +215,8 @@ void CWeaponShotgun::FillClip(void)
 	{
 		if (Clip1() < GetMaxClip1())
 		{
-			m_iClip1 += GetAmmoToRemove();
-			pOwner->RemoveAmmo( GetAmmoToRemove(), m_iPrimaryAmmoType );
+			m_iClip1 += 2;
+			pOwner->RemoveAmmo(2, m_iPrimaryAmmoType);
 		}
 	}
 }
@@ -326,7 +334,14 @@ void CWeaponShotgun::ItemPostFrame(void)
 		{
 			m_bInReload = false;
 			m_bNeedPump = false;
-			m_bDelayedFire = true;
+			m_bDelayedFire1 = true;
+		}
+		// If I'm secondary firing and have two rounds stop reloading and fire
+		else if ((pOwner->m_nButtons & IN_ATTACK2) && (m_iClip1 >= 2) && !m_bNeedPump)
+		{
+			m_bInReload = false;
+			m_bNeedPump = false;
+			m_bDelayedFire2 = true;
 		}
 		else if (m_flNextPrimaryAttack <= gpGlobals->curtime)
 		{
@@ -362,9 +377,40 @@ void CWeaponShotgun::ItemPostFrame(void)
 		return;
 	}
 
-	 if ((m_bDelayedFire || pOwner->m_nButtons & IN_ATTACK) && m_flNextPrimaryAttack <= gpGlobals->curtime)
+	// Shotgun uses same timing and ammo for secondary attack
+	if ((m_bDelayedFire2 || pOwner->m_nButtons & IN_ATTACK2) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 	{
-		m_bDelayedFire = false;
+		m_bDelayedFire2 = false;
+
+		if ((m_iClip1 <= 1 && UsesClipsForAmmo1()))
+		{
+			// If only one shell is left, do a single shot instead	
+			if (m_iClip1 == 1)
+			{
+				PrimaryAttack();
+			}
+			else if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
+			{
+				DryFire();
+			}
+			else
+			{
+				StartReload();
+			}
+		}
+		else
+		{
+			// If the firing button was just pressed, reset the firing time
+			if (pOwner->m_afButtonPressed & IN_ATTACK)
+			{
+				m_flNextPrimaryAttack = gpGlobals->curtime;
+			}
+			SecondaryAttack();
+		}
+	}
+	else if ((m_bDelayedFire1 || pOwner->m_nButtons & IN_ATTACK) && m_flNextPrimaryAttack <= gpGlobals->curtime)
+	{
+		m_bDelayedFire1 = false;
 		if ((m_iClip1 <= 0 && UsesClipsForAmmo1()) || (!UsesClipsForAmmo1() && !pOwner->GetAmmoCount(m_iPrimaryAmmoType)))
 		{
 			if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
@@ -436,9 +482,13 @@ CWeaponShotgun::CWeaponShotgun(void)
 	m_bReloadsSingly = true;
 
 	m_bNeedPump = false;
+	m_bDelayedFire1 = false;
+	m_bDelayedFire2 = false;
 
 	m_fMinRange1 = 0.0;
 	m_fMaxRange1 = 500;
+	m_fMinRange2 = 0.0;
+	m_fMaxRange2 = 200;
 }
 
 //-----------------------------------------------------------------------------

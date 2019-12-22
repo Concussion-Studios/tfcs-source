@@ -25,6 +25,9 @@ public:
 	CDialogTabChangeLog( vgui::Panel *parent );
 	~CDialogTabChangeLog( void );
 
+	virtual void OnCommand( const char *command );
+	virtual void OnClose( void );
+
 private:
 	vgui::RichText* m_RichText;
 };

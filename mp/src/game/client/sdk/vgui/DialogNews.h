@@ -20,11 +20,13 @@ class CDialogNews : public vgui::PropertyDialog
 	DECLARE_CLASS_SIMPLE( CDialogNews, vgui::PropertyDialog );
 
 public:
-	CDialogNews( vgui::VPANEL parent );
+	CDialogNews(vgui::Panel *parent);
 	~CDialogNews();
 
-	virtual void OnClose( void );
-	virtual void OnCommand( const char *command );
+	void Run();
+	virtual void Activate();
+
+	MESSAGE_FUNC( OnGameUIHidden, "GameUIHidden" );	// called when the GameUI is hidden
 };
 
 #endif // DIALOGNEWS_H

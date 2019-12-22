@@ -18,22 +18,15 @@
 #include "obstacle_pushaway.h"
 #include "in_buttons.h"
 #include "game.h"
+#include "tfc_projectile_base.h"
 #include "gib.h"
 #include "steam/steam_api.h"
 #include "cdll_int.h"
-#include "datacache/imdlcache.h"
-#include "tier0/vprof.h"
-#include "bone_setup.h"
-#include "ilagcompensationmanager.h"
-#include "effect_dispatch_data.h"
-#include "te_effect_dispatch.h"
-#include "weapon_basesdkgrenade.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 extern int gEvilImpulse101;
-bool IsInCommentaryMode( void );
 
 ConVar SDK_ShowStateTransitions( "sdk_ShowStateTransitions", "-2", FCVAR_CHEAT, "sdk_ShowStateTransitions <ent index or -1 for all>. Show player state transitions." );
 
@@ -42,25 +35,6 @@ EHANDLE g_pLastBlueSpawn;
 EHANDLE g_pLastRedSpawn;
 EHANDLE g_pLastGreenSpawn;
 EHANDLE g_pLastYellowSpawn;
-
-class CPhysicsPlayerCallback : public IPhysicsPlayerControllerEvent
-{
-public:
-	int ShouldMoveTo( IPhysicsObject *pObject, const Vector &position )
-	{
-		auto *pPlayer = ( CSDKPlayer* )pObject->GetGameData();
-		if ( pPlayer )
-		{
-			if ( pPlayer->TouchedPhysics() )
-				return 0;
-		}
-
-		return 1;
-	}
-};
-
-
-static CPhysicsPlayerCallback playerCallback;
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
@@ -71,7 +45,9 @@ public:
 	DECLARE_CLASS( CTEPlayerAnimEvent, CBaseTempEntity );
 	DECLARE_SERVERCLASS();
 
-	CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name ) {}
+	CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name )
+	{
+	}
 
 	CNetworkHandle( CBasePlayer, m_hPlayer );
 	CNetworkVar( int, m_iEvent );
@@ -379,30 +355,20 @@ void CSDKPlayer::Spawn()
 		EquipSuit( false );	
 
 		//Player spawn sound.
-		CPASFilter filter( GetAbsOrigin() );
-		filter.UsePredictionRules();
-		EmitSound( filter, this->entindex(),"Player.Spawn" );
+		EmitSound( "Player.Spawn" );
 
-		if ( IsInCommentaryMode() && !IsFakeClient() )
-		{
-			// Player is spawning in commentary mode. Tell the commentary system.
-			CBaseEntity *pEnt = NULL;
-			variant_t emptyVariant;
-			while ( (pEnt = gEntList.FindEntityByClassname( pEnt, "commentary_auto" )) != NULL )
-				pEnt->AcceptInput( "MultiplayerSpawned", this, this, emptyVariant, 0 );
-		}
 	}
 
 	m_hRagdoll = NULL;
 	
 	RemoveEffects( EF_NOINTERP );
 
-	m_impactEnergyScale = SDK_PHYSDAMAGE_SCALE;
-
 	//Tony; do the spawn animevent
 	DoAnimationEvent( PLAYERANIMEVENT_SPAWN );
 	
 	BaseClass::Spawn();
+	
+
 
 	m_bTeamChanged	= false;
 
@@ -532,120 +498,6 @@ CBaseEntity* CSDKPlayer::EntSelectSpawnPoint()
 	return pSpot;
 } 
 
-//=========================================================
-//=========================================================
-void CSDKPlayer::CheatImpulseCommands( int iImpulse )
-{
-	if ( !sv_cheats->GetBool() && State_Get() == STATE_ACTIVE )
-		return;
-
-	switch ( iImpulse )
-	{
-	case 101:
-		gEvilImpulse101 = true;
-
-		CBasePlayer::GiveAmmo( 255,	"sniper");
-		CBasePlayer::GiveAmmo( 255,	"nail");
-		CBasePlayer::GiveAmmo( 255,	"shell" );
-		CBasePlayer::GiveAmmo( 255,	"cell" );
-		CBasePlayer::GiveAmmo( 255,	"explosive" );
-		CBasePlayer::GiveAmmo( 255,	"fireball" );
-		CBasePlayer::GiveAmmo( 255,	"shotgun" );
-		CBasePlayer::GiveAmmo( 255,	"plasma" );
-		CBasePlayer::GiveAmmo( 4,	"grenades" );
-		CBasePlayer::GiveAmmo( 4,	"concussion" );
-		CBasePlayer::GiveAmmo( 4,	"emp" );
-		CBasePlayer::GiveAmmo( 4,	"napalm" );
-
-		GiveNamedItem( "weapon_crowbar" );
-		GiveNamedItem( "weapon_umbrella" );
-		GiveNamedItem( "weapon_wrench" );
-		GiveNamedItem( "weapon_medkit" );
-		GiveNamedItem( "weapon_knife" );
-		GiveNamedItem( "weapon_tranq" );
-		GiveNamedItem( "weapon_12gauge" );
-		GiveNamedItem( "weapon_shotgun" );
-		GiveNamedItem( "weapon_sniperrifle" );
-		GiveNamedItem( "weapon_autorifle" );
-		GiveNamedItem( "weapon_nailgun" );
-		GiveNamedItem( "weapon_railgun" );
-		GiveNamedItem( "weapon_supernailgun" );
-		GiveNamedItem( "weapon_rpg" );
-		GiveNamedItem( "weapon_ic" );
-		GiveNamedItem( "weapon_ac" );
-		GiveNamedItem( "weapon_grenade" );
-		GiveNamedItem( "weapon_grenade_concussion" );
-		GiveNamedItem( "weapon_grenade_napalm" );
-		GiveNamedItem( "weapon_grenade_emp" );
-		GiveNamedItem( "weapon_grenade_nail" );
-		GiveNamedItem( "weapon_grenade_mirv" );
-		GiveNamedItem( "weapon_grenade_hallucination" );
-		GiveNamedItem( "weapon_grenade_caltrop" );
-
-		if ( GetHealth() < 100 )
-			TakeHealth( 25, DMG_GENERIC );
-
-		if ( GetArmorValue() < 100 )
-			IncrementArmorValue( 25 );
-		
-		gEvilImpulse101 = false;
-
-		break;
-
-	default:
-		BaseClass::CheatImpulseCommands( iImpulse );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Player reacts to bumping a weapon. 
-// Input  : pWeapon - the weapon that the player bumped into.
-// Output : Returns true if player picked up the weapon
-//-----------------------------------------------------------------------------
-bool CSDKPlayer::BumpWeapon( CBaseCombatWeapon *pWeapon )
-{
-	CBaseCombatCharacter *pOwner = pWeapon->GetOwner();
-
-	// Can I have this weapon type?
-	if ( !IsAllowedToPickupWeapons() )
-		return false;
-
-	if ( pOwner || !Weapon_CanUse( pWeapon ) || !g_pGameRules->CanHavePlayerItem( this, pWeapon ) )
-	{
-		if ( gEvilImpulse101 )
-			UTIL_Remove( pWeapon );
-
-		return false;
-	}
-
-	// Don't let the player fetch weapons through walls (use MASK_SOLID so that you can't pickup through windows)
-	if( !pWeapon->FVisible( this, MASK_SOLID ) && !(GetFlags() & FL_NOTARGET) )
-		return false;
-
-	bool bOwnsWeaponAlready = !!Weapon_OwnsThisType( pWeapon->GetClassname(), pWeapon->GetSubType());
-
-	if ( bOwnsWeaponAlready == true ) 
-	{
-		//If we have room for the ammo, then "take" the weapon too.
-		 if ( Weapon_EquipAmmoOnly( pWeapon ) )
-		 {
-			 pWeapon->CheckRespawn();
-
-			 UTIL_Remove( pWeapon );
-			 return true;
-		 }
-		 else
-		 {
-			 return false;
-		 }
-	}
-
-	pWeapon->CheckRespawn();
-	Weapon_Equip( pWeapon );
-
-	return true;
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Put the player in the specified team
 //-----------------------------------------------------------------------------
@@ -720,122 +572,74 @@ void CSDKPlayer::InitialSpawn( void )
 
 }
 
+void CSDKPlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator )
+{
+	//Tony; disable prediction filtering, and call the baseclass.
+	CDisablePredictionFiltering disabler;
+	BaseClass::TraceAttack( inputInfo, vecDir, ptr, pAccumulator );
+}
+
 int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 {
 	CTakeDamageInfo info = inputInfo;
+
 	CBaseEntity *pInflictor = info.GetInflictor();
 	CBaseEntity *pAttacker = info.GetAttacker();
-	float flArmorBonus = 0.5f;
-	float flArmorRatio = 0.5f;
-	float flDamage = info.GetDamage();
-	bool bFriendlyFire = friendlyfire.GetBool();
 
 	if ( !pInflictor )
-		return 0;
-
-	// Already dead
-	if ( !IsAlive() )
-		return 0;
-
-	// Early out if there's no damage
-	if ( !info.GetDamage() )
-		return 0;
-
-	if ( GetFlags() & FL_GODMODE )
 		return 0;
 
 	if ( GetMoveType() == MOVETYPE_NOCLIP || GetMoveType() == MOVETYPE_OBSERVER )
 		return 0;
 
-	// if the player's team does not match the inflictor's team
-	// the player has changed teams between when they started the attack
-	if( pInflictor->GetTeamNumber() != TEAM_UNASSIGNED && 
-		info.GetAttacker() != NULL &&
-		pInflictor->GetTeamNumber() != info.GetAttacker()->GetTeamNumber() )
+	float flArmorBonus = 0.5f;
+	float flArmorRatio = 0.5f;
+	float flDamage = info.GetDamage();
+
+	//Tony; re-work this so if you're not dealing with teams at all, you can still be hurt by the world.
+	//and that it always runs through here if friendly fire is off.
+	bool bCheckFriendlyFire = false;
+	bool bFriendlyFire = friendlyfire.GetBool();
+	//Tony; only check teams in teamplay
+	if ( gpGlobals->teamplay && bFriendlyFire )
+		bCheckFriendlyFire = true;
+
+	if ( !bCheckFriendlyFire || ( bCheckFriendlyFire && pInflictor->GetTeamNumber() != GetTeamNumber() ) || pInflictor == this || info.GetAttacker() == this )
 	{
-		info.SetDamage( 0 );
-		info.SetDamageType( 0 );
-	}
-
-	if ( m_debugOverlays & OVERLAY_BUDDHA_MODE ) 
-	{
-		if ( ( m_iHealth - info.GetDamage() ) <= 0 )
-		{
-			m_iHealth = 1;
-			return 0;
-		}
-	}
-
-	if( info.GetDamageType() & DMG_BLAST_SURFACE )
-	{
-		if( GetWaterLevel() > 2 )
-		{
-			// Don't take blast damage from anything above the surface.
-			if( info.GetInflictor()->GetWaterLevel() == 0 )
-				return 0;
-		}
-	}
-
-	IServerVehicle *pVehicle = GetVehicle();
-	if ( pVehicle )
-	{
-		// Let the vehicle decide if we should take this damage or not
-		if ( pVehicle->PassengerShouldReceiveDamage( info ) == false )
-			return 0;
-	}
-
-	if ( IsInCommentaryMode() )
-	{
-		if( !ShouldTakeDamageInCommentaryMode( info ) )
-			return 0;
-	}
-
-	// blasts damage armor more unless whe aren't Heavy or soldier.
-	if ( ( info.GetDamageType() & DMG_BLAST ) && !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY || m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER ) )
-		flArmorBonus *= 2;
-
-	// Refuse the damage
-	if ( !g_pGameRules->FPlayerCanTakeDamage( this, info.GetAttacker(), inputInfo ) )
-		return 0;
-
-	if ( bFriendlyFire ||
-		info.GetAttacker()->GetTeamNumber() != GetTeamNumber() ||
-		pInflictor == this ||
-		info.GetAttacker() == this ||
-		info.GetDamageType() & DMG_BLAST )
-	{
-		/*if ( bFriendlyFire && (info.GetDamageType() & DMG_BLAST) == 0 )
+		if ( bFriendlyFire && (info.GetDamageType() & DMG_BLAST) == 0 )
 		{
 			if ( pInflictor->GetTeamNumber() == GetTeamNumber() && bCheckFriendlyFire)
 			{
 				flDamage *= 0.35; // bullets hurt teammates less
 			}
-		}*/
+		}
 
 		AddDamagerToHistory( pAttacker );
+
+		m_vecTotalBulletForce += inputInfo.GetDamageForce();
 
 		// keep track of amount of damage last sustained
 		m_lastDamageAmount = flDamage;
 
 		// Deal with Armour
-		if ( GetArmorValue() && !( info.GetDamageType() & ( DMG_FALL | DMG_DROWN | DMG_POISON | DMG_RADIATION ) ) )	// armor doesn't protect against fall or drown damage!
+		if ( ArmorValue() && !( info.GetDamageType() & (DMG_FALL | DMG_DROWN)) )
 		{
 			float flNew = flDamage * flArmorRatio;
 			float flArmor = (flDamage - flNew) * flArmorBonus;
 
 			// Does this use more armor than we have?
-			if ( flArmor > GetArmorValue() )
+			if (flArmor > ArmorValue() )
 			{
 				//armorHit = (int)(flArmor);
 
-				flArmor = GetArmorValue();
+				flArmor = ArmorValue();
 				flArmor *= (1/flArmorBonus);
 				flNew = flDamage - flArmor;
 				SetArmorValue( 0 );
 			}
 			else
 			{
-				int oldValue = (int)( GetArmorValue() );
+				int oldValue = (int)(ArmorValue());
 			
 				if ( flArmor < 0 )
 					 flArmor = 1;
@@ -855,17 +659,6 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		if ( info.GetDamage() <= 0 )
 			return 0;
 
-		// Modify the amount of damage the player takes, based on skill.
-		CTakeDamageInfo playerDamage = info;
-
-		if ( GetVehicleEntity() != NULL )
-		{
-			if( playerDamage.GetDamage() > 30 && playerDamage.GetInflictor() == GetVehicleEntity() && ( playerDamage.GetDamageType() & DMG_CRUSH ) )
-				playerDamage.ScaleDamage( 0.3f / playerDamage.GetDamage() );
-		}
-
-		m_vecTotalBulletForce += inputInfo.GetDamageForce();
-
 		CSingleUserRecipientFilter user( this );
 		user.MakeReliable();
 		UserMessageBegin( user, "Damage" );
@@ -873,9 +666,15 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 			WRITE_VEC3COORD( info.GetInflictor()->WorldSpaceCenter() );
 		MessageEnd();
 
+		// Do special explosion damage effect
+		if ( info.GetDamageType() & DMG_BLAST )
+		{
+			OnDamagedByExplosion( info );
+		}
+
 		gamestats->Event_PlayerDamage( this, info );
 
-		return CBaseCombatCharacter::OnTakeDamage( playerDamage );
+		return CBaseCombatCharacter::OnTakeDamage( info );
 	}
 	else
 	{
@@ -891,72 +690,24 @@ int CSDKPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	if ( !CBaseCombatCharacter::OnTakeDamage_Alive( info ) )
 		return 0;
 
-	CBaseEntity * attacker = info.GetAttacker();
-	if ( !attacker )
-		return 0;
-
-	// don't apply damage forces if we are the heavy
-	if ( !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY ) )
-	{
-		Vector vecDir = vec3_origin;
-		if ( info.GetInflictor() )
-		{
-			vecDir = info.GetInflictor()->WorldSpaceCenter() - Vector ( 0, 0, 10 ) - WorldSpaceCenter();
-			VectorNormalize( vecDir );
-		}
-
-		if ( info.GetInflictor() && ( GetMoveType() == MOVETYPE_WALK ) && 
-			( !attacker->IsSolidFlagSet( FSOLID_TRIGGER ) ) )
-		{
-			Vector force = vecDir * -DamageForce( WorldAlignSize(), info.GetBaseDamage() );
-			if ( force.z > 250.0f )
-				force.z = 250.0f;
-
-			// Do special explosion damage effect
-			if ( info.GetDamageType() & DMG_BLAST )
-			{
-				if ( m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER || 
-					 m_Shared.DesiredPlayerClass() == PLAYERCLASS_DEMOMAN )
-					force.z = 750.0f; // Flyyy
-			}
-
-			CWeaponSDKBase *pWeapon = (CWeaponSDKBase *)GetActiveWeapon();
-			if ( pWeapon )
-			{
-				CBaseSDKGrenade *pGrenade = dynamic_cast<CBaseSDKGrenade *>( pWeapon );
-				if( pGrenade )
-					force.z = 350.0f; // Flyyy
-			}
-
-			ApplyAbsVelocityImpulse( force );
-		}	
-	}
-
-	// Drown
-	if( info.GetDamageType() & DMG_DROWN )
-	{
-		if( m_idrowndmg == m_idrownrestored )
-			EmitSound( "Player.DrownStart" );
-		else
-			EmitSound( "Player.DrownContinue" );
-	}
-
-	// Burnt
-	if ( info.GetDamageType() & DMG_BURN )
-		EmitSound( "Player.BurnPain" );
-
 	// fire global game event
+
 	IGameEvent * event = gameeventmanager->CreateEvent( "player_hurt" );
+
 	if ( event )
 	{
 		event->SetInt("userid", GetUserID() );
-		event->SetInt("health", max( 0, m_iHealth ) );
-		event->SetInt("armor", max( 0, GetArmorValue() ) );
+		event->SetInt("health", max(0, m_iHealth) );
+		event->SetInt("armor", max(0, ArmorValue()) );
 
 		if ( info.GetDamageType() & DMG_BLAST )
+		{
 			event->SetInt( "hitgroup", HITGROUP_GENERIC );
+		}
 		else
+		{
 			event->SetInt( "hitgroup", LastHitGroup() );
+		}
 
 		CBaseEntity * attacker = info.GetAttacker();
 		const char *weaponName = "";
@@ -973,19 +724,29 @@ int CSDKPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 				{
 					// If the inflictor is the killer,  then it must be their current weapon doing the damage
 					if ( player->GetActiveWeapon() )
+					{
 						weaponName = player->GetActiveWeapon()->GetClassname();
+					}
 				}
 				else
+				{
 					weaponName = STRING( pInflictor->m_iClassname );  // it's just that easy
+				}
 			}
 		}
 		else
+		{
 			event->SetInt("attacker", 0 ); // hurt by "world"
+		}
 
 		if ( strncmp( weaponName, "weapon_", 7 ) == 0 )
+		{
 			weaponName += 7;
+		}
 		else if( strncmp( weaponName, "grenade", 9 ) == 0 )	//"grenade_projectile"	
+		{
 			weaponName = "grenade";
+		}
 
 		event->SetString( "weapon", weaponName );
 		event->SetInt( "priority", 5 );
@@ -995,18 +756,6 @@ int CSDKPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	
 	return 1;
 }
-
-void CSDKPlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
-{
-	if ( info.GetInflictor() && info.GetDamageType() & DMG_SONIC )
-	{
-		// No ear ringing for concussion grenade
-		UTIL_ScreenShake( info.GetInflictor()->GetAbsOrigin(), 4.0, 1.0, 0.5, 1000, SHAKE_START, false );
-		return;
-	}
-	BaseClass::OnDamagedByExplosion( info );
-}
-
 
 void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 {
@@ -1037,6 +786,7 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	//Tony; after transition, remove remaining items
 	RemoveAllItems( true );
 
+
 	if ( info.GetDamageType() & ( DMG_BUCKSHOT | DMG_BLAST ) || info.GetDamage() >= ( GetMaxHealth() * 0.75f ) )
 	{
 		// Release our gibs
@@ -1049,20 +799,21 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 		CreateRagdollEntity();
 	}
 
-	BaseClass::Event_Killed( subinfo );
 
-	if ( info.GetDamageType() & ( DMG_DISSOLVE | DMG_PLASMA ) )
+	BaseClass::Event_Killed( info );
+
+	if ( info.GetDamageType() & DMG_DISSOLVE )
 	{
 		if ( m_hRagdoll )
 			m_hRagdoll->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
 	}
 
-	if( info.GetDamageType() & ( DMG_BLAST| DMG_BURN ) )
+	if( info.GetDamageType() & ( DMG_BLAST|DMG_BURN|DMG_PLASMA ) )
 	{
 		if( m_hRagdoll )
 		{
 			CBaseAnimating *pRagdoll = (CBaseAnimating *)CBaseEntity::Instance( m_hRagdoll );
-			if( info.GetDamageType() & ( DMG_BURN | DMG_BLAST ) )
+			if( info.GetDamageType() & ( DMG_BURN|DMG_BLAST|DMG_PLASMA ) )
 				pRagdoll->Ignite( 45, false, 10 );
 		}
 	}
@@ -1094,21 +845,12 @@ void CSDKPlayer::BecomeAGibs( const CTakeDamageInfo &info )
 	CGib::SpawnSpecificGibs( this, 1, 750, 1500, "models/gibs/gibhead.mdl", 5 );
 }
 
-Class_T CSDKPlayer::Classify ( void )
-{
-	if( IsInAVehicle() )
-	{
-		IServerVehicle *pVehicle = GetVehicle();
-		return pVehicle->ClassifyPassenger( this, CLASS_PLAYER );
-	}
-	else
-		return CLASS_PLAYER;
-}
-
 void CSDKPlayer::ClearDamagerHistory()
 {
 	for ( int i = 0; i < ARRAYSIZE( m_DamagerHistory ); i++ )
+	{
 		m_DamagerHistory[i].Reset();
+	}
 }
 
 void CSDKPlayer::AddDamagerToHistory(EHANDLE hDamager)
@@ -1205,98 +947,6 @@ void CSDKPlayer::PlayerDeathThink()
 	//overridden, do nothing - our states handle this now
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Makes a splash when the player transitions between water states
-//-----------------------------------------------------------------------------
-void CSDKPlayer::Splash( void )
-{
-	CEffectData data;
-	data.m_fFlags = 0;
-	data.m_vOrigin = GetAbsOrigin();
-	data.m_vNormal = Vector(0,0,1);
-	data.m_vAngles = QAngle( 0, 0, 0 );
-	
-	if ( GetWaterType() & CONTENTS_SLIME )
-		data.m_fFlags |= FX_WATER_IN_SLIME;
-
-	float flSpeed = GetAbsVelocity().Length();
-	if ( flSpeed < 300 )
-	{
-		data.m_flScale = random->RandomFloat( 10, 12 );
-		DispatchEffect( "waterripple", data );
-	}
-	else
-	{
-		data.m_flScale = random->RandomFloat( 6, 8 );
-		DispatchEffect( "watersplash", data );
-	}
-}
-
-//=========================================================
-// TraceAttack
-//=========================================================
-void CSDKPlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator )
-{
-	if ( m_takedamage != DAMAGE_YES )
-		return;
-
-	CSDKPlayer *pAttacker = (CSDKPlayer*)ToSDKPlayer( inputInfo.GetAttacker() );
-	if ( pAttacker )
-	{
-		// Prevent team damage here so blood doesn't appear
-		if ( inputInfo.GetAttacker()->IsPlayer() )
-		{
-			if ( !g_pGameRules->FPlayerCanTakeDamage( this, inputInfo.GetAttacker(), inputInfo ) )
-				return;
-		}
-	}
-
-	// Save this bone for the ragdoll.
-	m_nForceBone = ptr->physicsbone;
-
-	SetLastHitGroup( ptr->hitgroup );
-
-	// Ignore hitboxes for all weapons except the sniper rifle
-	CTakeDamageInfo info = inputInfo;
-
-	// Since this code only runs on the server, make sure it shows the tempents it creates.
-	CDisablePredictionFiltering disabler;
-
-	// This does smaller splotches on the guy and splats blood on the world.
-	TraceBleed( info.GetDamage(), vecDir, ptr, info.GetDamageType() );
-
-	AddMultiDamage( info, this );
-}
-
-void CSDKPlayer::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
-{
-	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
-
-	// Setup the SDK specific callback.
-	IPhysicsPlayerController *pPlayerController = GetPhysicsController();
-	if ( pPlayerController )
-		pPlayerController->SetEventHandler( &playerCallback );
-}
-
-void CSDKPlayer::FireBullets ( const FireBulletsInfo_t &info )
-{
-	// Move other players back to history positions based on local player's lag
-	lagcompensation->StartLagCompensation( this, this->GetCurrentCommand() );
-
-	FireBulletsInfo_t modinfo = info;
-
-	CWeaponSDKBase *pWeapon = dynamic_cast<CWeaponSDKBase *>( GetActiveWeapon() );
-	if ( pWeapon )
-		modinfo.m_iPlayerDamage = modinfo.m_flDamage = pWeapon->GetSDKWpnData().m_iDamage;
-
-	NoteWeaponFired();
-
-	BaseClass::FireBullets( modinfo );
-
-	// Move other players back to history positions based on local player's lag
-	lagcompensation->FinishLagCompensation( this );
-}
-
 void CSDKPlayer::CreateRagdollEntity()
 {
 	if ( m_hRagdoll )
@@ -1363,80 +1013,6 @@ void CSDKPlayer::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 {
 	m_PlayerAnimState->DoAnimationEvent( event, nData );
 	TE_PlayerAnimEvent( this, event, nData );	// Send to any clients who can see this guy.
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Override setup bones so that is uses the render angles from
-//			the SDK animation state to setup the hitboxes.
-//-----------------------------------------------------------------------------
-void CSDKPlayer::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
-{
-	VPROF_BUDGET( "CSDKPlayer::SetupBones", VPROF_BUDGETGROUP_SERVER_ANIM );
-
-	// Set the mdl cache semaphore.
-	MDLCACHE_CRITICAL_SECTION();
-
-	// Get the studio header.
-	Assert( GetModelPtr() );
-
-	CStudioHdr *pStudioHdr = GetModelPtr( );
-	if ( !pStudioHdr )
-		return;
-
-	Vector pos[MAXSTUDIOBONES];
-	Quaternion q[MAXSTUDIOBONES];
-
-	// Adjust hit boxes based on IK driven offset.
-	Vector adjOrigin = GetAbsOrigin() + Vector( 0, 0, m_flEstIkOffset );
-
-	// FIXME: pass this into Studio_BuildMatrices to skip transforms
-	CBoneBitList boneComputed;
-	if ( m_pIk )
-	{
-		m_iIKCounter++;
-		m_pIk->Init( pStudioHdr, GetAbsAngles(), adjOrigin, gpGlobals->curtime, m_iIKCounter, boneMask );
-		GetSkeleton( pStudioHdr, pos, q, boneMask );
-
-		m_pIk->UpdateTargets( pos, q, pBoneToWorld, boneComputed );
-		CalculateIKLocks( gpGlobals->curtime );
-		m_pIk->SolveDependencies( pos, q, pBoneToWorld, boneComputed );
-	}
-	else
-	{
-		GetSkeleton( pStudioHdr, pos, q, boneMask );
-	}
-
-	CBaseAnimating *pParent = dynamic_cast< CBaseAnimating* >( GetMoveParent() );
-	if ( pParent )
-	{
-		// We're doing bone merging, so do special stuff here.
-		CBoneCache *pParentCache = pParent->GetBoneCache();
-		if ( pParentCache )
-		{
-			BuildMatricesWithBoneMerge( 
-				pStudioHdr, 
-				m_PlayerAnimState->GetRenderAngles(),
-				adjOrigin, 
-				pos, 
-				q, 
-				pBoneToWorld, 
-				pParent, 
-				pParentCache );
-
-			return;
-		}
-	}
-
-	Studio_BuildMatrices( 
-		pStudioHdr, 
-		m_PlayerAnimState->GetRenderAngles(),
-		adjOrigin, 
-		pos, 
-		q, 
-		-1,
-		GetModelScale(),
-		pBoneToWorld,
-		boneMask );
 }
 
 CWeaponSDKBase* CSDKPlayer::GetActiveSDKWeapon() const
@@ -1579,6 +1155,11 @@ bool CSDKPlayer::ClientCommand( const CCommand &args )
 	else if ( FStrEq( pcmd, "menuclosed" ) )
 	{
 		SetClassMenuOpen( false );
+		return true;
+	}
+	else if ( FStrEq( pcmd, "drop" ) )
+	{
+		ThrowActiveWeapon();
 		return true;
 	}
 
@@ -1762,6 +1343,112 @@ bool CSDKPlayer::HandleCommand_JoinClass( int iClass )
 		State_Transition( STATE_ACTIVE ); //Done picking stuff and we're in the pickingclass state, or dead, so we can spawn now.
 
 	return true;
+}
+
+void CSDKPlayer::HandleThrowGrenade(void)
+{
+	if ((m_afButtonPressed & IN_GRENADE1) && !WantThrow /*&& HasAnyAmmoOfType(1)*/ && HasWeapons())
+	{
+		timeholster = NULL;
+		timethrow = NULL;
+		timedeploy = NULL;
+		WantThrow = true;
+	}
+
+	ThrowGrenade();
+}
+
+void CSDKPlayer::ThrowGrenade(void)
+{
+	if (WantThrow)
+	{
+		CBaseViewModel *vm = GetViewModel(0);
+		CBaseViewModel *vm2 = GetViewModel(1);
+
+		//2nd viewmodel creation
+		if (!vm2)
+		{
+			CreateViewModel(1);
+			vm2 = GetViewModel(1);
+		}
+
+		//HOLSTER SEQUENCING
+		int sequence1 = vm->SelectWeightedSequence(ACT_VM_HOLSTER);
+		if ((timeholster == NULL) && (sequence1 >= 0))
+		{
+			vm->SendViewModelMatchingSequence(sequence1);
+			timeholster = (gpGlobals->curtime + vm->SequenceDuration(sequence1) + 0.5f);
+		}
+
+		//THROW SEQUENCING
+		if ((timeholster < gpGlobals->curtime) && (timeholster != NULL))
+		{
+			vm->AddEffects(EF_NODRAW);
+			vm2->SetWeaponModel("models/weapons/v_eq_fraggrenade.mdl", NULL);
+
+
+			int sequence2 = vm2->SelectWeightedSequence(ACT_VM_THROW);
+			if ((timethrow == NULL) && (sequence2 >= 0))
+			{
+				vm2->SendViewModelMatchingSequence(sequence2);
+				timethrow = (gpGlobals->curtime + vm2->SequenceDuration(sequence2));
+				CreateGrenade();
+			}
+		}
+
+		if ((timethrow < gpGlobals->curtime) && (timethrow != NULL))
+		{
+			vm2->SetWeaponModel(NULL, NULL);
+			UTIL_RemoveImmediate(vm2);
+			vm->RemoveEffects(EF_NODRAW);
+			int sequence3 = vm->SelectWeightedSequence(ACT_VM_DRAW);
+			if ((timedeploy == NULL) && (sequence3 >= 0))
+			{
+				vm->SendViewModelMatchingSequence(sequence3);
+				timedeploy = (gpGlobals->curtime + vm->SequenceDuration(sequence3));
+			}
+		}
+
+		if ((timedeploy < gpGlobals->curtime) && (timedeploy != NULL))
+		{
+			//Successfully Thrown A Grenade! Decrement ammo
+			//RemoveAmmo(1, 1);
+			WantThrow = false;
+		}
+	}
+}
+
+void CSDKPlayer::CreateGrenade(void)
+{
+	Vector	vecEye = EyePosition();
+	Vector	vForward, vRight;
+
+	EyeVectors(&vForward, &vRight, NULL);
+	Vector vecSrc = vecEye + vForward * 18.0f + vRight * 8.0f;
+	trace_t tr;
+
+	UTIL_TraceHull(vecEye, vecSrc, -Vector(4.0f + 2, 4.0f + 2, 4.0f + 2), Vector(4.0f + 2, 4.0f + 2, 4.0f + 2),
+		PhysicsSolidMaskForEntity(), this, GetCollisionGroup(), &tr);
+
+	if (tr.DidHit())
+	{
+		vecSrc = tr.endpos;
+	}
+	vForward[2] += 0.1f;
+
+	Vector vecThrow;
+	GetVelocity(&vecThrow, NULL);
+	vecThrow += vForward * 1200;
+
+	CTFCProjectileBase* pBolt = CTFCProjectileBase::Create("tf_proj_nail", vecSrc, EyeAngles(), this, Vector(0, 0, 0), 8.0f);
+	if (GetWaterLevel() == 3)
+		pBolt->SetAbsVelocity(GetAutoaimVector(0) * 1500);
+	else
+		pBolt->SetAbsVelocity(GetAutoaimVector(0) * 1500);
+	
+	//(vecSrc, vec3_angle, vecThrow, AngularImpulse(600, random->RandomInt(-1200, 1200), 0), this, 3.0f, false);
+
+	gamestats->Event_WeaponFired(this, true, GetClassname());
 }
 
 void CSDKPlayer::ShowClassSelectMenu()
@@ -2236,11 +1923,6 @@ void CSDKPlayer::SetMaxHealth( int MaxValue )
 	m_iMaxHealth = MaxValue; 
 }
 
-void CSDKPlayer::AdjustHealth( int HealthValue ) 
-{
-	m_iHealth = m_iMaxHealth = HealthValue;
-}
-
 void CSDKPlayer::IncrementArmorValue( int nCount, int nMaxValue )
 { 
 	nMaxValue = m_MaxArmorValue;
@@ -2259,9 +1941,4 @@ void CSDKPlayer::SetArmorValue( int value )
 void CSDKPlayer::SetMaxArmorValue( int MaxArmorValue )
 {
 	m_MaxArmorValue = MaxArmorValue;
-}
-
-void CSDKPlayer::AdjustArmor( int ArmorValue )
-{
-	m_ArmorValue = m_MaxArmorValue = ArmorValue;
 }

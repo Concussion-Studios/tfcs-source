@@ -228,8 +228,6 @@ enum CastVote
 //Since this is decided by the gamerules (and it can be whatever number as long as its less than MAX_PLAYERS).
 #if defined( CSTRIKE_DLL )
 	#define MAX_PLAYERS				65  // Absolute max players supported
-#elif SDK_DLL
-	#define MAX_PLAYERS				SDK_MAX_PLAYERS  // Absolute max players supported
 #else
 	#define MAX_PLAYERS				33  // Absolute max players supported
 #endif

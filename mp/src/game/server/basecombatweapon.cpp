@@ -31,10 +31,6 @@
 	#include "hl2mp_gamerules.h"
 #endif
 
-#ifdef SDK_DLL
-#include "sdk_gamerules.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -373,24 +369,24 @@ bool CBaseCombatWeapon::WeaponLOSCondition( const Vector &ownerPos, const Vector
 //-----------------------------------------------------------------------------
 int CBaseCombatWeapon::WeaponRangeAttack1Condition( float flDot, float flDist )
 {
-	if ( UsesPrimaryAmmo() && !HasPrimaryAmmo() )
-	{
-		return COND_NO_PRIMARY_AMMO;
-	}
-	else if ( flDist < m_fMinRange1) 
-	{
-		return COND_TOO_CLOSE_TO_ATTACK;
-	}
-	else if (flDist > m_fMaxRange1) 
-	{
-		return COND_TOO_FAR_TO_ATTACK;
-	}
-	else if (flDot < 0.5) 	// UNDONE: Why check this here? Isn't the AI checking this already?
-	{
-		return COND_NOT_FACING_ATTACK;
-	}
+ 	if ( UsesPrimaryAmmo() && !HasPrimaryAmmo() )
+ 	{
+ 		return COND_NO_PRIMARY_AMMO;
+ 	}
+ 	else if ( flDist < m_fMinRange1) 
+ 	{
+ 		return COND_TOO_CLOSE_TO_ATTACK;
+ 	}
+ 	else if (flDist > m_fMaxRange1) 
+ 	{
+ 		return COND_TOO_FAR_TO_ATTACK;
+ 	}
+ 	else if (flDot < 0.5) 	// UNDONE: Why check this here? Isn't the AI checking this already?
+ 	{
+ 		return COND_NOT_FACING_ATTACK;
+ 	}
 
-	return COND_CAN_RANGE_ATTACK1;
+ 	return COND_CAN_RANGE_ATTACK1;
 }
 
 //-----------------------------------------------------------------------------
@@ -587,14 +583,6 @@ void CBaseCombatWeapon::Materialize( void )
 		SetMoveType( MOVETYPE_VPHYSICS );
 
 		HL2MPRules()->AddLevelDesignerPlacedObject( this );
-	}
-#elif SDK_DLL
-	if ( HasSpawnFlags( SF_NORESPAWN ) == false )
-	{
-		VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags() | FSOLID_TRIGGER, false );
-		SetMoveType( MOVETYPE_VPHYSICS );
-
-		SDKGameRules()->AddLevelDesignerPlacedObject( this );
 	}
 #else
 	SetSolid( SOLID_BBOX );

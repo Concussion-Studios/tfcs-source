@@ -238,7 +238,7 @@ void CHudVoiceStatus::OnThink( void )
 				//=============================================================================
 
 				activeSpeaker.pAvatar = new CAvatarImage();
-#ifdef SDK_DLL //CSTRIKE_DLL
+#ifdef CSTRIKE_DLL
 				// [jpaquin] this allows counter strike to display default avatars for bots.  It can't be a virtual function on
 				// C_BasePlayer because there would be no way to get a game specific default image if the player is null.
 				extern vgui::IImage* GetDefaultAvatarImage( C_BasePlayer *pPlayer );
@@ -323,7 +323,7 @@ bool CHudVoiceStatus::ShouldDraw()
 
 void CHudVoiceStatus::Paint()
 {
-	if( !m_pVoiceIcon )
+   	if( !m_pVoiceIcon )
 		return;
 	
 	int x, y, w, h;

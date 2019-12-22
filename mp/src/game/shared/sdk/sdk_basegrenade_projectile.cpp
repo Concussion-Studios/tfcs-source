@@ -11,21 +11,17 @@ extern ConVar sv_gravity;
 
 
 #ifdef CLIENT_DLL
+
 	#include "c_sdk_player.h"
+
 #else
-	#include "sdk_player.h"
+
 	#include "soundent.h"
-	#include "te_effect_dispatch.h"
-BEGIN_DATADESC( CBaseGrenadeProjectile )
-	// Fields
-	DEFINE_FIELD( m_pMainGlow, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_pGlowTrail, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_flNextBlipTime, FIELD_TIME ),
-	DEFINE_FIELD( m_inSolid, FIELD_BOOLEAN ),
-	
-	// Function Pointers
-	DEFINE_THINKFUNC( DangerSoundThink ),
-END_DATADESC()
+
+	BEGIN_DATADESC( CBaseGrenadeProjectile )
+		DEFINE_THINKFUNC( DangerSoundThink ),
+	END_DATADESC()
+
 #endif
 
 const float GRENADE_COEFFICIENT_OF_RESTITUTION = 0.2f;
@@ -34,16 +30,16 @@ const float GRENADE_COEFFICIENT_OF_RESTITUTION = 0.2f;
 IMPLEMENT_NETWORKCLASS_ALIASED( BaseGrenadeProjectile, DT_BaseGrenadeProjectile )
 
 BEGIN_NETWORK_TABLE( CBaseGrenadeProjectile, DT_BaseGrenadeProjectile )
-#ifdef CLIENT_DLL
-	RecvPropVector( RECVINFO( m_vInitialVelocity ) )
-#else
-	SendPropVector( SENDINFO( m_vInitialVelocity ), 
-		20,		// nbits
-		0,		// flags
-		-3000,	// low value
-		3000	// high value
-		)
-#endif
+	#ifdef CLIENT_DLL
+		RecvPropVector( RECVINFO( m_vInitialVelocity ) )
+	#else
+		SendPropVector( SENDINFO( m_vInitialVelocity ), 
+			20,		// nbits
+			0,		// flags
+			-3000,	// low value
+			3000	// high value
+			)
+	#endif
 END_NETWORK_TABLE()
 
 
@@ -98,20 +94,11 @@ END_NETWORK_TABLE()
 		BaseClass::Spawn();
 	}
 
-	void CBaseGrenadeProjectile::Precache()
-	{
-		BaseClass::Precache();
-	}
-
 #else
 
 	void CBaseGrenadeProjectile::Spawn( void )
 	{
 		BaseClass::Spawn();
-
-		Precache( );
-
-		SetModel( GetGrenadeModel() );
 
 		SetSolidFlags( FSOLID_NOT_STANDABLE );
 		SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
@@ -122,20 +109,10 @@ END_NETWORK_TABLE()
 		SetCollisionGroup( COLLISION_GROUP_WEAPON );
 		CreateVPhysics();
 
-		BlipSound();
-		m_flNextBlipTime = gpGlobals->curtime + GRENADE_BLIP_FREQUENCY;
+		//Tony; bit of a hack for the sdk, the CS grenade is really heavy for some reason.
+		if ( VPhysicsGetObject() )
+			VPhysicsGetObject()->SetMass( 5 );
 	}
-
-	void CBaseGrenadeProjectile::Precache()
-	{
-		BaseClass::Precache();
-
-		PrecacheModel( GetGrenadeModel() );
-		PrecacheScriptSound( GetBlipSound() );
-		PrecacheModel( "sprites/light_glow02.vmt" );
-		PrecacheModel( "sprites/laser.vmt" );
-	}
-
 	void CBaseGrenadeProjectile::SetVelocity( const Vector &velocity, const AngularImpulse &angVelocity )
 	{
 		IPhysicsObject *pPhysicsObject = VPhysicsGetObject();
@@ -144,7 +121,6 @@ END_NETWORK_TABLE()
 			pPhysicsObject->AddVelocity( &velocity, &angVelocity );
 		}
 	}
-
 // this will hit only things that are in newCollisionGroup, but NOT in collisionGroupAlreadyChecked
 	class CTraceFilterCollisionGroupDelta : public CTraceFilterEntitiesOnly
 	{
@@ -227,88 +203,11 @@ END_NETWORK_TABLE()
 			pPhysics->SetVelocity( &vel, &angVel );
 		}
 	}
-
 	bool CBaseGrenadeProjectile::CreateVPhysics()
 	{
 		// Create the object in the physics system
 		VPhysicsInitNormal( SOLID_BBOX, 0, false );
 		return true;
-	}
-
-	void CBaseGrenadeProjectile::CreateEffects( void )
-	{
-		CSDKPlayer *pPlayer = dynamic_cast<CSDKPlayer*>( GetThrower() );
-		if ( !pPlayer )
-			return;
-
-		static int r;
-		static int g;
-		static int b;
-
-		switch ( pPlayer->GetTeamNumber() )
-		{
-			case SDK_TEAM_RED:
-				r = 255;
-				g = 64;
-				b = 64;
-				break;
-			case SDK_TEAM_BLUE:
-				r = 153;
-				g = 204;
-				b = 255;
-				break;
-			case SDK_TEAM_GREEN:
-				r = 153;
-				g = 255;
-				b = 153;
-				break;
-			case SDK_TEAM_YELLOW:
-				r = 255;
-				g = 178;
-				b = 0;
-				break;
-			default:
-				break;
-		}
-
-		// Start up the eye glow
-		m_pMainGlow = CSprite::SpriteCreate( "sprites/light_glow02.vmt", GetLocalOrigin(), false );
-
-		int	nAttachment = LookupAttachment( "fuse" );
-
-		if ( m_pMainGlow != NULL )
-		{
-			m_pMainGlow->FollowEntity( this );
-			m_pMainGlow->SetAttachment( this, nAttachment );
-			m_pMainGlow->SetTransparency( kRenderGlow, r, g, b, 200, kRenderFxNoDissipation );
-			m_pMainGlow->SetScale( 0.2f );
-			m_pMainGlow->SetGlowProxySize( 4.0f );
-		}
-
-		// Start up the eye trail
-		m_pGlowTrail = CSpriteTrail::SpriteTrailCreate( "sprites/laser.vmt", GetLocalOrigin(), false );
-
-		if ( m_pGlowTrail != NULL )
-		{
-			m_pGlowTrail->FollowEntity( this );
-			m_pGlowTrail->SetAttachment( this, nAttachment );
-			m_pGlowTrail->SetTransparency( kRenderTransAdd, r, g, b, 255, kRenderFxNone );
-			m_pGlowTrail->SetStartWidth( 8.0f );
-			m_pGlowTrail->SetEndWidth( 1.0f );
-			m_pGlowTrail->SetLifeTime( 0.5f );
-		}
-	}
-
-	int CBaseGrenadeProjectile::OnTakeDamage( const CTakeDamageInfo &inputInfo )
-	{
-		// Manually apply vphysics because BaseCombatCharacter takedamage doesn't call back to CBaseEntity OnTakeDamage
-		VPhysicsTakeDamage( inputInfo );
-
-		// Grenades only suffer blast damage and burn damage.
-		if( !( inputInfo.GetDamageType() & ( DMG_BLAST | DMG_BURN ) ) )
-			return 0;
-
-		return BaseClass::OnTakeDamage( inputInfo );
 	}
 
 	void CBaseGrenadeProjectile::DangerSoundThink( void )
@@ -325,13 +224,6 @@ END_NETWORK_TABLE()
 			return;
 		}
 
-		if( gpGlobals->curtime > m_flNextBlipTime )
-		{
-			BlipSound();
-		
-			m_flNextBlipTime = gpGlobals->curtime + GRENADE_BLIP_FREQUENCY;
-		}
-
 		CSoundEnt::InsertSound ( SOUND_DANGER, GetAbsOrigin() + GetAbsVelocity() * 0.5, GetAbsVelocity().Length( ), 0.2 );
 
 		SetNextThink( gpGlobals->curtime + 0.2 );
@@ -346,8 +238,6 @@ END_NETWORK_TABLE()
 	void CBaseGrenadeProjectile::SetDetonateTimerLength( float timer )
 	{
 		m_flDetonateTime = gpGlobals->curtime + timer;
-
-		CreateEffects();
 	}
 
 	void CBaseGrenadeProjectile::ResolveFlyCollisionCustom( trace_t &trace, Vector &vecVelocity )
@@ -474,48 +364,4 @@ END_NETWORK_TABLE()
 		m_vInitialVelocity = velocity;
 	}
 
-	void CBaseGrenadeProjectile::Splash()
-	{
-		Vector centerPoint = GetAbsOrigin();
-		Vector normal( 0, 0, 1 );
-
-		// Find our water surface by tracing up till we're out of the water
-		trace_t tr;
-		Vector vecTrace( 0, 0, MAX_WATER_SURFACE_DISTANCE );
-		UTIL_TraceLine( centerPoint, centerPoint + vecTrace, MASK_WATER, NULL, COLLISION_GROUP_NONE, &tr );
-
-		// If we didn't start in water, we're above it
-		if ( tr.startsolid == false )
-		{
-			// Look downward to find the surface
-			vecTrace.Init( 0, 0, -MAX_WATER_SURFACE_DISTANCE );
-			UTIL_TraceLine( centerPoint, centerPoint + vecTrace, MASK_WATER, NULL, COLLISION_GROUP_NONE, &tr );
-
-			// If we hit it, setup the explosion
-			if ( tr.fraction < 1.0f )
-				centerPoint = tr.endpos;
-			else
-				//NOTENOTE: We somehow got into a splash without being near water?
-				Assert( 0 );
-		}
-		else if ( tr.fractionleftsolid )
-		{
-			// Otherwise we came out of the water at this point
-			centerPoint = centerPoint + (vecTrace * tr.fractionleftsolid);
-		}
-		else
-		{
-			// Use default values, we're really deep
-		}
-
-		CEffectData	data;
-		data.m_vOrigin = centerPoint;
-		data.m_vNormal = normal;
-		data.m_flScale = random->RandomFloat( 1.0f, 2.0f );
-
-		if ( GetWaterType() & CONTENTS_SLIME )
-			data.m_fFlags |= FX_WATER_IN_SLIME;
-
-		DispatchEffect( "gunshotsplash", data );
-	}
 #endif

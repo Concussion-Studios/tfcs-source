@@ -27,11 +27,11 @@ public:
 	CTFCProjectileBaseRockets();
 	~CTFCProjectileBaseRockets();
 	
-	virtual void Spawn( void );
-	virtual void Precache( void );
-	virtual void RocketTouch( CBaseEntity *pOther );
-	virtual void Explode( void );
-	virtual void Fire( void );
+	void Spawn( void );
+	void Precache( void );
+	void RocketTouch( CBaseEntity *pOther );
+	void Explode( void );
+	void Fire( void );
 	
 	virtual float GetDamage() { return m_flDamage; }
 	virtual void SetDamage(float flDamage) { m_flDamage = flDamage; }
@@ -40,7 +40,7 @@ public:
 
 	static CTFCProjectileBaseRockets *Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner );	
 
-	virtual void SetupInitialTransmittedGrenadeVelocity( const Vector &velocity );
+	void SetupInitialTransmittedGrenadeVelocity( const Vector &velocity );
 
 	//Tony; by default projectiles don't have one, so make sure derived weapons do!!
 	virtual SDKWeaponID GetWeaponID( void ) const {	return SDK_WEAPON_NONE; }
@@ -49,9 +49,9 @@ protected:
 	virtual void DoExplosion();	
 
 	// Creates the smoke trail
-	virtual void CreateSmokeTrail( void );
+	void CreateSmokeTrail( void );
 
-	virtual void FlyThink( void );
+	void FlyThink( void );
 
 	CHandle<SmokeTrail>	m_hRocketTrail;
 	float m_flDamage;

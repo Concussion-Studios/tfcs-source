@@ -37,6 +37,22 @@ void CTFCViewRender::Init()
 
 void CTFCViewRender::SetupRenderTargets()
 {
+	ITexture *depthOld = materials->FindTexture( "_rt_ResolvedFullFrameDepth", TEXTURE_GROUP_RENDER_TARGET );
+	static int flags = TEXTUREFLAGS_NOMIP | TEXTUREFLAGS_NOLOD | TEXTUREFLAGS_RENDERTARGET;
+	if ( depthOld )
+		flags = depthOld->GetFlags();
+
+	int iW, iH;
+	materials->GetBackBufferDimensions( iW, iH );
+	materials->BeginRenderTargetAllocation();
+	materials->CreateNamedRenderTargetTextureEx(
+			"_rt_ResolvedFullFrameDepth_TFC",
+			iW, iH, RT_SIZE_NO_CHANGE,
+			IMAGE_FORMAT_RGBA16161616F,
+			MATERIAL_RT_DEPTH_NONE,
+			flags,
+			0);
+	materials->EndRenderTargetAllocation();
 }
 
 void CTFCViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw ) 

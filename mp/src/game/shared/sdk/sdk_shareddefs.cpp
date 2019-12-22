@@ -6,14 +6,6 @@
 
 #include "cbase.h"
 #include "weapon_sdkbase.h"
-#include "KeyValues.h"
-#include "takedamageinfo.h"
-#include "sdk_gamerules.h"
-#if defined( CLIENT_DLL )
-	#include "c_team.h"
-#else
-	#include "team.h"
-#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -60,7 +52,7 @@ const char *pszGameModeNames[] =
 	"Undefined",			// GAMEMODE_UNDEFINED : #GameMode_Undefined
 	"Capture The Flag",		// GAMEMODE_CTF : #GameMode_CTF
 	"Control Point",		// GAMEMODE_CP : #GameMode_CP
-	"Territorial Control",	// GAMEMODE_TC : #GameMode_TC
+	"Territorial Control",		// GAMEMODE_TC : #GameMode_TC
 	"Atack & Defend",		// GAMEMODE_AD : #GameMode_AD
 	"Player Escort",		// GAMEMODE_ESC : #GameMode_ESC
 	"Team DeathMatch",		// GAMEMODE_TDM : #GameMode_TDM
@@ -103,58 +95,56 @@ const char *pszPossibleGibModels[] =
 	NULL
 };
 
+// ----------------------------------------------------------------------------- //
 // Global Weapon Definitions
+// ----------------------------------------------------------------------------- //
+
+//--------------------------------------------------------------------------------------------------------
 static const char * s_WeaponAliasInfo[] = 
 {
-	"none",							// WEAPON_NONE
+	"none",				// WEAPON_NONE
 
-	"tranq",						// WEAPON_TRANQ
-	"shotgun",						// WEAPON_SHOTGUN
-	"12gauge",						// WEAPON_12GAUGE
-	"nailgun",						// WEAPON_NAILGUN
-	"grenade",						// WEAPON_GRENADE
-	"grenade_concussion",			// WEAPON_GRENADE_CONCUSSION
-	"grenade_emp",					// WEAPON_GRENADE_EMP
-	"grenade_napalm",				// WEAPON_GRENADE_NAPALM
-	"grenade_mirv",					// WEAPON_GRENADE_MIRV
-	"grenade_caltrop",				// WEAPON_GRENADE_CALTROP
-	"grenade_nail",					// WEAPON_GRENADE_NAIL
-	"grenade_hallucination",		// WEAPON_GRENADE_HALLUCINATION
-	"crowbar",						// WEAPON_CROWBAR
-	"umbrella",						// WEAPON_UMBRELLA
-	"supernailgun",					// WEAPON_SUPERNAILGUN
-	"knife",						// WEAPON_KNIFE
-	"wrench",						// WEAPON_WRENCH
-	"ac",							// WEAPON_AC
-	"medkit", 						// WEAPON_MEDKIT
-	"railgun", 						// WEAPON_RAILGUN
-	"rpg", 							// WEAPON_RPG
-	"ic", 							// WEAPON_IC
-	"sniperrifle", 					// WEAPON_SNIPERRIFLE,
-	"autorifle", 					// WEAPON_AUTORIFLE,
-	"grenadelauncher", 				// WEAPON_GRENADELAUNCHER,
-	"pipebomblauncher", 			// WEAPON_PIPEBOMBLAUNCHER,
+	"mp5",				// WEAPON_MP5
+	"shotgun",			// WEAPON_SHOTGUN
+	"12gauge",			// WEAPON_SHOTGUN12GAUGE
+	"nailgun",			// WEAPON_NAILGUN
+	"grenade",			// WEAPON_GRENADE
+	"pistol",			// WEAPON_PISTOL
+	"crowbar",			// WEAPON_CROWBAR
+	"umbrella",			// WEAPON_UMBRELLA
+	"supernailgun",		// WEAPON_SUPERNAILGUN
+	"knife",			// WEAPON_KNIFE
+	"wrench",			// WEAPON_WRENCH
+	"ac",				// WEAPON_AC
+	"medkit", 			// WEAPON_MEDKIT
+	"rpg", 			// WEAPON_RPG
 
-	NULL,							// WEAPON_NONE
+	NULL,				// WEAPON_NONE
 };
 
+//--------------------------------------------------------------------------------------------------------
+//
 // Given an alias, return the associated weapon ID
+//
 int AliasToWeaponID( const char *alias )
 {
-	if ( alias )
+	if (alias)
 	{
-		for( int i = 0; s_WeaponAliasInfo[ i ] != NULL; ++i )
-			if ( !Q_stricmp( s_WeaponAliasInfo[ i ], alias ) )
+		for( int i=0; s_WeaponAliasInfo[i] != NULL; ++i )
+			if (!Q_stricmp( s_WeaponAliasInfo[i], alias ))
 				return i;
 	}
 
 	return WEAPON_NONE;
 }
 
+//--------------------------------------------------------------------------------------------------------
+//
 // Given a weapon ID, return its alias
+//
 const char *WeaponIDToAlias( int id )
 {
-	if ( ( id >= WEAPON_MAX ) || ( id < 0 ) )
+	if ( (id >= WEAPON_MAX) || (id < 0) )
 		return NULL;
 
 	return s_WeaponAliasInfo[id];

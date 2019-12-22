@@ -26,23 +26,6 @@
 	#include "sdk_basegrenade_projectile.h"
 	#include "vote_controller.h"
 	#include "tfc_voteissues.h"
-	#include "eventqueue.h"
-	#include "game.h"
-	#include "items.h"
-	#include "entitylist.h"
-	#include "in_buttons.h"
-	#include <ctype.h>
-	#include "iscorer.h"
-	#include "gameinterface.h"
-
-	// when we are within this close to running out of entities,  items 
-	// marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
-	#define ENTITY_INTOLERANCE	100
-
-	#define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
-
-	ConVar sv_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
-	ConVar sv_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -177,8 +160,6 @@ CSDKGameRules::CSDKGameRules()
 
 	m_bChangelevelDone = false;
 	m_bNextMapVoteDone = false;
-
-	m_hRespawnableItemsAndWeapons.RemoveAll();
 
 	m_iSpawnPointCount_Blue = 0;
 	m_iSpawnPointCount_Red = 0;
@@ -819,8 +800,13 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 
 		if( playerclass != PLAYERCLASS_UNDEFINED )
 		{
+			//Assert( PLAYERCLASS_UNDEFINED < playerclass && playerclass < NUM_PLAYERCLASSES );
+
 			CSDKTeam *pTeam = GetGlobalSDKTeam( team );
 			const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( playerclass );
+
+			//Anthony: We don't care about if the classinfo is a team!
+			//Assert( pClassInfo.m_iTeam == team );
 
 			pPlayer->SetModel( pClassInfo.m_szPlayerModel );
 			pPlayer->SetHitboxSet( 0 );
@@ -829,6 +815,26 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			int bufsize = sizeof(buf);
 
 			//Give weapons
+
+			// Primary weapon
+			Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iPrimaryWeapon) );
+			CBaseEntity *pPrimaryWpn = pPlayer->GiveNamedItem( buf );
+			Assert( pPrimaryWpn );
+
+			// Secondary weapon
+			CBaseEntity *pSecondaryWpn = NULL;
+			if ( pClassInfo.m_iSecondaryWeapon != WEAPON_NONE )
+			{
+				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iSecondaryWeapon) );
+				pSecondaryWpn = pPlayer->GiveNamedItem( buf );
+			}
+
+			// Melee weapon
+			if ( pClassInfo.m_iMeleeWeapon )
+			{
+				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iMeleeWeapon) );
+				pPlayer->GiveNamedItem( buf );
+			}
 
 			// First weapon
 			CBaseEntity *pWeapon1 = NULL;
@@ -912,7 +918,28 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 
 			CWeaponSDKBase *pWpn = NULL;
 
-			// Give Ammo
+			// Primary Ammo
+			pWpn = dynamic_cast<CWeaponSDKBase *>(pPrimaryWpn);
+
+			if( pWpn )
+			{
+				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+				pPlayer->GiveAmmo( iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1 );
+			}
+
+			// Secondary Ammo
+			if ( pSecondaryWpn )
+			{
+				pWpn = dynamic_cast<CWeaponSDKBase *>(pSecondaryWpn);
+
+				if( pWpn )
+				{
+					int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+					int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+					pPlayer->GiveAmmo( iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1 );
+				}
+			}
 
 			// Weapon One Ammo
 			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon1);
@@ -1019,10 +1046,14 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			{
 				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType1) );
 				CBaseEntity *pGrenade = pPlayer->GiveNamedItem( buf );
-				Assert( pGrenade );		
+				Assert( pGrenade );
+				
 				pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade);
+
 				if( pWpn )
+				{
 					pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType1 - 1, pWpn->GetSDKWpnData().szAmmo1 );
+				}
 			}
 
 			// Grenade Type 2
@@ -1030,21 +1061,33 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			{
 				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType2) );
 				CBaseEntity *pGrenade2 = pPlayer->GiveNamedItem( buf );
-				Assert( pGrenade2 );	
+				Assert( pGrenade2 );
+				
 				pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade2);
+
 				if( pWpn )
+				{
 					pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType2 - 1, pWpn->GetSDKWpnData().szAmmo1 );
+				}
 			}
 
-			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pWeapon1 );
-			pPlayer->AdjustArmor( pClassInfo.m_iMaxArmor );
-			pPlayer->AdjustHealth( pClassInfo.m_iMaxHealth );
-			pPlayer->SetMaxSpeed( pClassInfo.m_flMaxSpeed );
+			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pPrimaryWpn );
+
+			//Armor
+			pPlayer->SetMaxArmorValue( pClassInfo.m_iMaxArmor );
+			pPlayer->SetArmorValue( pClassInfo.m_iArmor );
+
+			// Health
+			pPlayer->SetMaxHealth( pClassInfo.m_iMaxHealth );
+			pPlayer->SetHealth( pClassInfo.m_iHealth );
+
 		}
 		else
 		{
-			Assert( !"Player spawning with PLAYERCLASS_UNDEFINED" );
+			pPlayer->SetModel( SDK_PLAYER_MODEL );
 		}
+
+		pPlayer->SetMaxSpeed( 600 );
 	}
 }
 
@@ -1291,7 +1334,7 @@ int CSDKGameRules::SelectDefaultTeam()
 
 	CSDKTeam *pBlue = GetGlobalSDKTeam(SDK_TEAM_BLUE);
 	CSDKTeam *pRed = GetGlobalSDKTeam(SDK_TEAM_RED);
-	CSDKTeam *pYellow = GetGlobalSDKTeam(SDK_TEAM_YELLOW);
+	CSDKTeam *pYellow = GetGlobalSDKTeam(SDK_TEAM_GREEN);
 	CSDKTeam *pGreen = GetGlobalSDKTeam(SDK_TEAM_GREEN);
 
 	int iNumBlue = pBlue->GetNumPlayers();
@@ -1630,204 +1673,8 @@ void CSDKGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &in
 		gameeventmanager->FireEvent( event );
 	}		
 }
-
-
-CItem* IsManagedObjectAnItem( CBaseEntity *pObject )
-{
-	return dynamic_cast< CItem*>( pObject );
-}
-
-CWeaponSDKBase* IsManagedObjectAWeapon( CBaseEntity *pObject )
-{
-	return dynamic_cast< CWeaponSDKBase*>( pObject );
-}
-
-bool GetObjectsOriginalParameters( CBaseEntity *pObject, Vector &vOriginalOrigin, QAngle &vOriginalAngles )
-{
-	if ( CItem *pItem = IsManagedObjectAnItem( pObject ) )
-	{
-		if ( pItem->m_flNextResetCheckTime > gpGlobals->curtime )
-			 return false;
-		
-		vOriginalOrigin = pItem->GetOriginalSpawnOrigin();
-		vOriginalAngles = pItem->GetOriginalSpawnAngles();
-
-		pItem->m_flNextResetCheckTime = gpGlobals->curtime + sv_item_respawn_time.GetFloat();
-		return true;
-	}
-	else if ( CWeaponSDKBase *pWeapon = IsManagedObjectAWeapon( pObject )) 
-	{
-		if ( pWeapon->m_flNextResetCheckTime > gpGlobals->curtime )
-			 return false;
-
-		vOriginalOrigin = pWeapon->GetOriginalSpawnOrigin();
-		vOriginalAngles = pWeapon->GetOriginalSpawnAngles();
-
-		pWeapon->m_flNextResetCheckTime = gpGlobals->curtime + sv_weapon_respawn_time.GetFloat();
-		return true;
-	}
-
-	return false;
-}
-
-void CSDKGameRules::ManageObjectRelocation( void )
-{
-	int iTotal = m_hRespawnableItemsAndWeapons.Count();
-
-	if ( iTotal > 0 )
-	{
-		for ( int i = 0; i < iTotal; i++ )
-		{
-			CBaseEntity *pObject = m_hRespawnableItemsAndWeapons[i].Get();
-			
-			if ( pObject )
-			{
-				Vector vSpawOrigin;
-				QAngle vSpawnAngles;
-
-				if ( GetObjectsOriginalParameters( pObject, vSpawOrigin, vSpawnAngles ) == true )
-				{
-					float flDistanceFromSpawn = (pObject->GetAbsOrigin() - vSpawOrigin ).Length();
-
-					if ( flDistanceFromSpawn > WEAPON_MAX_DISTANCE_FROM_SPAWN )
-					{
-						bool shouldReset = false;
-						IPhysicsObject *pPhysics = pObject->VPhysicsGetObject();
-
-						if ( pPhysics )
-							shouldReset = pPhysics->IsAsleep();
-						else
-							shouldReset = (pObject->GetFlags() & FL_ONGROUND) ? true : false;
-
-						if ( shouldReset )
-						{
-							pObject->Teleport( &vSpawOrigin, &vSpawnAngles, NULL );
-							pObject->EmitSound( "BaseCombatWeapon.WeaponMaterialize" );
-
-							IPhysicsObject *pPhys = pObject->VPhysicsGetObject();
-							if ( pPhys )
-								pPhys->Wake();
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-//=========================================================
-//AddLevelDesignerPlacedWeapon
-//=========================================================
-void CSDKGameRules::AddLevelDesignerPlacedObject( CBaseEntity *pEntity )
-{
-	if ( m_hRespawnableItemsAndWeapons.Find( pEntity ) == -1 )
-		m_hRespawnableItemsAndWeapons.AddToTail( pEntity );
-}
-
-//=========================================================
-//RemoveLevelDesignerPlacedWeapon
-//=========================================================
-void CSDKGameRules::RemoveLevelDesignerPlacedObject( CBaseEntity *pEntity )
-{
-	if ( m_hRespawnableItemsAndWeapons.Find( pEntity ) != -1 )
-		m_hRespawnableItemsAndWeapons.FindAndRemove( pEntity );
-}
-
-//=========================================================
-// Where should this item respawn?
-// Some game variations may choose to randomize spawn locations
-//=========================================================
-Vector CSDKGameRules::VecItemRespawnSpot( CItem *pItem )
-{
-	return pItem->GetOriginalSpawnOrigin();
-}
-
-//=========================================================
-// What angles should this item use to respawn?
-//=========================================================
-QAngle CSDKGameRules::VecItemRespawnAngles( CItem *pItem )
-{
-	return pItem->GetOriginalSpawnAngles();
-}
-
-//=========================================================
-// At what time in the future may this Item respawn?
-//=========================================================
-float CSDKGameRules::FlItemRespawnTime( CItem *pItem )
-{
-	return sv_item_respawn_time.GetFloat();
-}
 #endif
 
-
-//=========================================================
-// FlWeaponRespawnTime - what is the time in the future
-// at which this weapon may spawn?
-//=========================================================
-float CSDKGameRules::FlWeaponRespawnTime( CBaseCombatWeapon *pWeapon )
-{
-#ifndef CLIENT_DLL
-	if ( weaponstay.GetInt() > 0 )
-	{
-		// make sure it's only certain weapons
-		if ( !(pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD) )
-			return 0;		// weapon respawns almost instantly
-	}
-
-	return sv_weapon_respawn_time.GetFloat();
-#endif
-
-	return 0;		// weapon respawns almost instantly
-}
-
-//=========================================================
-// FlWeaponRespawnTime - Returns 0 if the weapon can respawn 
-// now,  otherwise it returns the time at which it can try
-// to spawn again.
-//=========================================================
-float CSDKGameRules::FlWeaponTryRespawn( CBaseCombatWeapon *pWeapon )
-{
-#ifndef CLIENT_DLL
-	if ( pWeapon && (pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD) )
-	{
-		if ( gEntList.NumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE) )
-			return 0;
-
-		// we're past the entity tolerance level,  so delay the respawn
-		return FlWeaponRespawnTime( pWeapon );
-	}
-#endif
-	return 0;
-}
-
-//=========================================================
-// VecWeaponRespawnSpot - where should this weapon spawn?
-// Some game variations may choose to randomize spawn locations
-//=========================================================
-Vector CSDKGameRules::VecWeaponRespawnSpot( CBaseCombatWeapon *pWeapon )
-{
-#ifndef CLIENT_DLL
-	CWeaponSDKBase *pSDKWeapon = dynamic_cast< CWeaponSDKBase*>( pWeapon );
-	if ( pSDKWeapon )
-		return pSDKWeapon->GetOriginalSpawnOrigin();
-#endif
-	
-	return pWeapon->GetAbsOrigin();
-}
-
-//=========================================================
-// WeaponShouldRespawn - any conditions inhibiting the
-// respawning of this weapon?
-//=========================================================
-int CSDKGameRules::WeaponShouldRespawn( CBaseCombatWeapon *pWeapon )
-{
-#ifndef CLIENT_DLL
-	if ( pWeapon->HasSpawnFlags( SF_NORESPAWN ) )
-		return GR_WEAPON_RESPAWN_NO;
-#endif
-
-	return GR_WEAPON_RESPAWN_YES;
-}
 
 bool CSDKGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 {
@@ -1913,47 +1760,13 @@ CAmmoDef* GetAmmoDef()
 
 			def.AddAmmoType( WeaponIDToAlias(i), DMG_BULLET, TRACER_LINE_AND_WHIZ, 0, 0, 200/*max carry*/, 1, 0 );
 		}
-
-		def.AddAmmoType( "sniper",		DMG_BULLET,													TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "nail",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "shell",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "cell",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "explosive",	DMG_BLAST,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "fireball",	DMG_BLAST | DMG_BURN,										TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "shotgun",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "grenades",	DMG_BLAST,													TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "concussion",	DMG_SONIC | DMG_NEVERGIB,									TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "napalm",		DMG_BURN | DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "emp",			DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,					TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "plasma",		DMG_DISSOLVE | DMG_PLASMA | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 200/*max carry*/,	1, 0 );
-
-		KeyValuesAD pAmmo( "AmmoDefs" );
-		if ( pAmmo->LoadFromFile( filesystem, "scripts/ammo_defs.txt", "MOD" ) )
-		{
-			FOR_EACH_TRUE_SUBKEY( pAmmo, ammo )
-			{
-				const char* name = ammo->GetName();
-
-				int dmgBits = ammo->GetInt( "dmgType" );
-				int tracer = ammo->GetInt( "tracer" );
-				int plr = ammo->GetInt( "plrDmg" );
-				int npc = ammo->GetInt( "npcDmg" );
-				int max = ammo->GetInt( "maxAmmo" );
-
-				float impulse;
-				KeyValues *imp = ammo->FindKey( "BulletImpulse" );
-				if ( imp )
-					impulse = BULLET_IMPULSE( imp->GetFloat( "grains" ), imp->GetFloat( "ftps" ) );
-				else
-					impulse = ammo->GetFloat( "impulse" );
-			
-				int flags = ammo->GetInt( "flags" );
-				int minSplash = ammo->GetInt( "minSplash", 4 );
-				int maxSplash = ammo->GetInt( "maxSplash", 8 );
-				
-				def.AddAmmoType( name, dmgBits, tracer, plr, npc, max, impulse, flags, minSplash, maxSplash );
-			}
-		}
+		def.AddAmmoType("nail", DMG_BULLET, TRACER_LINE_AND_WHIZ, 0, 0, 200/*max carry*/, 1, 0);
+		def.AddAmmoType("shell", DMG_BUCKSHOT, TRACER_NONE, 0, 0, 200/*max carry*/, 1, 0);
+		def.AddAmmoType("cell", DMG_BULLET, TRACER_NONE, 0, 0, 200/*max carry*/, 1, 0);
+		def.AddAmmoType("explosive", DMG_BLAST, TRACER_NONE, 0, 0, 200/*max carry*/, 1, 0);
+		// def.AddAmmoType( BULLET_PLAYER_50AE,		DMG_BULLET, TRACER_LINE, 0, 0, "ammo_50AE_max",		2400, 0, 10, 14 );
+		def.AddAmmoType( "shotgun", DMG_BUCKSHOT, TRACER_NONE, 0, 0,	200/*max carry*/, 1, 0 );
+		def.AddAmmoType( "grenades", DMG_BLAST, TRACER_NONE, 0, 0,	4/*max carry*/, 1, 0 );
 	}
 
 	return &def;

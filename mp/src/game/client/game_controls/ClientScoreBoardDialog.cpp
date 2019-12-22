@@ -332,7 +332,7 @@ void CClientScoreBoardDialog::UpdatePlayerInfo()
 			playerData->SetString("name", newName);
 
 			int itemID = FindItemIDForPlayerIndex( i );
-			int sectionID = gr->GetTeam( i );
+  			int sectionID = gr->GetTeam( i );
 			
 			if ( gr->IsLocalPlayer( i ) )
 			{
@@ -506,17 +506,6 @@ void CClientScoreBoardDialog::UpdatePlayerAvatar( int playerIndex, KeyValues *kv
 				if ( iMapIndex == m_mapAvatarsToImageList.InvalidIndex() )
 				{
 					CAvatarImage *pImage = new CAvatarImage();
-
-#ifdef SDK_DLL
-					/*if ( pi.fakeplayer )
-					{
-						// [jpaquin] this allows counter strike to display default avatars for bots.  It can't be a virtual function on
-						// C_BasePlayer because there would be no way to get a game specific default image if the player is null.
-						extern vgui::IImage* GetDefaultAvatarImage( C_BasePlayer *pPlayer );
-						pImage->SetDefaultImage( GetDefaultAvatarImage( UTIL_PlayerByIndex( engine->GetPlayerInfo( playerIndex, &pi ) ) ) );
-					}*/
-#endif
-
 					pImage->SetAvatarSteamID( steamIDForPlayer );
 					pImage->SetAvatarSize( 32, 32 );	// Deliberately non scaling
 					iImageIndex = m_pImageList->AddImage( pImage );

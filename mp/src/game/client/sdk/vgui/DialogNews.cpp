@@ -20,8 +20,6 @@
 #include "vgui/IVGui.h"
 
 #include "KeyValues.h"
-#include "ienginevgui.h"
-
 #include "DialogTabChangeLog.h"
 #include "DialogTabCredits.h"
 
@@ -30,47 +28,19 @@ using namespace vgui;
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
-static DHANDLE<CDialogNews> g_hCreditsMenu;
-
-CON_COMMAND( WhatsNew, "Show/hide News UI." )
+static void CC_Dialog()
 {
-	if ( !g_hCreditsMenu.Get() )
-	{
-		VPANEL parent = enginevgui->GetPanel( PANEL_GAMEUIDLL );
-		if ( parent == NULL )
-		{
-			Assert( 0 );
-			return;
-		}
-
-		auto* pPanel = new CDialogNews( parent );
-
-		g_hCreditsMenu.Set( pPanel );
-	}
-
-
-	auto* pPanel = g_hCreditsMenu.Get();
-
-
-	// Center
-	int x, y, w, h;
-	vgui::surface()->GetWorkspaceBounds( x, y, w, h );
-	
-	int mw = pPanel->GetWide();
-	int mh = pPanel->GetTall();
-	pPanel->SetPos( x + w / 2 - mw / 2, y + h / 2 - mh / 2 );
-
-
-	pPanel->Activate();
+	CDialogNews*options = new CDialogNews( NULL );
+	options->Activate();
 }
+
+static ConCommand WhatsNew( "mdlpickerdialog", CC_Dialog, "Show/hide News UI." );
 
 //-----------------------------------------------------------------------------
 // Purpose: Basic help dialog
 //-----------------------------------------------------------------------------
-CDialogNews::CDialogNews( VPANEL parent ) : PropertyDialog( nullptr, "DialogNews" )
+CDialogNews::CDialogNews(vgui::Panel *parent) : PropertyDialog( parent, "DialogNews" )
 {
-	SetParent( parent );
-
 	SetDeleteSelfOnClose( true );
 	SetBounds( 0, 0, 512, 406 );
 	SetSizeable( false );
@@ -81,7 +51,7 @@ CDialogNews::CDialogNews( VPANEL parent ) : PropertyDialog( nullptr, "DialogNews
 	AddPage( new CDialogTabCredits( this ), "#GameUI_Credits" );
 
 	SetApplyButtonVisible( false );
-	SetCancelButtonVisible( false );
+	GetPropertySheet()->SetTabWidth(84);
 }
 
 //-----------------------------------------------------------------------------
@@ -92,17 +62,33 @@ CDialogNews::~CDialogNews()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose: Brings the dialog to the fore
 //-----------------------------------------------------------------------------
-void CDialogNews::OnClose( void )
+void CDialogNews::Activate()
 {
-	BaseClass::OnClose();
+	BaseClass::Activate();
+	EnableApplyButton( false );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose: Opens the dialog
 //-----------------------------------------------------------------------------
-void CDialogNews::OnCommand( const char *command )
+void CDialogNews::Run()
 {
-		BaseClass::OnCommand( command );
+	SetTitle( "#GameUI_News", true );
+	Activate();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when the GameUI is hidden
+//-----------------------------------------------------------------------------
+void CDialogNews::OnGameUIHidden()
+{
+	// tell our children about it
+	for ( int i = 0 ; i < GetChildCount() ; i++ )
+	{
+		Panel *pChild = GetChild( i );
+		if ( pChild )
+			PostMessage( pChild, new KeyValues( "GameUIHidden" ) );
+	}
 }

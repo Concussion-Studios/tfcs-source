@@ -297,9 +297,7 @@ IMotionEvent::simresult_e CPhysicsNPCSolver::Simulate( IPhysicsMotionController 
 
 		if ( pObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD )
 		{
-			Vector origin;
-			pObject->GetPosition(&origin, NULL);
-			CBasePlayer *pPlayer = UTIL_GetNearestPlayer(origin);
+			CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
 			if ( pPlayer )
 			{
 				pPlayer->ForceDropOfCarriedPhysObjects( m_hEntity );

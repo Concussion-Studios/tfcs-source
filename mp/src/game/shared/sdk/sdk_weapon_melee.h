@@ -30,8 +30,6 @@ public:
 
 	virtual	void	Spawn( void );
 	virtual	void	Precache( void );
-
-	virtual const char	*GetDeploySound( void ) { return "Default.WeaponDeployMelee"; }
 	
 	//Attack functions
 	virtual	void	PrimaryAttack( void );
@@ -41,11 +39,11 @@ public:
 	bool 			DoSwingTrace( trace_t &traceHit );
 
 	//Functions to select animation sequences 
-	virtual Activity	GetPrimaryAttackActivity( void )	{ return ACT_VM_HITCENTER; }
-	virtual Activity	GetSecondaryAttackActivity( void )	{ return ACT_VM_HITCENTER2; }
+	virtual Activity	GetPrimaryAttackActivity( void )	{	return	ACT_VM_HITCENTER;	}
+	virtual Activity	GetSecondaryAttackActivity( void )	{	return	ACT_VM_HITCENTER2;	}
 
-	virtual float	GetRange( void )								{ return GetSDKWpnData().m_flMeleeRange; }
-	virtual	float	GetDamageForActivity( Activity hitActivity )	{ return GetSDKWpnData().m_iDamage;	}
+	virtual float	GetRange( void )								{	return	32.0f;	}
+	virtual	float	GetDamageForActivity( Activity hitActivity )	{	return	GetSDKWpnData().m_iDamage;	}
 
 	CWeaponSDKMelee( const CWeaponSDKMelee & );
 

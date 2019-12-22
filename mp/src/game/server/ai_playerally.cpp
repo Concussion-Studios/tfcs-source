@@ -366,14 +366,12 @@ void CAI_PlayerAlly::DisplayDeathMessage( void )
 	if ( npc_ally_deathmessage.GetBool() == 0 )
 		return;
 
-	for (int i = 1; i <= gpGlobals->maxClients; i++) 
-	{
-		CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-		if (!pPlayer)
-			continue;
+	CBaseEntity *pPlayer = AI_GetSinglePlayer();
 
-		UTIL_ShowMessage(GetDeathMessageText(), pPlayer);
-		pPlayer->NotifySinglePlayerGameEnding();
+	if ( pPlayer )	
+	{
+		UTIL_ShowMessage( GetDeathMessageText(), ToBasePlayer( pPlayer ) );
+		ToBasePlayer(pPlayer)->NotifySinglePlayerGameEnding();
 	}
 
 	CBaseEntity *pReload = CreatePlayerLoadSave( GetAbsOrigin(), 1.5f, 8.0f, 4.5f );
@@ -408,9 +406,16 @@ void CAI_PlayerAlly::GatherConditions( void )
 		SetCondition( COND_TALKER_CLIENTUNSEEN );
 	}
 
-	CBasePlayer *pLocalPlayer = UTIL_GetNearestPlayer(GetAbsOrigin()); 
+	CBasePlayer *pLocalPlayer = AI_GetSinglePlayer();
 
-	if (pLocalPlayer && !pLocalPlayer->IsAlive()) 
+	if ( !pLocalPlayer )
+	{
+		if ( AI_IsSinglePlayer() )
+			SetCondition( COND_TALKER_PLAYER_DEAD );
+		return;
+	}
+
+	if ( !pLocalPlayer->IsAlive() )
 	{
 		SetCondition( COND_TALKER_PLAYER_DEAD );
 	}
@@ -419,7 +424,7 @@ void CAI_PlayerAlly::GatherConditions( void )
 	{
 				
 		bool bPlayerIsLooking = false;
-		if (pLocalPlayer && (pLocalPlayer->GetAbsOrigin() - GetAbsOrigin()).Length2DSqr() < Square(TALKER_STARE_DIST))
+		if ( ( pLocalPlayer->GetAbsOrigin() - GetAbsOrigin() ).Length2DSqr() < Square(TALKER_STARE_DIST) )
 		{
 			if ( pLocalPlayer->FInViewCone( EyePosition() ) )
 			{
@@ -454,7 +459,7 @@ void CAI_PlayerAlly::GatherEnemyConditions( CBaseEntity *pEnemy )
 		{
 			if( Classify() == CLASS_PLAYER_ALLY_VITAL && hl2_episodic.GetBool() )
 			{
-				CBasePlayer *pPlayer = UTIL_GetNearestVisiblePlayer(this);
+				CBasePlayer *pPlayer = AI_GetSinglePlayer();
 
 				if( pPlayer )
 				{
@@ -995,12 +1000,12 @@ void CAI_PlayerAlly::StartTask( const Task_t *pTask )
 {
 	switch ( pTask->iTask )
 	{
-	case TASK_MOVE_AWAY_PATH: 
+	case TASK_MOVE_AWAY_PATH:
 		{
-			if (HasCondition(COND_PLAYER_PUSHING))
+			if ( HasCondition( COND_PLAYER_PUSHING ) && AI_IsSinglePlayer() )
 			{
 				// @TODO (toml 10-22-04): cope with multiplayer push
-				GetMotor()->SetIdealYawToTarget(UTIL_GetNearestVisiblePlayer(this)->WorldSpaceCenter()); 
+				GetMotor()->SetIdealYawToTarget( UTIL_GetLocalPlayer()->WorldSpaceCenter() );
 			}
 			BaseClass::StartTask( pTask );
 			break;
@@ -1167,16 +1172,13 @@ void CAI_PlayerAlly::Event_Killed( const CTakeDamageInfo &info )
 	// notify the player
 	if ( IsInPlayerSquad() )
 	{
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		CBasePlayer *player = AI_GetSinglePlayer();
+		if ( player )
 		{
-			CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-			if (!pPlayer)
-				continue;
-
 			variant_t emptyVariant;
-			pPlayer->AcceptInput("OnSquadMemberKilled", this, this, emptyVariant, 0);
+			player->AcceptInput( "OnSquadMemberKilled", this, this, emptyVariant, 0 );
 		}
-	} //lun4r_end
+	}
 
 	if ( GetSpeechSemaphore( this )->GetOwner() == this )
 		GetSpeechSemaphore( this )->Release();
@@ -1457,7 +1459,7 @@ bool CAI_PlayerAlly::IsOkToSpeak( ConceptCategory_t category, bool fRespondingTo
 		}
 
 		// Don't talk if we're too far from the player
-		CBaseEntity *pPlayer = UTIL_GetNearestPlayer(GetAbsOrigin());
+		CBaseEntity *pPlayer = AI_GetSinglePlayer();
 		if ( pPlayer )
 		{
 			float flDist = sv_npc_talker_maxdist.GetFloat();

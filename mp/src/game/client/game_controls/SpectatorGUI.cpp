@@ -485,7 +485,7 @@ void CSpectatorGUI::ApplySchemeSettings(IScheme *pScheme)
 
 	SetBorder( NULL );
 
-#if defined ( CSTRIKE_DLL ) || defined ( SDK_DLL )
+#ifdef CSTRIKE_DLL
 	SetZPos(80);	// guarantee it shows above the scope
 #endif
 }

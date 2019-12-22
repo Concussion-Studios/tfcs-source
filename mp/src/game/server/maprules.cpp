@@ -349,11 +349,24 @@ void CGameText::Display( CBaseEntity *pActivator )
 	if ( !CanFireForActivator( pActivator ) )
 		return;
 
-	// also send to all if we haven't got a specific activator player to send to
-	if (MessageToAll() || !pActivator || !pActivator->IsPlayer())
-		UTIL_HudMessageAll(m_textParms, MessageGet());
+	if ( MessageToAll() )
+	{
+		UTIL_HudMessageAll( m_textParms, MessageGet() );
+	}
 	else
-		UTIL_HudMessage(ToBasePlayer(pActivator), m_textParms, MessageGet());
+	{
+		// If we're in singleplayer, show the message to the player.
+		if ( gpGlobals->maxClients == 1 )
+		{
+			CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
+			UTIL_HudMessage( pPlayer, m_textParms, MessageGet() );
+		}
+		// Otherwise show the message to the player that triggered us.
+		else if ( pActivator && pActivator->IsNetClient() )
+		{
+			UTIL_HudMessage( ToBasePlayer( pActivator ), m_textParms, MessageGet() );
+		}
+	}
 }
 
 

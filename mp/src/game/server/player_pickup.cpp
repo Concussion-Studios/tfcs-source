@@ -24,7 +24,7 @@ void Pickup_ForcePlayerToDropThisObject( CBaseEntity *pTarget )
 
 	if ( pPhysics->GetGameFlags() & FVPHYSICS_PLAYER_HELD )
 	{
-		CBasePlayer *pPlayer = UTIL_GetNearestPlayer(pTarget->GetAbsOrigin()); 
+		CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
 		pPlayer->ForceDropOfCarriedPhysObjects( pTarget );
 	}
 }

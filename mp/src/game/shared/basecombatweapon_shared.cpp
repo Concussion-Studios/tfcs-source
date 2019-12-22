@@ -36,10 +36,6 @@
 	#include "hl2mp_gamerules.h"
 #endif
 
-#ifdef SDK_DLL
-	#include "sdk_gamerules.h"
-#endif
-
 #endif
 
 #include "vprof.h"
@@ -275,7 +271,7 @@ void CBaseCombatWeapon::Precache( void )
 				m_iPrimaryAmmoType = (int)TF_AMMO_METAL;
 			}
 #endif
-		}
+ 		}
 		if ( GetWpnData().szAmmo2[0] )
 		{
 			m_iSecondaryAmmoType = GetAmmoDef()->Index( GetWpnData().szAmmo2 );
@@ -775,10 +771,6 @@ void CBaseCombatWeapon::OnPickedUp( CBaseCombatCharacter *pNewOwner )
 	HL2MPRules()->RemoveLevelDesignerPlacedObject( this );
 #endif
 
-#ifdef SDK_DLL
-	SDKGameRules()->RemoveLevelDesignerPlacedObject( this );
-#endif
-
 	// Someone picked me up, so make it so that I can't be removed.
 	SetRemoveable( false );
 #endif
@@ -1031,8 +1023,7 @@ void CBaseCombatWeapon::SetActivity( Activity act, float duration )
 { 
 	//Adrian: Oh man...
 #if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ) || defined( SDK_DLL ) )
-	if (GetOwner()->IsPlayer())
-		SetModel( GetWorldModel() );
+	SetModel( GetWorldModel() );
 #endif
 	
 	int sequence = SelectWeightedSequence( act ); 
@@ -1043,8 +1034,7 @@ void CBaseCombatWeapon::SetActivity( Activity act, float duration )
 
 	//Adrian: Oh man again...
 #if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ) || defined( SDK_DLL ) )
-	if (GetOwner()->IsPlayer())
-		SetModel( GetViewModel() );
+	SetModel( GetViewModel() );
 #endif
 
 	if ( sequence != ACTIVITY_NOT_AVAILABLE )
@@ -2674,14 +2664,14 @@ BEGIN_DATADESC( CBaseCombatWeapon )
 // don't save these, init to 0 and regenerate
 //	DEFINE_FIELD( m_flNextEmptySoundTime, FIELD_TIME ),
 //	DEFINE_FIELD( m_Activity, FIELD_INTEGER ),
-	DEFINE_FIELD( m_nIdealSequence, FIELD_INTEGER ),
+ 	DEFINE_FIELD( m_nIdealSequence, FIELD_INTEGER ),
 	DEFINE_FIELD( m_IdealActivity, FIELD_INTEGER ),
 
 	DEFINE_FIELD( m_fFireDuration, FIELD_FLOAT ),
 
 	DEFINE_FIELD( m_bReloadsSingly, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iSubType, FIELD_INTEGER ),
-	DEFINE_FIELD( m_bRemoveable, FIELD_BOOLEAN ),
+ 	DEFINE_FIELD( m_bRemoveable, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_flUnlockTime,		FIELD_TIME ),
 	DEFINE_FIELD( m_hLocker,			FIELD_EHANDLE ),

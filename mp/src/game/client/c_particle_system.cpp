@@ -109,8 +109,8 @@ void C_ParticleSystem::PostDataUpdate( DataUpdateType_t updateType )
 			}
 			else
 			{
-				ParticleProp()->StopEmission();
-			}
+						ParticleProp()->StopEmission();
+					}
 		}
 	}
 }

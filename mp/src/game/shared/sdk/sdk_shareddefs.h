@@ -10,24 +10,16 @@
 #endif
 
 #define SDK_GAME_DESCRIPTION	"Team Fortress Classic: Source"
-#define SDK_MAX_PLAYERS	128
 
 enum sdkteams_e
 {
-	SDK_TEAM_BLUE = FIRST_GAME_TEAM,
+	SDK_TEAM_BLUE = LAST_SHARED_TEAM+1,
 	SDK_TEAM_RED,
-	SDK_TEAM_GREEN,
 	SDK_TEAM_YELLOW,
+	SDK_TEAM_GREEN,
 };
 
-extern const char *pszTeamNames[];
-
-#define CONTENTS_REDTEAM	CONTENTS_TEAM1
-#define CONTENTS_BLUETEAM	CONTENTS_TEAM2
-#define CONTENTS_GREENTEAM	CONTENTS_UNUSED
-#define CONTENTS_YELLOWTEAM	CONTENTS_UNUSED6
-
-#define SDK_NUM_PLAYERCLASSES 10
+#define SDK_NUM_PLAYERCLASSES 10		//Tony; our template sample has 3 player classes.
 #define SDK_PLAYERCLASS_IMAGE_LENGTH 64
 
 #define PLAYERCLASS_RANDOM		-2
@@ -51,14 +43,19 @@ extern const char *pszTeamNames[];
 
 extern const char *pszPlayerClasses[];
 
+#define SDK_PLAYER_MODEL "models/player/scout.mdl"
+
 //Tony; We need to precache all possible player models that we're going to use
 extern const char *pszPossiblePlayerModels[];
 
 //Anthony; We need all the Gib models we will use for gibing a player, let's precache that!
 extern const char *pszPossibleGibModels[];
 
+extern const char *pszTeamNames[];
+
 //Tony; these defines handle the default speeds for all of these - all are listed regardless of which option is enabled.
 #define SDK_DEFAULT_PLAYER_RUNSPEED			220
+#define SDK_DEFAULT_PLAYER_PRONESPEED		50
 
 #define SDK_PLAYER_INDEX_NONE			( MAX_PLAYERS + 1 )
 
@@ -84,19 +81,12 @@ typedef enum
 	WEAPON_NONE = 0,
 
 	SDK_WEAPON_NONE = WEAPON_NONE,
-
-	WEAPON_TRANQ,
+	WEAPON_MP5,
 	WEAPON_SHOTGUN,
 	WEAPON_12GAUGE,
 	WEAPON_NAILGUN,
 	WEAPON_GRENADE,
-	WEAPON_GRENADE_CONCUSSION,
-	WEAPON_GRENADE_EMP,
-	WEAPON_GRENADE_NAPALM,
-	WEAPON_GRENADE_MIRV,
-	WEAPON_GRENADE_CALTROP,
-	WEAPON_GRENADE_NAIL,
-	WEAPON_GRENADE_HALLUCINATION,
+	WEAPON_PISTOL,
 	WEAPON_CROWBAR,
 	WEAPON_UMBRELLA,
 	WEAPON_SUPERNAILGUN,
@@ -104,13 +94,7 @@ typedef enum
 	WEAPON_WRENCH,
 	WEAPON_AC,
 	WEAPON_MEDKIT,
-	WEAPON_RAILGUN,
 	WEAPON_RPG,
-	WEAPON_IC,
-	WEAPON_SNIPERRIFLE,
-	WEAPON_AUTORIFLE,
-	WEAPON_GRENADELAUNCHER,
-	WEAPON_PIPEBOMBLAUNCHER,
 	
 	WEAPON_MAX,		// number of weapons weapon index
 } SDKWeaponID;
@@ -130,7 +114,7 @@ int AliasToWeaponID( const char *alias );
 enum SDKPlayerState
 {
 	STATE_ACTIVE=0,
-	STATE_WELCOME,				// Show the level intro screen.
+	STATE_WELCOME,			// Show the level intro screen.
 	STATE_PICKINGTEAM,			// Choosing team.
 	STATE_PICKINGCLASS,			// Choosing class.
 	STATE_DEATH_ANIM,			// Playing death anim, waiting for that to finish.

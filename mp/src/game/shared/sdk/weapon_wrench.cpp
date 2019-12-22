@@ -46,8 +46,8 @@ END_NETWORK_TABLE()
 BEGIN_PREDICTION_DATA(CWeaponWrench)
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS(weapon_wrench, CWeaponWrench);
-PRECACHE_WEAPON_REGISTER(weapon_wrench);
+LINK_ENTITY_TO_CLASS(weapon_spanner, CWeaponWrench);
+PRECACHE_WEAPON_REGISTER(weapon_spanner);
 
 CWeaponWrench::CWeaponWrench()
 {

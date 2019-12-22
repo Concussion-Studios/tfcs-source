@@ -92,11 +92,11 @@ void CSDKGameMovement::SetPlayerSpeed( void )
 
 	if ( mv->m_nButtons & IN_DUCK )
 	{
-		mv->m_flClientMaxSpeed = m_pSDKPlayer->m_Shared.m_flMaxSpeed;	//gets cut in fraction later
+		mv->m_flClientMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//gets cut in fraction later
 	}
 	else
 	{
-		flMaxSpeed = m_pSDKPlayer->m_Shared.m_flMaxSpeed;	//jogging
+		flMaxSpeed = m_pSDKPlayer->m_Shared.m_flRunSpeed;	//jogging
 		mv->m_flClientMaxSpeed = flMaxSpeed - 100 + stamina;
 	}
 }
@@ -869,31 +869,20 @@ void CSDKGameMovement::Duck( void )
 //-----------------------------------------------------------------------------
 unsigned int CSDKGameMovement::PlayerSolidMask( bool brushOnly )
 {
-	unsigned int uMask = 0;
+	int mask = 0;
 
-	if ( m_pSDKPlayer )
+	switch ( player->GetTeamNumber() )
 	{
-		switch( m_pSDKPlayer->GetTeamNumber() )
-		{
-		case SDK_TEAM_RED:
-			uMask = CONTENTS_BLUETEAM | CONTENTS_GREENTEAM | CONTENTS_YELLOWTEAM;
-			break;
+	case SDK_TEAM_BLUE:
+		mask = CONTENTS_TEAM1;
+		break;
 
-		case SDK_TEAM_BLUE:
-			uMask = CONTENTS_REDTEAM | CONTENTS_GREENTEAM | CONTENTS_YELLOWTEAM;
-			break;
-
-		case SDK_TEAM_GREEN:
-			uMask = CONTENTS_REDTEAM | CONTENTS_BLUETEAM | CONTENTS_YELLOWTEAM;
-			break;
-
-		case SDK_TEAM_YELLOW:
-			uMask = CONTENTS_REDTEAM | CONTENTS_BLUETEAM | CONTENTS_GREENTEAM;
-			break;
-		}
+	case SDK_TEAM_RED:
+		mask = CONTENTS_TEAM2;
+		break;
 	}
 
-	return ( uMask | BaseClass::PlayerSolidMask( brushOnly ) );
+	return ( mask | BaseClass::PlayerSolidMask( brushOnly ) );
 }
 
 

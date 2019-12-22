@@ -14,11 +14,12 @@
 #include "weapon_sdkbase.h"
 
 
-#ifdef CLIENT_DLL	
+#ifdef CLIENT_DLL
+	
 	#define CBaseSDKGrenade C_BaseSDKGrenade
+
 #endif
 
-#define DEFAULT_GRENADE_TIMER	4.0f //Seconds
 
 class CBaseSDKGrenade : public CWeaponSDKBase
 {
@@ -30,8 +31,6 @@ public:
 	CBaseSDKGrenade();
 
 	virtual void	Precache();
-
-	virtual const char	*GetDeploySound( void ) { return "Deploy.Grenade"; }
 
 	virtual bool	Deploy();
 	bool			Holster( CBaseCombatWeapon *pSwitchingTo );
