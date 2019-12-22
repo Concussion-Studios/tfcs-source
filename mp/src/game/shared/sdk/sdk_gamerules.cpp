@@ -25,7 +25,6 @@
 	#include "mapentities.h"
 	#include "sdk_basegrenade_projectile.h"
 	#include "vote_controller.h"
-	#include "tfc_voteissues.h"
 	#include "eventqueue.h"
 	#include "game.h"
 	#include "items.h"
@@ -533,9 +532,6 @@ void CSDKGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 	int iFov = atoi( pszFov );
 	iFov = clamp( iFov, 75, MAX_FOV );
 	pSDKPlayer->SetDefaultFOV( iFov );
-
-	pSDKPlayer->m_bIsPlayerADev = pSDKPlayer->PlayerIsDev() && ( Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "tfc_dev_mark" ) ) > 0 );
-	pSDKPlayer->m_bIsPlayerABetaTester = pSDKPlayer->PlayerIsBeta() && ( Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "tfc_beta_mark" ) ) > 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -1271,18 +1267,6 @@ void CSDKGameRules::CreateStandardEntities()
 #endif
 		CBaseEntity::Create( "sdk_gamerules", vec3_origin, vec3_angle );
 	Assert( pEnt );
-
-	CBaseEntity::Create( "vote_controller", vec3_origin, vec3_angle );
-
-	new CKickIssue();
-	CRestartGameIssue *pRestartVote = new CRestartGameIssue();
-	if ( pRestartVote )
-		pRestartVote->Init();
-	new CChangeLevelIssue();
-	new CNextLevelIssue();
-	C4TeamsMode *p4TeamsMode = new C4TeamsMode();
-	if ( p4TeamsMode )
-		p4TeamsMode->Init();
 }
 
 int CSDKGameRules::SelectDefaultTeam()
@@ -1987,34 +1971,6 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 				pszFormat = "SDK_Chat_Team_Dead";
 			else
 				pszFormat = "SDK_Chat_Team";
-		}
-	}
-	else if ( pSDKPlayer->IsDeveloper() )
-	{
-		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
-		{
-			pszFormat = "SDK_Chat_DevSpec";
-		}
-		else
-		{
-			if ( pSDKPlayer->IsAlive() == false )
-				pszFormat = "SDK_Chat_DevDead";
-			else
-				pszFormat = "SDK_Chat_Dev";
-		}
-	}
-	else if ( pSDKPlayer->IsBetaTester() )
-	{
-		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
-		{
-			pszFormat = "SDK_Chat_BetaSpec";
-		}
-		else
-		{
-			if ( pSDKPlayer->IsAlive() == false )
-				pszFormat = "SDK_Chat_BetaDead";
-			else
-				pszFormat = "SDK_Chat_Beta";
 		}
 	}
 	else

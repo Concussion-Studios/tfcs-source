@@ -147,12 +147,6 @@ public:
 	void SDKPushawayThink(void);
 	void InitVCollision( const Vector& vecAbsOrigin, const Vector& vecAbsVelocity );
 
-	virtual bool PlayerIsDev();
-	virtual bool PlayerIsBeta();
-
-	virtual bool IsDeveloper() { return m_bIsPlayerADev; }
-	virtual bool IsBetaTester() { return m_bIsPlayerABetaTester; }
-
 	Vector m_vecTotalBulletForce;	//Accumulator for bullet force in a single frame
 
 // In shared code.
@@ -283,12 +277,6 @@ private:
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iHealth );
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iMaxHealth );
 	CNetworkVarForDerived( int, m_MaxArmorValue );
-
-public:
-
-	bool m_bIsPlayerADev;
-	bool m_bIsPlayerABetaTester;
-
 };
 
 
