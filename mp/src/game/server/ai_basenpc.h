@@ -1762,12 +1762,12 @@ public:
 	virtual void		Event_Killed( const CTakeDamageInfo &info );
 
 	virtual Vector		GetShootEnemyDir( const Vector &shootOrigin, bool bNoisy = true );
-#ifdef HL2_DLL
+#if defined ( HL2_DLL ) || defined ( SDK_DLL )
 	virtual Vector		GetActualShootPosition( const Vector &shootOrigin );
 	virtual Vector		GetActualShootTrajectory( const Vector &shootOrigin );
 	virtual	Vector		GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL );
 	virtual	float		GetSpreadBias( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget );
-#endif //HL2_DLL
+#endif //HL2_DLL && SDK_DLL
 	virtual void		CollectShotStats( const Vector &vecShootOrigin, const Vector &vecShootDir );
 	virtual Vector		BodyTarget( const Vector &posSrc, bool bNoisy = true );
 	virtual Vector		GetAutoAimCenter() { return BodyTarget(vec3_origin, false); }

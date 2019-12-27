@@ -35,7 +35,7 @@ public:
 	
 	//Attack functions
 	virtual	void	PrimaryAttack( void );
-	virtual	void	SecondaryAttack( void );
+	virtual	void	SecondaryAttack( void ) {}
 	
 	virtual void	ItemPostFrame( void );
 	bool 			DoSwingTrace( trace_t &traceHit );

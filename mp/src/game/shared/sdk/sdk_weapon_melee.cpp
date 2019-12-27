@@ -116,16 +116,6 @@ void CWeaponSDKMelee::PrimaryAttack()
 }
 
 //------------------------------------------------------------------------------
-// Purpose :
-// Input   :
-// Output  :
-//------------------------------------------------------------------------------
-void CWeaponSDKMelee::SecondaryAttack()
-{
-	Swing( true );
-}
-
-//------------------------------------------------------------------------------
 // Purpose: Implement impact function
 //------------------------------------------------------------------------------
 bool CWeaponSDKMelee::DoSwingTrace(trace_t &traceHit)

@@ -30,8 +30,6 @@ public:
 	CWeaponKnife();
 
 	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_KNIFE; }
-	virtual bool CanWeaponBeDropped() const				{ return false; }
-	virtual float	GetRange(void)					{ return	64.0f; }	//Tony; let the crowbar swing further.
 
 private:
 

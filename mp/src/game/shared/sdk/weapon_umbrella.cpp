@@ -29,9 +29,7 @@ public:
 
 	CWeaponUmbrella();
 
-	virtual SDKWeaponID GetWeaponID(void) const		{ return WEAPON_UMBRELLA; }
-	virtual float	GetRange(void)					{ return	64.0f; }	//Tony; let the crowbar swing further.
-	virtual bool CanWeaponBeDropped() const				{ return false; }
+	virtual SDKWeaponID GetWeaponID(void) const { return WEAPON_UMBRELLA; }
 
 private:
 

@@ -9560,7 +9560,7 @@ void CAI_BaseNPC::CollectShotStats( const Vector &vecShootOrigin, const Vector &
 #endif
 }
 
-#ifdef HL2_DLL
+#if defined ( HL2_DLL ) || defined ( SDK_DLL )
 //-----------------------------------------------------------------------------
 // Purpose: Return the actual position the NPC wants to fire at when it's trying
 //			to hit it's current enemy.
@@ -9571,30 +9571,6 @@ Vector CAI_BaseNPC::GetActualShootPosition( const Vector &shootOrigin )
 	Vector vecEnemyLKP = GetEnemyLKP();
 	Vector vecEnemyOffset = GetEnemy()->BodyTarget( shootOrigin ) - GetEnemy()->GetAbsOrigin();
 	Vector vecTargetPosition = vecEnemyOffset + vecEnemyLKP;
-
-#ifdef PORTAL
-	// Check if it's also visible through portals
-	CProp_Portal *pPortal = FInViewConeThroughPortal( vecEnemyLKP );
-	if ( pPortal )
-	{
-		// Get the target's position through portals
-		Vector vecEnemyOffsetTransformed;
-		Vector vecEnemyLKPTransformed;
-		UTIL_Portal_VectorTransform( pPortal->m_hLinkedPortal->MatrixThisToLinked(), vecEnemyOffset, vecEnemyOffsetTransformed );
-		UTIL_Portal_PointTransform( pPortal->m_hLinkedPortal->MatrixThisToLinked(), vecEnemyLKP, vecEnemyLKPTransformed );
-		Vector vecTargetPositionTransformed = vecEnemyOffsetTransformed + vecEnemyLKPTransformed;
-
-		// Get the distance to the target with and without portals
-		float fDistanceToEnemyThroughPortalSqr = GetAbsOrigin().DistToSqr( vecTargetPositionTransformed );
-		float fDistanceToEnemySqr = GetAbsOrigin().DistToSqr( vecTargetPosition );
-
-		if ( fDistanceToEnemyThroughPortalSqr < fDistanceToEnemySqr || !FInViewCone( vecEnemyLKP ) || !FVisible( vecEnemyLKP ) )
-		{
-			// We're better off shooting through the portals
-			vecTargetPosition = vecTargetPositionTransformed;
-		}
-	}
-#endif
 
 	// lead for some fraction of a second.
 	return (vecTargetPosition + ( GetEnemy()->GetSmoothedVelocity() * ai_lead_time.GetFloat() ));
@@ -9693,7 +9669,6 @@ Vector CAI_BaseNPC::GetActualShootTrajectory( const Vector &shootOrigin )
 	// the player so that they see the cool bubble trails in the water ahead of them.
 	if (GetEnemy()->IsPlayer() && (GetWaterLevel() != 3) && (GetEnemy()->GetWaterLevel() == 3))
 	{
-#if 1
 		if (random->RandomInt(0, 4) < 3)
 		{
 			Vector vecEnemyForward;
@@ -9719,25 +9694,6 @@ Vector CAI_BaseNPC::GetActualShootTrajectory( const Vector &shootOrigin )
 			VectorNormalize( vecShotDir );
 			return vecShotDir;
 		}
-#else
-		if (random->RandomInt(0, 4) < 3)
-		{
-			// Aim at a point a few feet in front of the player's eyes
-			Vector vecEnemyForward;
-			GetEnemy()->GetVectors( &vecEnemyForward, NULL, NULL );
-
-			Vector vecAimPos = GetEnemy()->EyePosition() + (120.0f * vecEnemyForward );
-
-			Vector vecShotDir = vecAimPos - shootOrigin;
-			VectorNormalize( vecShotDir );
-
-			CShotManipulator manipulator( vecShotDir );
-			manipulator.ApplySpread( VECTOR_CONE_10DEGREES, 1 );
-			vecShotDir = manipulator.GetResult();
-
-			return vecShotDir;
-		}
-#endif
 	}
 
 	Vector vecProjectedPosition = GetActualShootPosition( shootOrigin );
@@ -9754,14 +9710,14 @@ Vector CAI_BaseNPC::GetActualShootTrajectory( const Vector &shootOrigin )
 
 	// Apply appropriate accuracy.
 	bool bUsePerfectAccuracy = false;
-	if ( GetEnemy() && GetEnemy()->Classify() == CLASS_BULLSEYE )
+	/*if ( GetEnemy() && GetEnemy()->Classify() == CLASS_BULLSEYE )
 	{
 		CNPC_Bullseye *pBullseye = dynamic_cast<CNPC_Bullseye*>(GetEnemy()); 
 		if ( pBullseye && pBullseye->UsePerfectAccuracy() )
 		{
 			bUsePerfectAccuracy = true;
 		}
-	}
+	}*/
 
 	if ( !bUsePerfectAccuracy )
 	{
