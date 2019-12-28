@@ -500,7 +500,9 @@ C_SDKPlayer::C_SDKPlayer() : m_iv_angEyeAngles( "C_SDKPlayer::m_iv_angEyeAngles"
 	m_fNextThinkPushAway = 0.0f;
 
 	m_pFlashlightBeam = NULL;
-
+	
+	ConVarRef scissor( "r_flashlightscissor" );
+	scissor.SetValue( "0" );
 }
 
 C_SDKPlayer::~C_SDKPlayer()

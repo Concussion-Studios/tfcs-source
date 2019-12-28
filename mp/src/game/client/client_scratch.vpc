@@ -37,6 +37,9 @@ $Project "Client (TFCSOURCE)"
 		$File	"$SRCDIR\game\shared\playerclass_info_parse.h"
 		$File	"bsp_utils.cpp"
 		$File	"bsp_utils.h"
+		$File	"c_env_projectedtexture.h"
+		$File	"worldlight.cpp"
+		$File	"worldlight.h"
 
 		$Folder	"game_controls"
 		{

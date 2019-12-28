@@ -44,6 +44,7 @@ $Project "Server (TFCSOURCE)"
 		$File	"$SRCDIR\game\shared\playerclass_info_parse.cpp"
 		$File	"$SRCDIR\game\shared\playerclass_info_parse.h"
 		$File	"logic_mirror_movement.cpp"
+		$File	"env_projectedtexture.h"
 
 		$Folder	"SDK"
 		{
@@ -70,7 +71,7 @@ $Project "Server (TFCSOURCE)"
 
 			$Folder	"Items"
 			{
-				$File	"entity_backpack.cpp"
+				$File	"sdk\entity_backpack.cpp"
 				$File	"sdk\entity_armor.cpp"
 				$File	"sdk\entity_ammo.cpp"
 			}
