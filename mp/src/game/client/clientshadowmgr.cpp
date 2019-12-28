@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -56,27 +56,27 @@
 
 
 #include "cbase.h"
-#include "engine/IShadowMgr.h"
+#include "engine/ishadowmgr.h"
 #include "model_types.h"
 #include "bitmap/imageformat.h"
-#include "materialsystem/IMaterialProxy.h"
-#include "materialsystem/IMaterialVar.h"
-#include "materialsystem/IMaterial.h"
-#include "materialsystem/IMesh.h"
-#include "materialsystem/ITexture.h"
-#include "BSPTreeData.h"
+#include "materialsystem/imaterialproxy.h"
+#include "materialsystem/imaterialvar.h"
+#include "materialsystem/imaterial.h"
+#include "materialsystem/imesh.h"
+#include "materialsystem/itexture.h"
+#include "bsptreedata.h"
 #include "utlmultilist.h"
-#include "CollisionUtils.h"
+#include "collisionutils.h"
 #include "iviewrender.h"
-#include "IVRenderView.h"
+#include "ivrenderview.h"
 #include "tier0/vprof.h"
 #include "engine/ivmodelinfo.h"
 #include "view_shared.h"
-#include "engine/IVDebugOverlay.h"
+#include "engine/ivdebugoverlay.h"
 #include "engine/IStaticPropMgr.h"
 #include "datacache/imdlcache.h"
 #include "viewrender.h"
-#include "tier0/ICommandLine.h"
+#include "tier0/icommandline.h"
 #include "vstdlib/jobthread.h"
 #include "toolframework_client.h"
 #include "bonetoworldarray.h"
@@ -1159,7 +1159,7 @@ void CVisibleShadowList::PrioritySort()
 				flLargestArea = m_ShadowsInView[nIndex].m_flArea;
 			}
 		}
-		swap( m_PriorityIndex[i], m_PriorityIndex[nLargestInd] );
+		::V_swap( m_PriorityIndex[i], m_PriorityIndex[nLargestInd] );
 	}
 }
 
@@ -4107,8 +4107,8 @@ void CClientShadowMgr::ComputeShadowTextures( const CViewSetup &view, int leafCo
 			}
 		}
 
-		ParallelProcess( s_NPCShadowBoneSetups.Base(), s_NPCShadowBoneSetups.Count(), &SetupBonesOnBaseAnimating );
-		ParallelProcess( s_NonNPCShadowBoneSetups.Base(), s_NonNPCShadowBoneSetups.Count(), &SetupBonesOnBaseAnimating );
+		ParallelProcess( "NPCShadowBoneSetups", s_NPCShadowBoneSetups.Base(), s_NPCShadowBoneSetups.Count(), &SetupBonesOnBaseAnimating );
+		ParallelProcess( "NonNPCShadowBoneSetups", s_NonNPCShadowBoneSetups.Base(), s_NonNPCShadowBoneSetups.Count(), &SetupBonesOnBaseAnimating );
 
 		nModelsRendered = 0;
 	}

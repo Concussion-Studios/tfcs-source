@@ -75,7 +75,7 @@
 #endif // USE_MONITORS
 
 // Projective textures
-#include "C_Env_Projected_Texture.h"
+#include "c_env_projectedtexture.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
