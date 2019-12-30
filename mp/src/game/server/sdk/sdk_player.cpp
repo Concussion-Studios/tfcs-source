@@ -786,13 +786,17 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 			return 0;
 	}
 
-	// blasts damage armor more unless whe aren't Heavy or soldier.
-	if ( ( info.GetDamageType() & DMG_BLAST ) && !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY || m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER ) )
-		flArmorBonus *= 2;
-
 	// Refuse the damage
 	if ( !g_pGameRules->FPlayerCanTakeDamage( this, info.GetAttacker(), inputInfo ) )
 		return 0;
+
+	// if whe are the pyro refuse the damage taken by fire
+	if ( ( info.GetDamageType() & DMG_BURN ) && m_Shared.DesiredPlayerClass() == PLAYERCLASS_PYRO )
+		return 0;
+
+	// blasts damage armor more unless whe aren't Heavy or soldier.
+	if ( ( info.GetDamageType() & DMG_BLAST ) && !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY || m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER ) )
+		flArmorBonus *= 2;
 
 	if ( bFriendlyFire ||
 		info.GetAttacker()->GetTeamNumber() != GetTeamNumber() ||
@@ -921,7 +925,7 @@ int CSDKPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			{
 				CBaseSDKGrenade *pGrenade = dynamic_cast<CBaseSDKGrenade *>( pWeapon );
 				if( pGrenade )
-					force.z = 350.0f; // Flyyy
+					force.z = 550.0f; // Flyyy
 			}
 
 			ApplyAbsVelocityImpulse( force );
