@@ -247,6 +247,8 @@ CSDKPlayer::CSDKPlayer()
 
 	UseClientSideAnimation();
 
+	m_flHealthRegenDelay = 0.0f;
+
 	m_angEyeAngles.Init();
 
 	m_pCurStateInfo = NULL;	// no state yet
@@ -313,6 +315,31 @@ void CSDKPlayer::PostThink()
 	m_angEyeAngles = EyeAngles();
 
 	m_PlayerAnimState->Update( m_angEyeAngles[YAW], m_angEyeAngles[PITCH] );
+
+	// Health regeneration system
+	if ( gpGlobals->curtime >= m_flHealthRegenDelay )
+	{
+		// Don't regenerate the health of those who aren't alive or playing
+		if ( m_Shared.DesiredPlayerClass() == PLAYERCLASS_MEDIC && ( GetTeamNumber() == TEAM_SPECTATOR || !IsAlive() ) )
+			return;
+
+		// Don't regenerate to non medics
+		if ( m_Shared.DesiredPlayerClass() == PLAYERCLASS_MEDIC )
+		{
+			int currentHealth = GetHealth();
+			int newHealth = currentHealth;
+			int maxHealth = GetMaxHealth();
+
+			if ( currentHealth < maxHealth )	// we're wounded, so start regenerating health
+				newHealth = currentHealth + 1;
+			else if ( currentHealth > maxHealth )	// don't allow us to go over our maximum health
+				newHealth = maxHealth;
+			if ( newHealth != currentHealth )
+				SetHealth( newHealth );	// actually set our new health value (assuming our health has changed)		
+		}
+
+		m_flHealthRegenDelay = gpGlobals->curtime + 1;
+	}
 }
 
 

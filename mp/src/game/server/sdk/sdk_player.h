@@ -255,6 +255,8 @@ private:
 	// Last usercmd we shot a bullet on.
 	int m_iLastWeaponFireUsercmd;
 
+	float m_flHealthRegenDelay;
+
 	virtual void Weapon_Equip( CBaseCombatWeapon *pWeapon );		//Tony; override so diethink can be cleared
 	virtual void ThrowActiveWeapon( void );
 	virtual void SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  );
