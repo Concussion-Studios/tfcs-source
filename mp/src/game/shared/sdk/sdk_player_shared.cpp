@@ -35,6 +35,199 @@ ConVar sv_showimpacts("sv_showimpacts", "0", FCVAR_REPLICATED, "Shows client (re
 
 void DispatchEffect( const char *pName, const CEffectData &data );
 
+//=============================================================================
+//
+// Tables.
+//
+
+// Client specific.
+#ifdef CLIENT_DLL
+BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerSharedLocal )
+	// CTF stuffs
+	RecvPropInt( RECVINFO( m_bInGoalZone ) ),
+
+	// PLayer Classes
+	RecvPropInt( RECVINFO( m_iPlayerClass ) ),
+	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
+END_RECV_TABLE()
+
+BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
+	// Local Data.
+	RecvPropDataTable( "sdksharedlocaldata", 0, 0, &REFERENCE_RECV_TABLE( DT_SDKPlayerSharedLocal ) ),
+END_RECV_TABLE()
+
+BEGIN_PREDICTION_DATA_NO_BASE( CSDKPlayerShared )
+END_PREDICTION_DATA()
+
+#else
+BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerSharedLocal )
+	// CTF stuffs
+	SendPropInt( SENDINFO( m_bInGoalZone ), 1, SPROP_UNSIGNED ),
+
+	// PLayer Classes
+	SendPropInt( SENDINFO( m_iPlayerClass), 4 ),
+	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), 4 ),
+END_SEND_TABLE()
+
+BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
+	// Local Data.
+	SendPropDataTable( "sdksharedlocaldata", 0, &REFERENCE_SEND_TABLE( DT_SDKPlayerSharedLocal ), SendProxy_SendLocalDataTable ),	
+END_SEND_TABLE()
+#endif
+
+// --------------------------------------------------------------------------------------------------- //
+// CSDKPlayerShared implementation.
+// --------------------------------------------------------------------------------------------------- //
+CSDKPlayerShared::CSDKPlayerShared()
+{
+	SetDesiredPlayerClass( PLAYERCLASS_UNDEFINED );
+
+	m_bInGoalZone = false;
+}
+
+CSDKPlayerShared::~CSDKPlayerShared()
+{
+}
+
+void CSDKPlayerShared::Init( CSDKPlayer *pPlayer )
+{
+	m_pOuter = pPlayer;
+}
+
+bool CSDKPlayerShared::IsDucking( void ) const
+{
+	return ( m_pOuter->GetFlags() & FL_DUCKING ) ? true : false;
+}
+
+bool CSDKPlayerShared::IsOnGround() const
+{
+	return ( m_pOuter->GetFlags() & FL_ONGROUND ) ? true : false;
+}
+
+bool CSDKPlayerShared::IsOnGodMode() const
+{
+	return ( m_pOuter->GetFlags() & FL_GODMODE ) ? true : false;
+}
+
+int CSDKPlayerShared::GetButtons()
+{
+	return m_pOuter->m_nButtons;
+}
+
+bool CSDKPlayerShared::IsButtonPressing( int btn )
+{
+	return ( ( m_pOuter->m_nButtons & btn ) ) ? true : false;
+}
+
+bool CSDKPlayerShared::IsButtonPressed( int btn )
+{
+	return ( ( m_pOuter->m_afButtonPressed & btn ) ) ? true : false;
+}
+
+bool CSDKPlayerShared::IsButtonReleased( int btn )
+{
+	return ( ( m_pOuter->m_afButtonReleased & btn ) ) ? true : false;
+}
+
+void CSDKPlayerShared::SetJumping( bool bJumping )
+{
+	m_bJumping = bJumping;
+	
+	if ( IsSniperZoomed() )
+		ForceUnzoom();
+}
+
+void CSDKPlayerShared::SetGoalState( bool state )
+{
+	m_bInGoalZone = state;
+}
+
+//-----------------------------------------------------------------------------
+// Consider the weapon's built-in accuracy, this character's proficiency with
+// the weapon, and the status of the target. Use this information to determine
+// how accurately to shoot at the target.
+//-----------------------------------------------------------------------------
+Vector CSDKPlayerShared::GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget )
+{
+	if (pWeapon)
+		return pWeapon->GetBulletSpread() * pWeapon->GetAccuracyModifier();
+
+	return VECTOR_CONE_15DEGREES;
+}
+
+void CSDKPlayerShared::ForceUnzoom( void )
+{
+	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
+	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
+	{
+		CWeaponSDKBaseSniper *pSniper = dynamic_cast<CWeaponSDKBaseSniper *>( pWeapon );
+		if ( pSniper )
+			pSniper->ExitScope();
+	}
+}
+
+bool CSDKPlayerShared::IsSniperZoomed( void ) const
+{
+	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
+	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
+	{
+		CWeaponSDKBaseSniper *pSniper = (CWeaponSDKBaseSniper *)pWeapon;
+		Assert( pSniper );
+		return pSniper->IsScoped();
+	}
+
+	return false;
+}
+
+
+void CSDKPlayerShared::SetDesiredPlayerClass( int playerclass )
+{
+	m_iDesiredPlayerClass = playerclass;
+}
+
+int CSDKPlayerShared::DesiredPlayerClass( void )
+{
+	return m_iDesiredPlayerClass;
+}
+
+void CSDKPlayerShared::SetPlayerClass( int playerclass )
+{
+	m_iPlayerClass = playerclass;
+}
+
+int CSDKPlayerShared::PlayerClass( void )
+{
+	return m_iPlayerClass;
+}
+
+CWeaponSDKBase* CSDKPlayerShared::GetActiveSDKWeapon() const
+{
+	CBaseCombatWeapon *pWeapon = m_pOuter->GetActiveWeapon();
+	if ( pWeapon )
+	{
+		Assert( dynamic_cast< CWeaponSDKBase* >( pWeapon ) == static_cast< CWeaponSDKBase* >( pWeapon ) );
+		return static_cast< CWeaponSDKBase* >( pWeapon );
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void CSDKPlayerShared::ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs )
+{
+	Vector org = m_pOuter->GetAbsOrigin();
+
+	static Vector vecMin(-32, -32, 0 );
+	static Vector vecMax(32, 32, 72 );
+
+	VectorAdd( vecMin, org, *pVecWorldMins );
+	VectorAdd( vecMax, org, *pVecWorldMaxs );
+}
+
+// --------------------------------------------------------------------------------------------------- //
+// CSDKPlayer shared implementations.
+// --------------------------------------------------------------------------------------------------- //
 void CSDKPlayer::FireBullet( 
 						   Vector vecSrc,	// shooting postion
 						   const QAngle &shootAngles,  //shooting angle
@@ -170,6 +363,8 @@ void CSDKPlayer::FireBullet(
 		ApplyMultiDamage();
 #endif
 }
+
+
 bool CSDKPlayer::CanMove( void ) const
 {
 	bool bValidMoveState = (State_Get() == STATE_ACTIVE || State_Get() == STATE_OBSERVER_MODE);		
@@ -230,109 +425,6 @@ const Vector CSDKPlayer::GetPlayerMaxs( void ) const
 	}
 }
 
-
-// --------------------------------------------------------------------------------------------------- //
-// CSDKPlayerShared implementation.
-// --------------------------------------------------------------------------------------------------- //
-CSDKPlayerShared::CSDKPlayerShared()
-{
-	SetDesiredPlayerClass( PLAYERCLASS_UNDEFINED );
-}
-
-CSDKPlayerShared::~CSDKPlayerShared()
-{
-}
-
-void CSDKPlayerShared::Init( CSDKPlayer *pPlayer )
-{
-	m_pOuter = pPlayer;
-}
-
-bool CSDKPlayerShared::IsDucking( void ) const
-{
-	return ( m_pOuter->GetFlags() & FL_DUCKING ) ? true : false;
-}
-
-void CSDKPlayerShared::SetJumping( bool bJumping )
-{
-	m_bJumping = bJumping;
-	
-	if ( IsSniperZoomed() )
-		ForceUnzoom();
-}
-
-//-----------------------------------------------------------------------------
-// Consider the weapon's built-in accuracy, this character's proficiency with
-// the weapon, and the status of the target. Use this information to determine
-// how accurately to shoot at the target.
-//-----------------------------------------------------------------------------
-Vector CSDKPlayerShared::GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget )
-{
-	if (pWeapon)
-		return pWeapon->GetBulletSpread(WEAPON_PROFICIENCY_PERFECT);
-
-	return VECTOR_CONE_15DEGREES;
-}
-
-void CSDKPlayerShared::ForceUnzoom( void )
-{
-	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
-	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
-	{
-		CWeaponSDKBaseSniper *pSniper = dynamic_cast<CWeaponSDKBaseSniper *>( pWeapon );
-		if ( pSniper )
-			pSniper->ExitScope();
-	}
-}
-
-bool CSDKPlayerShared::IsSniperZoomed( void ) const
-{
-	CWeaponSDKBase *pWeapon = GetActiveSDKWeapon();
-	if( pWeapon && ( pWeapon->GetSDKWpnData().m_bIsSniper ) )
-	{
-		CWeaponSDKBaseSniper *pSniper = (CWeaponSDKBaseSniper *)pWeapon;
-		Assert( pSniper );
-		return pSniper->IsScoped();
-	}
-
-	return false;
-}
-
-
-void CSDKPlayerShared::SetDesiredPlayerClass( int playerclass )
-{
-	m_iDesiredPlayerClass = playerclass;
-}
-
-int CSDKPlayerShared::DesiredPlayerClass( void )
-{
-	return m_iDesiredPlayerClass;
-}
-
-void CSDKPlayerShared::SetPlayerClass( int playerclass )
-{
-	m_iPlayerClass = playerclass;
-}
-
-int CSDKPlayerShared::PlayerClass( void )
-{
-	return m_iPlayerClass;
-}
-
-CWeaponSDKBase* CSDKPlayerShared::GetActiveSDKWeapon() const
-{
-	CBaseCombatWeapon *pWeapon = m_pOuter->GetActiveWeapon();
-	if ( pWeapon )
-	{
-		Assert( dynamic_cast< CWeaponSDKBase* >( pWeapon ) == static_cast< CWeaponSDKBase* >( pWeapon ) );
-		return static_cast< CWeaponSDKBase* >( pWeapon );
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
 CWeaponSDKBase *CSDKPlayer::GetWeaponOwnerID( int iID )
 {
 	for (int i = 0;i < WeaponCount(); i++) 
@@ -347,17 +439,6 @@ CWeaponSDKBase *CSDKPlayer::GetWeaponOwnerID( int iID )
 	}
 
 	return NULL;
-}
-
-void CSDKPlayerShared::ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs )
-{
-	Vector org = m_pOuter->GetAbsOrigin();
-
-	static Vector vecMin(-32, -32, 0 );
-	static Vector vecMax(32, 32, 72 );
-
-	VectorAdd( vecMin, org, *pVecWorldMins );
-	VectorAdd( vecMax, org, *pVecWorldMaxs );
 }
 
 void CSDKPlayer::InitSpeeds()
@@ -415,17 +496,4 @@ bool CSDKPlayer::ShouldCollide( int collisionGroup, int contentsMask ) const
 		}
 	}
 	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
-}
-
-//-----------------------------------------------------------------------------
-// Consider the weapon's built-in accuracy, this character's proficiency with
-// the weapon, and the status of the target. Use this information to determine
-// how accurately to shoot at the target.
-//-----------------------------------------------------------------------------
-Vector CSDKPlayer::GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget )
-{
-	if ( pWeapon )
-		return pWeapon->GetBulletSpread() * pWeapon->GetAccuracyModifier();
-	
-	return VECTOR_CONE_15DEGREES; // TODO: Class Base Accuracy
 }

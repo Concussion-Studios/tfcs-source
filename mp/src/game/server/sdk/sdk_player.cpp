@@ -119,19 +119,6 @@ END_DATADESC()
 LINK_ENTITY_TO_CLASS( player, CSDKPlayer );
 PRECACHE_REGISTER(player);
 
-// CSDKPlayerShared Data Tables
-//=============================
-
-// specific to the local player
-BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKSharedLocalPlayerExclusive )
-	SendPropInt( SENDINFO( m_iPlayerClass), 4 ),
-	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), 4 ),
-END_SEND_TABLE()
-
-BEGIN_SEND_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
-	SendPropDataTable( "sdksharedlocaldata", 0, &REFERENCE_SEND_TABLE(DT_SDKSharedLocalPlayerExclusive), SendProxy_SendLocalDataTable ),
-END_SEND_TABLE()
-
 extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
 
 BEGIN_SEND_TABLE_NOBASE( CSDKPlayer, DT_SDKLocalPlayerExclusive )

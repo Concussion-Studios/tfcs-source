@@ -46,9 +46,6 @@ extern ConVar cl_backspeed;
 extern ConVar cl_sidespeed;
 extern ConVar cl_righthand;
 
-ConVar tfc_dev_mark( "tfc_dev_mark", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
-ConVar tfc_beta_mark( "tfc_beta_mark", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
-
 ConVar sdk_max_separation_force("sdk_max_separation_force", "256", FCVAR_CHEAT | FCVAR_HIDDEN);
 
 ConVar cl_hl1_rollspeed( "cl_hl1_rollspeed", "300.0", FCVAR_USERINFO | FCVAR_ARCHIVE ); // 300.0
@@ -144,19 +141,6 @@ void __MsgFunc_ReloadEffect( bf_read &msg )
 }
 USER_MESSAGE_REGISTER( ReloadEffect );
 
-// CSDKPlayerShared Data Tables
-//=============================
-
-// specific to the local player ( ideally should not be in CSDKPlayerShared! )
-BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKSharedLocalPlayerExclusive )
-	RecvPropInt( RECVINFO( m_iPlayerClass ) ),
-	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
-END_RECV_TABLE()
-
-BEGIN_RECV_TABLE_NOBASE( CSDKPlayerShared, DT_SDKPlayerShared )
-	RecvPropDataTable( "sdksharedlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_SDKSharedLocalPlayerExclusive) ),
-END_RECV_TABLE()
-
 BEGIN_RECV_TABLE_NOBASE( C_SDKPlayer, DT_SDKLocalPlayerExclusive )
 	RecvPropInt( RECVINFO( m_iShotsFired ) ),
 	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
@@ -187,12 +171,6 @@ IMPLEMENT_CLIENTCLASS_DT( C_SDKPlayer, DT_SDKPlayer, CSDKPlayer )
 
 	RecvPropBool( RECVINFO( m_bSpawnInterpCounter ) ),
 END_RECV_TABLE()
-
-// ------------------------------------------------------------------------------------------ //
-// Prediction tables.
-// ------------------------------------------------------------------------------------------ //
-BEGIN_PREDICTION_DATA_NO_BASE( CSDKPlayerShared )
-END_PREDICTION_DATA()
 
 BEGIN_PREDICTION_DATA( C_SDKPlayer )
 	DEFINE_PRED_FIELD( m_flCycle, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),

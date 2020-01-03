@@ -18,6 +18,20 @@ class C_SDKPlayer;
 class CSDKPlayer;
 #endif
 
+//=============================================================================
+//
+// Tables.
+//
+#ifdef CLIENT_DLL
+	EXTERN_RECV_TABLE( DT_SDKPlayerShared );
+#else
+	EXTERN_SEND_TABLE( DT_SDKPlayerShared );
+#endif
+
+//=============================================================================
+//
+// Shared player class.
+//
 class CSDKPlayerShared
 {
 public:
@@ -39,9 +53,26 @@ public:
 
 	void	Init( OuterClass *pOuter );
 
-	Vector	GetAttackSpread(CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL);
+	CWeaponSDKBase* GetActiveSDKWeapon() const;
+
+	Vector	GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget = NULL );
+	void	SetJumping( bool bJumping );
+	void	ForceUnzoom( void );
+	void	ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs );
+
 	bool	IsSniperZoomed( void ) const;
 	bool	IsDucking( void ) const; 
+	bool	IsOnGround( void ) const;
+	bool	IsOnGodMode() const;
+	int		GetButtons();
+	bool	IsButtonPressing( int btn );
+	bool	IsButtonPressed( int btn );
+	bool	IsButtonReleased( int btn );
+	bool	IsJumping( void ) { return m_bJumping; }
+
+	// CTF Functions
+	bool	IsInGoalZone() { return m_bInGoalZone; }
+	void	SetGoalState( bool state );
 
 	void	SetDesiredPlayerClass( int playerclass );
 	int		DesiredPlayerClass( void );
@@ -50,26 +81,16 @@ public:
 	int		PlayerClass( void );
 	bool	IsClass( int playerclass ) const { return ( m_iPlayerClass == playerclass ); }
 
-	CWeaponSDKBase* GetActiveSDKWeapon() const;
-
-	bool	IsJumping( void ) { return m_bJumping; }
-	void	SetJumping( bool bJumping );
-
-	void	ForceUnzoom( void );
-
-	void ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs );
-
 private:
 
+	CNetworkVar( bool, m_bInGoalZone );
 	CNetworkVar( int, m_iPlayerClass );
 	CNetworkVar( int, m_iDesiredPlayerClass );
 
 public:
 
 	bool m_bJumping;
-
 	float m_flLastViewAnimationTime;
-
 	float m_flMaxSpeed;
 
 private:
@@ -77,4 +98,4 @@ private:
 	OuterClass *m_pOuter;
 };			   
 
-#endif //SDK_PLAYER_SHARED_H
+#endif // SDK_PLAYER_SHARED_H
