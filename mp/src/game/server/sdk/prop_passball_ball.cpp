@@ -140,6 +140,16 @@ void CPropPassBall::StartTouch( CBaseEntity* pOther )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CPropPassBall::OnReachGoal()
+{ 
+	GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
+	//ForceRespawn();
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CPropPassBall::InputSetTeam( inputdata_t &inputData )
 {
 	BaseClass::InputSetTeam( inputData );

@@ -25,6 +25,7 @@ public:
 	virtual void StartTouch( CBaseEntity* pOther );
 	virtual void Think();
 	virtual int ObjectCaps();
+	void OnReachGoal();
 
 	//
 	// Input handlers.

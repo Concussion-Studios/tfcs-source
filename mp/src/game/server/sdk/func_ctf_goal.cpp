@@ -1,6 +1,8 @@
 #include "cbase.h"
 #include "triggers.h"
 #include "sdk_player.h"
+#include "prop_passball_ball.h"
+#include "sdk_team.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: CTF/Pass The Ball Goal
@@ -36,7 +38,7 @@ void CFuncCTFGoal::Spawn()
 	
 void CFuncCTFGoal::GoalTouch( CBaseEntity* pOther )
 {
-	CSDKPlayer *pSDK = ToSDKPlayer( pOther );
+	auto *pSDK = ToSDKPlayer( pOther );
 	if ( pSDK )
 	{
 		// compare player team with goal zone team number
@@ -45,6 +47,15 @@ void CFuncCTFGoal::GoalTouch( CBaseEntity* pOther )
 			pSDK->m_Shared.SetGoalState( true );
 			ClientPrint( pSDK, HUD_PRINTCENTER, "BRING THE ENEMY FLAG TO THIS ZONE." );
 		}
+	}
+
+	auto* pBall = dynamic_cast<CPropPassBall*>( pOther );
+	if ( pBall )
+	{
+		if ( pBall->GetOwnerEntity() == pSDK )
+			GetGlobalSDKTeam( pSDK->GetTeamNumber() )->AddScore( 1 ); // Reward the player's team for bringing up the ball
+
+		//pBall->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
 	}
 }
 
