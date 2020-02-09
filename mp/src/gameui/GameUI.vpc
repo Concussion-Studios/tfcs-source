@@ -5,8 +5,7 @@
 //-----------------------------------------------------------------------------
 
 $macro SRCDIR		".."
-
-$Macro GAMENAME   "tf_coop_extended"
+$Macro GAMENAME   "tfcsource"
 
 $MacroRequired "GAMENAME"
 
@@ -37,15 +36,7 @@ $Configuration
 {
 	$Compiler
 	{
-		$PreprocessorDefinitions		"$BASE;TF_CLASSIC_CLIENT"
-	}
-}
-
-$Configuration
-{
-	$Compiler
-	{
-		$AdditionalIncludeDirectories	"$BASE;.\;.\controls;.\tf;$SRCDIR\game\shared;$SRCDIR\game\client;$SRCDIR\game\client\game_controls"
+		$AdditionalIncludeDirectories	"$BASE;.\;.\controls;.\swarm;$SRCDIR\game\shared;$SRCDIR\game\client;$SRCDIR\game\client\game_controls"
 		$PreprocessorDefinitions		"$BASE;SUPPRESS_INVALID_PARAMETER_NO_INFO;_CRT_NO_VA_START_VALIDATION;NO_STRING_T;CLIENT_DLL;VECTOR;VERSION_SAFE_STEAM_API_INTERFACES;DISABLE_PROTECTED_THINGS;strncpy=use_Q_strncpy_instead;_snprintf=use_Q_snprintf_instead" 
 		$PreprocessorDefinitions		"$BASE;GAMEUI_EXPORTS;GAMEUI_DLL"
 		$Create/UsePrecompiledHeader	"Use Precompiled Header (/Yu)"
@@ -69,12 +60,15 @@ $Project "GameUI"
 		{
 			$File	"$SRCDIR\game\client\vgui_video_player.cpp"
 
-			$File	"BitmapImagePanel.cpp" \
+			$File	"AchievementsDialog.cpp" \
+					"BitmapImagePanel.cpp" \
 					"CommandCheckButton.cpp" \
 					"CvarNegateCheckButton.cpp" \
 					"CvarSlider.cpp" \
 					"CvarTextEntry.cpp" \
-					"CvarToggleCheckButton.cpp" \
+					"CreateMultiplayerGameDialog.cpp" \
+					"CreateMultiplayerGameGameplayPage.cpp" \
+					"CreateMultiplayerGameServerPage.cpp" \
 					"GameConsole.cpp" \
 					"GameConsoleDialog.cpp" \
 					"GameUI_Interface.cpp" \
@@ -117,36 +111,30 @@ $Project "GameUI"
 			}	
 		}
 		
-		$Folder	"TF GameUI"
+		$Folder	"Swarm GameUI"
 		{
-			$File	"tf\basemodframe.cpp"
-			$File	"tf\BaseModPanel.cpp"
-			$File	"tf\UIGameData.cpp"
-			$File	"tf\ui_defines.h"
+			$File	"swarm\basemodframe.cpp"
+			$File	"swarm\basemodpanel.cpp"
+			$File	"swarm\uigamedata.cpp"
+			$File	"swarm\ui_defines.h"
 
 			$Folder	"VPanels"
 			{
-				$File	"tf\vachievements.cpp" \
-						"tf\vdropdownmenu.cpp" \
-						"tf\vflyoutmenu.cpp" \
-						"tf\vgenericconfirmation.cpp" \
-						"tf\vgenericpanellist.cpp" \
-						"tf\vhybridbutton.cpp" \
-						"tf\vingamemainmenu.cpp" \
-						"tf\vloadingprogress.cpp" \
-						"tf\vmainmenu.cpp" \
-						"tf\vmenubackground.cpp" \
-						"tf\vslidercontrol.cpp" \
-						"tf\vcreditsscreen.cpp" \
-						"tf\vcreategame.cpp" \
-						"tf\vcreategamegameplaypage.cpp" \
-						"tf\vcreategameserverpage.cpp" \
-						"tf\vblogpanel.cpp"
+				$File	"swarm\vdropdownmenu.cpp" \
+						"swarm\vflyoutmenu.cpp" \
+						"swarm\vgenericconfirmation.cpp" \
+						"swarm\vgenericpanellist.cpp" \
+						"swarm\vhybridbutton.cpp" \
+						"swarm\vingamemainmenu.cpp" \
+						"swarm\vloadingprogress.cpp" \
+						"swarm\vmainmenu.cpp" \
+						"swarm\vmenubackground.cpp" \
+						"swarm\vslidercontrol.cpp"
 			}
 			
 			$Folder	"Buttons"
 			{
-				$File	"tf\nb_header_footer.cpp"
+				$File	"swarm\nb_header_footer.cpp"
 			}
 		}
 		
