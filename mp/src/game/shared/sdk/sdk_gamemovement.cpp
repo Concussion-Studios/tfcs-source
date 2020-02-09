@@ -22,6 +22,8 @@
 
 ConVar	sdk_clamp_back_speed( "sdk_clamp_back_speed", "0.9", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar  sdk_clamp_back_speed_min( "sdk_clamp_back_speed_min", "100", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar	tfc_bhops("tfc_bhops", "1", FCVAR_REPLICATED);
+ConVar	tfc_max_bhop_speed("tfc_max_bhop_speed", "2", FCVAR_REPLICATED);
 
 extern bool g_bMovementOptimizations;
 
@@ -36,6 +38,7 @@ public:
 	void SetPlayerSpeed( void );
 	virtual void ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMove );
 	virtual bool CanAccelerate();
+	virtual void LimitForwardVel(void);
 	virtual bool CheckJumpButton( void );
 	virtual void WalkMove( void );
 	virtual void CheckParameters( void );
@@ -405,8 +408,8 @@ void CSDKGameMovement::CategorizePosition( void )
 		return;
 	}
 
-	// Check for a jump.
-	if ( mv->m_vecVelocity.z > 250.0f )
+	// Check for a jump.  Chrits: Changed upward velocity 250->180
+	if ( mv->m_vecVelocity.z > 180.0f )
 	{
 		SetGroundEntity( NULL );
 		return;
@@ -535,6 +538,28 @@ bool CSDKGameMovement::ResolveStanding( void )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Limit forward velocity when bunnyhopping
+//-----------------------------------------------------------------------------
+void CSDKGameMovement::LimitForwardVel(void)
+{
+	if (tfc_max_bhop_speed.GetFloat() >= 1.0f)
+	{
+		// Get max speed scaled by class and the player's current velocity
+		float flMax = tfc_max_bhop_speed.GetFloat() * player->m_flMaxspeed;
+		float flVel = mv->m_vecVelocity.Length();
+
+		// Is the player above the speed limit?
+		float flDiff = flVel - flMax;
+		if (flDiff > 0.0f)
+		{
+			// Scale the velocity back based on how far above the max speed the player is
+			// TODO: Rework this function!
+			mv->m_vecVelocity -= flDiff * 0.1;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 bool CSDKGameMovement::CheckJumpButton( void )
@@ -584,15 +609,23 @@ bool CSDKGameMovement::CheckJumpButton( void )
 	// No more effect
 	if (m_pSDKPlayer->GetGroundEntity() == NULL)
 	{
-		mv->m_nOldButtons |= IN_JUMP;
+		//Chrits: Q1 style jumping
+		if (!(mv->m_nOldButtons & IN_JUMP) && tfc_bhops.GetBool())
+		{
+			mv->m_nButtons &= ~IN_JUMP;
+		}
 		return false;		// in air, so no effect
 	}
 
 	if ( mv->m_nOldButtons & IN_JUMP )
 		return false;		// don't pogo stick
 
+
 	// In the air now.
 	SetGroundEntity( NULL );
+
+	// Limit speed
+	LimitForwardVel();
 	
 	m_pSDKPlayer->PlayStepSound( (Vector &)mv->GetAbsOrigin(), player->GetSurfaceData(), 1.0, true );
 	m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_JUMP );

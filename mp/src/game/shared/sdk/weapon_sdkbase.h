@@ -52,6 +52,7 @@ public:
  
 	// Get SDK weapon specific weapon data.
 	CSDKWeaponInfo const	&GetSDKWpnData() const;
+	virtual int				GetDamageType(void) { return g_aWeaponDamageTypes[GetWeaponID()]; }
  
 	// Get a pointer to the player that owns this weapon
 	CSDKPlayer* GetPlayerOwner() const;

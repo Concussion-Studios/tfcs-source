@@ -78,6 +78,23 @@ enum TFCGameModes
 
 extern const char *pszGameModeNames[];	// localized gamemode names
 
+// Ammo types
+typedef enum
+{
+	AMMO_NONE = 0,
+	AMMO_SHELLS,
+	AMMO_CELLS,
+	AMMO_ROCKETS,
+	AMMO_NAILS,
+	AMMO_GRENADES1,
+	AMMO_GRENADES2,
+	AMMO_DETPACK,
+
+	AMMO_LAST
+};
+
+extern const char *s_AmmoNames[];
+
 // Weapon IDs for all SDK Game weapons
 typedef enum
 {
@@ -114,6 +131,8 @@ typedef enum
 	
 	WEAPON_MAX,		// number of weapons weapon index
 } SDKWeaponID;
+
+extern int g_aWeaponDamageTypes[];
 
 typedef enum
 {

@@ -35,6 +35,29 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	m_flMaxSpeed = pKeyValuesData->GetFloat( "speed_max", SDK_DEFAULT_PLAYER_RUNSPEED );
 	m_iMaxHealth = pKeyValuesData->GetInt( "health_max", 100 );
 	m_iMaxArmor = pKeyValuesData->GetInt( "armor_max", 100 );
+	m_iSpawnArmor = pKeyValuesData->GetInt("armor_spawn", 0);
+	m_flArmorClass = pKeyValuesData->GetInt("armor_class", 0.3f);
+
+	KeyValues *pKeyValuesAmmo = pKeyValuesData->FindKey("MaxAmmo");
+	KeyValues *pKeyValuesSpawnAmmo = pKeyValuesData->FindKey("SpawnAmmo");
+
+	//Get max ammo carried by class
+	if (pKeyValuesAmmo)
+	{
+		for (int i = AMMO_NONE + 1; i < AMMO_LAST; i++)
+		{
+			m_aMaxAmmo[i] = pKeyValuesAmmo->GetInt(s_AmmoNames[i], 0);
+		}
+	}
+
+	//Get ammo that player will spawn with
+	if (pKeyValuesSpawnAmmo)
+	{
+		for (int i = AMMO_NONE + 1; i < AMMO_LAST; i++)
+		{
+			m_aSpawnAmmo[i] = pKeyValuesAmmo->GetInt(s_AmmoNames[i], 0);
+		}
+	}
 
 	const char *pszWeapon1 = pKeyValuesData->GetString("weapon1", NULL);
 	if (pszWeapon1)
@@ -99,14 +122,14 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	m_iNumGrensType1 = pKeyValuesData->GetInt( "numgrens", 0 );
 	if ( m_iNumGrensType1 > 0 )
 	{
-		const char *pszGrenType1 = pKeyValuesData->GetString( "grenadetype", NULL );
+		const char *pszGrenType1 = pKeyValuesData->GetString( "grenade1", NULL );
 		m_iGrenType1 = AliasToWeaponID( pszGrenType1 );
 	}
 
 	m_iNumGrensType2 = pKeyValuesData->GetInt( "numgrens2", 0 );
 	if ( m_iNumGrensType2 > 0 )
 	{
-		const char *pszGrenType2 = pKeyValuesData->GetString( "grenadetype2", NULL );
+		const char *pszGrenType2 = pKeyValuesData->GetString( "grenade2", NULL );
 		m_iGrenType2 = AliasToWeaponID( pszGrenType2 );
 	}
 }

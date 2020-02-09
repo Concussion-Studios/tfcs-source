@@ -824,6 +824,12 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			char buf[64];
 			int bufsize = sizeof(buf);
 
+			//Give ammo before weapons
+			for (int iAmmo = AMMO_NONE + 1; iAmmo < AMMO_LAST; iAmmo++)
+			{
+				pPlayer->GiveAmmo(pClassInfo.m_aSpawnAmmo[iAmmo], iAmmo);
+			}
+
 			//Give weapons
 
 			// First weapon
@@ -906,131 +912,131 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 				pWeapon10 = pPlayer->GiveNamedItem(buf);
 			}
 
-			CWeaponSDKBase *pWpn = NULL;
+			//CWeaponSDKBase *pWpn = NULL;
 
 			// Give Ammo
 
 			// Weapon One Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon1);
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon1);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Two Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon2);
+			//// Weapon Two Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon2);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Three Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon3);
+			//// Weapon Three Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon3);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Four Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon4);
+			//// Weapon Four Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon4);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Five Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon5);
+			//// Weapon Five Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon5);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Six Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon6);
+			//// Weapon Six Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon6);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Seven Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon7);
+			//// Weapon Seven Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon7);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Eight Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon8);
+			//// Weapon Eight Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon8);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Nine Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon9);
+			//// Weapon Nine Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon9);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
-			// Weapon Ten Ammo
-			pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon10);
+			//// Weapon Ten Ammo
+			//pWpn = dynamic_cast<CWeaponSDKBase *>(pWeapon10);
 
-			if (pWpn)
-			{
-				int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
-				int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
-				pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
-			}
+			//if (pWpn)
+			//{
+			//	int iNumClip = pWpn->GetSDKWpnData().m_iDefaultAmmoClips - 1;	//account for one clip in the gun
+			//	int iClipSize = pWpn->GetSDKWpnData().iMaxClip1;
+			//	pPlayer->GiveAmmo(iNumClip * iClipSize, pWpn->GetSDKWpnData().szAmmo1);
+			//}
 
 			// Grenade Type 1
-			if ( pClassInfo.m_iGrenType1 != WEAPON_NONE )
-			{
-				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType1) );
-				CBaseEntity *pGrenade = pPlayer->GiveNamedItem( buf );
-				Assert( pGrenade );		
-				pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade);
-				if( pWpn )
-					pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType1 - 1, pWpn->GetSDKWpnData().szAmmo1 );
-			}
+			//if ( pClassInfo.m_iGrenType1 != WEAPON_NONE )
+			//{
+			//	Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType1) );
+			//	CBaseEntity *pGrenade = pPlayer->GiveNamedItem( buf );
+			//	Assert( pGrenade );		
+			//	pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade);
+			//	if( pWpn )
+			//		pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType1 - 1, pWpn->GetSDKWpnData().szAmmo1 );
+			//}
 
-			// Grenade Type 2
-			if ( pClassInfo.m_iGrenType2 != WEAPON_NONE )
-			{
-				Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType2) );
-				CBaseEntity *pGrenade2 = pPlayer->GiveNamedItem( buf );
-				Assert( pGrenade2 );	
-				pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade2);
-				if( pWpn )
-					pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType2 - 1, pWpn->GetSDKWpnData().szAmmo1 );
-			}
+			//// Grenade Type 2
+			//if ( pClassInfo.m_iGrenType2 != WEAPON_NONE )
+			//{
+			//	Q_snprintf( buf, bufsize, "weapon_%s", WeaponIDToAlias(pClassInfo.m_iGrenType2) );
+			//	CBaseEntity *pGrenade2 = pPlayer->GiveNamedItem( buf );
+			//	Assert( pGrenade2 );	
+			//	pWpn = dynamic_cast<CWeaponSDKBase *>(pGrenade2);
+			//	if( pWpn )
+			//		pPlayer->GiveAmmo( pClassInfo.m_iNumGrensType2 - 1, pWpn->GetSDKWpnData().szAmmo1 );
+			//}
 
 			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pWeapon1 );
 			pPlayer->AdjustArmor( pClassInfo.m_iMaxArmor );
@@ -1888,28 +1894,35 @@ CAmmoDef* GetAmmoDef()
 	{
 		bInitted = true;
 
-		for (int i=WEAPON_NONE+1;i<WEAPON_MAX;i++)
-		{
-			//Tony; ignore grenades, shotgun and the crowbar, grenades and shotgun are handled seperately because of their damage type not being DMG_BULLET.
-			if (i == WEAPON_GRENADE || i == WEAPON_CROWBAR || i == WEAPON_UMBRELLA  || i == WEAPON_SHOTGUN || i == WEAPON_12GAUGE || i == WEAPON_NAILGUN
-				|| i == WEAPON_SUPERNAILGUN || i == WEAPON_WRENCH || i == WEAPON_KNIFE || i == WEAPON_AC || i == WEAPON_MEDKIT || i == WEAPON_RPG)
-				continue;
+		//for (int i=WEAPON_NONE+1;i<WEAPON_MAX;i++)
+		//{
+		//	//Tony; ignore grenades, shotgun and the crowbar, grenades and shotgun are handled seperately because of their damage type not being DMG_BULLET.
+		//	if (i == WEAPON_GRENADE || i == WEAPON_CROWBAR || i == WEAPON_UMBRELLA  || i == WEAPON_SHOTGUN || i == WEAPON_12GAUGE || i == WEAPON_NAILGUN
+		//		|| i == WEAPON_SUPERNAILGUN || i == WEAPON_WRENCH || i == WEAPON_KNIFE || i == WEAPON_AC || i == WEAPON_MEDKIT || i == WEAPON_RPG)
+		//		continue;
 
-			def.AddAmmoType( WeaponIDToAlias(i), DMG_BULLET, TRACER_LINE_AND_WHIZ, 0, 0, 200/*max carry*/, 1, 0 );
+		//	def.AddAmmoType( WeaponIDToAlias(i), DMG_BULLET, TRACER_LINE_AND_WHIZ, 0, 0, 200/*max carry*/, 1, 0 );
+		//}
+
+		for (int i = AMMO_NONE; i < AMMO_LAST; ++i)
+		{
+			def.AddAmmoType(s_AmmoNames[i], DMG_BULLET, TRACER_NONE, 0, 0, 200, 1, 0);
 		}
 
-		def.AddAmmoType( "sniper",		DMG_BULLET,													TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "nail",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "shell",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "cell",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "explosive",	DMG_BLAST,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "fireball",	DMG_BLAST | DMG_BURN,										TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "shotgun",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
-		def.AddAmmoType( "grenades",	DMG_BLAST,													TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "concussion",	DMG_SONIC | DMG_NEVERGIB,									TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "napalm",		DMG_BURN | DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "emp",			DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,					TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
-		def.AddAmmoType( "plasma",		DMG_DISSOLVE | DMG_PLASMA | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 200/*max carry*/,	1, 0 );
+		//def.AddAmmoType( "sniper",		DMG_BULLET,													TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "nail",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "shell",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "cell",		DMG_BULLET,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "explosive",	DMG_BLAST,													TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "fireball",	DMG_BLAST | DMG_BURN,										TRACER_NONE,			0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "shotgun",		DMG_BUCKSHOT,												TRACER_LINE_AND_WHIZ,	0, 0, 200/*max carry*/, 1, 0 );
+		//def.AddAmmoType( "grenades1",	DMG_BLAST,													TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
+		//def.AddAmmoType( "grenades2",	DMG_BLAST,													TRACER_NONE,			0, 0, 4,				1, 0 );
+		//def.AddAmmoType( "detpack",		DMG_BLAST,													TRACER_NONE,			0, 0, 4,				1, 0 );
+		//def.AddAmmoType( "concussion",	DMG_SONIC | DMG_NEVERGIB,									TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
+		//def.AddAmmoType( "napalm",		DMG_BURN | DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
+		//def.AddAmmoType( "emp",			DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,					TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
+		//def.AddAmmoType( "plasma",		DMG_DISSOLVE | DMG_PLASMA | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 200/*max carry*/,	1, 0 );
 
 		KeyValuesAD pAmmo( "AmmoDefs" );
 		if ( pAmmo->LoadFromFile( filesystem, "scripts/ammo_defs.txt", "MOD" ) )

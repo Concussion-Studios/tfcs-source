@@ -607,6 +607,70 @@ void CSDKPlayer::CheatImpulseCommands( int iImpulse )
 	}
 }
 
+//=========================================================
+// Discard unused ammo
+//=========================================================
+void CSDKPlayer::DiscardAmmo(void)
+{
+	int iCells = 0;
+	int iShells = 0;
+	int iRockets = 0;
+	int iNails = 0;
+
+	if (m_Shared.PlayerClass() != PLAYERCLASS_ENGINEER)
+	{
+		int iCells = GetAmmoCount(AMMO_CELLS);
+		int iShells = GetAmmoCount(AMMO_SHELLS);
+		int iRockets = GetAmmoCount(AMMO_ROCKETS);
+		int iNails = GetAmmoCount(AMMO_NAILS);
+
+		// Cycle through all of the player's weapon slots
+		for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
+		{
+			CBaseCombatWeapon *pBaseWeapon = GetWeapon(i);
+			if (pBaseWeapon)
+			{
+				// if the player uses this weapon, set the amount to discard to 0
+				if (pBaseWeapon->GetPrimaryAmmoType() == AMMO_CELLS)
+					iCells = 0;
+				else if (pBaseWeapon->GetPrimaryAmmoType() == AMMO_SHELLS)
+					iShells = 0;
+				else if (pBaseWeapon->GetPrimaryAmmoType() == AMMO_ROCKETS)
+					iRockets = 0;
+				else if (pBaseWeapon->GetPrimaryAmmoType() == AMMO_NAILS)
+					iNails = 0;
+			}
+		}
+	}
+	else if (m_Shared.PlayerClass() == PLAYERCLASS_ENGINEER)
+	{
+		// Discard some cells and rockets
+		iCells = min(80, GetAmmoCount(AMMO_CELLS));
+		iRockets = min(30, GetAmmoCount(AMMO_ROCKETS));
+	}
+
+	if (iCells != 0 && iShells != 0 && iRockets != 0 && iNails != 0)
+	{
+		//TODO: Create ammo packs and give them some forward velocity
+		RemoveAmmo(iCells, AMMO_CELLS);
+		RemoveAmmo(iShells, AMMO_SHELLS);
+		RemoveAmmo(iRockets, AMMO_ROCKETS);
+		RemoveAmmo(iNails, AMMO_NAILS);
+	}
+	
+}
+
+void HandleCommand_Discard(void)
+{
+	CSDKPlayer *pPlayer = dynamic_cast<CSDKPlayer *>(UTIL_GetCommandClient());
+	if (pPlayer)
+	{
+		pPlayer->DiscardAmmo();
+	}
+}
+
+ConCommand discard_ammo("discard", HandleCommand_Discard);
+
 //-----------------------------------------------------------------------------
 // Purpose: Player reacts to bumping a weapon. 
 // Input  : pWeapon - the weapon that the player bumped into.

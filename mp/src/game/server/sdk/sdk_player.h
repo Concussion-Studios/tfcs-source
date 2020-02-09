@@ -119,6 +119,9 @@ public:
 	virtual int GetArmorValue()	{ return m_ArmorValue; }
 	virtual int GetMaxArmorValue() { return m_MaxArmorValue; }
 
+	// Ammo and items
+	void		DiscardAmmo(void);							//Chrits; discard unused ammo
+
 	// Health
 	virtual void SetHealth( int value );
 	virtual void SetMaxHealth( int MaxValue );
@@ -257,10 +260,11 @@ private:
 
 	float m_flHealthRegenDelay;
 
-	virtual void Weapon_Equip( CBaseCombatWeapon *pWeapon );		//Tony; override so diethink can be cleared
-	virtual void ThrowActiveWeapon( void );
-	virtual void SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  );
-	virtual void SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir );
+	virtual void	Weapon_Equip( CBaseCombatWeapon *pWeapon );		//Tony; override so diethink can be cleared
+	virtual void	ThrowActiveWeapon( void );
+	virtual void	SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  );
+	virtual void	SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir );
+
 	// When the player joins, it cycles their view between trigger_camera entities.
 	// This is the current camera, and the time that we'll switch to the next one.
 	EHANDLE m_pIntroCamera;

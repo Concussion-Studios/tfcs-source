@@ -27,6 +27,10 @@ public:
 	float m_flMaxSpeed;
 	int m_iMaxArmor;
 	int m_iMaxHealth;
+	int m_iSpawnArmor;
+	float m_flArmorClass;
+	int m_aMaxAmmo[AMMO_LAST];
+	int m_aSpawnAmmo[AMMO_LAST];
 
 	//Weapons
 	int m_iWeapon1;
