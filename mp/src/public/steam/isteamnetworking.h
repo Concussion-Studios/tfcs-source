@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: interface to steam managing network connections between game clients & servers
 //
@@ -10,7 +10,9 @@
 #pragma once
 #endif
 
-#include "steam_api_common.h"
+#include "steamtypes.h"
+#include "steamclientpublic.h"
+
 
 // list of possible errors returned by SendP2PPacket() API
 // these will be posted in the P2PSessionConnectFail_t callback
@@ -61,7 +63,7 @@ enum EP2PSend
 #elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
 #else
-#error steam_api_common.h should define VALVE_CALLBACK_PACK_xxx
+#error isteamclient.h must be included
 #endif 
 struct P2PSessionState_t
 {
@@ -125,14 +127,8 @@ class ISteamNetworking
 {
 public:
 	////////////////////////////////////////////////////////////////////////////////////////////
-	//
-	// UDP-style (connectionless) networking interface.  These functions send messages using
-	// an API organized around the destination.  Reliable and unreliable messages are supported.
-	//
-	// For a more TCP-style interface (meaning you have a connection handle), see the functions below.
-	// Both interface styles can send both reliable and unreliable messages.
-	//
-	// Automatically establishes NAT-traversing or Relay server connections
+	// Session-less connection functions
+	//    automatically establishes NAT-traversing or Relay server connections
 
 	// Sends a P2P packet to the specified user
 	// UDP-like, unreliable and a max packet size of 1200 bytes
@@ -185,18 +181,11 @@ public:
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////
+	// LISTEN / CONNECT style interface functions
 	//
-	// LISTEN / CONNECT connection-oriented interface functions
-	//
-	// These functions are more like a client-server TCP API.  One side is the "server"
-	// and "listens" for incoming connections, which then must be "accepted."  The "client"
-	// initiates a connection by "connecting."  Sending and receiving is done through a
-	// connection handle.
-	//
-	// For a more UDP-style interface, where you do not track connection handles but
-	// simply send messages to a SteamID, use the UDP-style functions above.
-	//
-	// Both methods can send both reliable and unreliable methods.
+	// This is an older set of functions designed around the Berkeley TCP sockets model
+	// it's preferential that you use the above P2P functions, they're more robust
+	// and these older functions will be removed eventually
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -272,21 +261,13 @@ public:
 };
 #define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking005"
 
-// Global interface accessor
-inline ISteamNetworking *SteamNetworking();
-STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamNetworking, STEAMNETWORKING_INTERFACE_VERSION );
-
-// Global accessor for the gameserver client
-inline ISteamNetworking *SteamGameServerNetworking();
-STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamGameServerNetworking, STEAMNETWORKING_INTERFACE_VERSION );
-
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )
 #pragma pack( push, 4 )
 #elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
 #else
-#error steam_api_common.h should define VALVE_CALLBACK_PACK_xxx
+#error isteamclient.h must be included
 #endif 
 
 // callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
