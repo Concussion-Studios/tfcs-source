@@ -46,10 +46,10 @@ public:
 	virtual void LoadControlSettingsAndUserConfig(const char *dialogResourceName, int dialogID = 0);
 
 	// Override to change how build mode is activated
-	virtual void ActivateBuildMode();
+	virtual void ActivateBuildMode() { BaseClass::ActivateBuildMode(); }
 
 	// Return the buildgroup that this panel is part of.
-	virtual BuildGroup *GetBuildGroup();
+	virtual BuildGroup *GetBuildGroup() { return BaseClass::GetBuildGroup(); }
 
 	// Virtual factory for control creation
 	// controlName is a string which is the same as the class name
@@ -148,7 +148,6 @@ protected:
 private:
 	void ForceSubPanelsToUpdateWithNewDialogVariables();
 
-	BuildGroup *_buildGroup;
 	FocusNavGroup m_NavGroup;
 	KeyValues *m_pDialogVariables;
 

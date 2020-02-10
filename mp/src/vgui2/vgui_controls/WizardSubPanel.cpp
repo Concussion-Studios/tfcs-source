@@ -25,7 +25,6 @@ WizardSubPanel::WizardSubPanel(Panel *parent, const char *panelName) : EditableP
 	SetVisible(false);
 	m_iDesiredWide = 0;
 	m_iDesiredTall = 0;
-	SetBuildGroup(GetBuildGroup());
 }
 
 //-----------------------------------------------------------------------------

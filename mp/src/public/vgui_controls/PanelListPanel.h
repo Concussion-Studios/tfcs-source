@@ -85,6 +85,8 @@ public:
 
 	int	ComputeVPixelsNeeded();
 
+	void SetInnerPanel(bool bInner);
+
 protected:
 	// overrides
 	virtual void OnSizeChanged(int wide, int tall);
@@ -118,6 +120,7 @@ private:
 	int						m_iNumColumns;
 	int						m_iDefaultHeight;
 	int						m_iPanelBuffer;
+	bool					m_bInnerPanel;
 
 	CPanelAnimationVar( bool, m_bAutoHideScrollbar, "autohide_scrollbar", "0" );
 };

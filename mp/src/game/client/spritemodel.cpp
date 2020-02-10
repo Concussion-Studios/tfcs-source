@@ -212,7 +212,6 @@ static void AdjustSubRect(CEngineSprite *pSprite, int frame, float *pfLeft, floa
 	return;
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -357,6 +356,15 @@ bool CEngineSprite::IsVideo()
 	return ( m_VideoMaterial != NULL );
 }
 
+bool CEngineSprite::IsBIK()
+{
+	return ( m_hBIKMaterial != BIKMATERIAL_INVALID );
+}
+bool CEngineSprite::IsAVI()
+{
+	return ( m_hAVIMaterial != AVIMATERIAL_INVALID );
+}
+
 //-----------------------------------------------------------------------------
 // Returns the texture coordinate range	used to draw the sprite
 //-----------------------------------------------------------------------------
@@ -416,13 +424,10 @@ IMaterial *CEngineSprite::GetMaterial( RenderMode_t nRenderMode, int nFrame )
 	}
 	
 	IMaterial *pMaterial = m_material[nRenderMode];
-	if ( pMaterial )
+	IMaterialVar* pFrameVar = pMaterial->FindVarFast( "$frame", &frameCache );
+	if ( pFrameVar )
 	{
-		IMaterialVar* pFrameVar = pMaterial->FindVarFast( "$frame", &frameCache );
-		if ( pFrameVar )
-		{
-			pFrameVar->SetIntValue( nFrame );
-		}
+		pFrameVar->SetIntValue( nFrame );
 	}
 
 	return pMaterial;

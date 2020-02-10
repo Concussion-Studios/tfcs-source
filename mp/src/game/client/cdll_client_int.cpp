@@ -268,7 +268,7 @@ void ProcessCacheUsedMaterials()
 	g_bRequestCacheUsedMaterials = false;
 	if ( materials )
 	{
-        materials->CacheUsedMaterials();
+		materials->CacheUsedMaterials();
 	}
 }
 
@@ -353,6 +353,19 @@ class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface = (class IClientPur
 
 static ConVar *g_pcv_ThreadMode = NULL;
 
+#if defined SDK_DLL && defined _WINDOWS
+//#pragma message(FILE_LINE_STRING " !!FIXME!! replace all this with Sys_LoadGameModule")
+static class DllOverride {
+	public:
+		DllOverride() {
+			Sys_LoadInterface("filesystem_stdio.dll", FILESYSTEM_INTERFACE_VERSION, nullptr, (void **)&g_pFullFileSystem);
+			const char *pGameDir = CommandLine()->ParmValue("-game", "hl2");
+			pGameDir = VarArgs("%s/bin", pGameDir);
+			g_pFullFileSystem->AddSearchPath(pGameDir, "EXECUTABLE_PATH", PATH_ADD_TO_HEAD);
+		}
+} g_DllOverride;
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: interface for gameui to modify voice bans
 //-----------------------------------------------------------------------------
@@ -393,48 +406,48 @@ public:
 		}
 	}
 
-    //=============================================================================
-    // HPE_BEGIN
-    // [dwenger] Necessary for stats display
-    //=============================================================================
+	//=============================================================================
+	// HPE_BEGIN
+	// [dwenger] Necessary for stats display
+	//=============================================================================
 
-    void CreateAchievementsPanel( vgui::Panel* pParent )
-    {
-        if (g_pAchievementsAndStatsInterface)
-        {
-            g_pAchievementsAndStatsInterface->CreatePanel( pParent );
-        }
-    }
+	void CreateAchievementsPanel( vgui::Panel* pParent )
+	{
+		if (g_pAchievementsAndStatsInterface)
+		{
+			g_pAchievementsAndStatsInterface->CreatePanel( pParent );
+		}
+	}
 
-    void DisplayAchievementPanel()
-    {
-        if (g_pAchievementsAndStatsInterface)
-        {
-            g_pAchievementsAndStatsInterface->DisplayPanel();
-        }
-    }
+	void DisplayAchievementPanel()
+	{
+		if (g_pAchievementsAndStatsInterface)
+		{
+			g_pAchievementsAndStatsInterface->DisplayPanel();
+		}
+	}
 
-    void ShutdownAchievementPanel()
-    {
-        if (g_pAchievementsAndStatsInterface)
-        {
-            g_pAchievementsAndStatsInterface->ReleasePanel();
-        }
-    }
+	void ShutdownAchievementPanel()
+	{
+		if (g_pAchievementsAndStatsInterface)
+		{
+			g_pAchievementsAndStatsInterface->ReleasePanel();
+		}
+	}
 
 	int GetAchievementsPanelMinWidth( void ) const
 	{
-        if ( g_pAchievementsAndStatsInterface )
-        {
-            return g_pAchievementsAndStatsInterface->GetAchievementsPanelMinWidth();
-        }
+		if ( g_pAchievementsAndStatsInterface )
+		{
+			return g_pAchievementsAndStatsInterface->GetAchievementsPanelMinWidth();
+		}
 
 		return 0;
 	}
 
-    //=============================================================================
-    // HPE_END
-    //=============================================================================
+	//=============================================================================
+	// HPE_END
+	//=============================================================================
 
 	const char *GetHolidayString()
 	{
@@ -1247,10 +1260,10 @@ void CHLClient::PostInit()
 //-----------------------------------------------------------------------------
 void CHLClient::Shutdown( void )
 {
-    if (g_pAchievementsAndStatsInterface)
-    {
-        g_pAchievementsAndStatsInterface->ReleasePanel();
-    }
+	if (g_pAchievementsAndStatsInterface)
+	{
+		g_pAchievementsAndStatsInterface->ReleasePanel();
+	}
 
 #ifdef SIXENSE
 	g_pSixenseInput->Shutdown();
@@ -2085,7 +2098,7 @@ void SimulateEntities()
 	VPROF_BUDGET("Client SimulateEntities", VPROF_BUDGETGROUP_CLIENT_SIM);
 
 	// Service timer events (think functions).
-  	ClientThinkList()->PerformThinkFunctions();
+	ClientThinkList()->PerformThinkFunctions();
 
 	// TODO: make an ISimulateable interface so C_BaseNetworkables can simulate?
 	{

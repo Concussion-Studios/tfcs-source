@@ -41,3 +41,7 @@ $Project "vgui_controls"
 {
 	"vgui2\vgui_controls\vgui_controls.vpc" [$WIN32||$POSIX]
 }
+$Project "gameui"
+{
+	"gameui\GameUI.vpc" [$WIN32]
+}

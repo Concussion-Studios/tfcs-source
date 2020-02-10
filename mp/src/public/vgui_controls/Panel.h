@@ -13,6 +13,7 @@
 #endif
 
 #include "tier1/utlflags.h"
+#include "tier1/KeyValues.h"
 #include "vgui/VGUI.h"
 #include "vgui/Dar.h"
 #include "vgui_controls/MessageMap.h"
@@ -139,7 +140,7 @@ class IForceVirtualInheritancePanel
 //			This is designed as an easy-access to the vgui-functionality; for more
 //			low-level access to vgui functions use the IPanel/IClientPanel interfaces directly
 //-----------------------------------------------------------------------------
-class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
+class Panel : public IClientPanel, public virtual IForceVirtualInheritancePanel
 {
 	DECLARE_CLASS_SIMPLE_NOBASE( Panel );
 
@@ -201,6 +202,9 @@ public:
 	int  GetZPos( void );
 	void SetAlpha(int alpha);	// sets alpha modifier for panel and all child panels [0..255]
 	int GetAlpha();	// returns the current alpha
+
+	virtual void GetModelPos( float &x, float &y, float &z ){ return; };
+	virtual void SetModelPos( float x, float y, float z ){ return; };
 
 	// panel visibility
 	// invisible panels and their children do not drawn, updated, or receive input messages
@@ -342,6 +346,12 @@ public:
 	virtual bool IsOpaque();
 	bool IsRightAligned();		// returns true if the settings are aligned to the right of the screen
 	bool IsBottomAligned();		// returns true if the settings are aligned to the bottom of the screen
+
+	// Override to change how build mode is activated
+	void ActivateBuildMode();
+
+	// Return the buildgroup that this panel is part of.
+	BuildGroup *GetBuildGroup();
 
 	// scheme access functions
 	virtual HScheme GetScheme();
@@ -861,7 +871,7 @@ private:
 	Color			_fgColor;		// foreground color
 	Color			_bgColor;		// background color
 
-	HBuildGroup		_buildGroup;
+	HBuildGroup		_buildGroupHandle;
 
 	short			m_nPinDeltaX;		// Relative position of the pinned corner to the edge
 	short			m_nPinDeltaY;
@@ -909,6 +919,8 @@ private:
 
 	CUtlString m_sNavBackName;
 	PHandle m_NavBack;
+protected:
+	static int s_NavLock;
 
 private:
 
@@ -946,6 +958,8 @@ private:
 
 	// obselete, remove soon
 	void OnOldMessage(KeyValues *params, VPANEL ifromPanel);
+
+	BuildGroup *_buildGroup;
 };
 
 inline void Panel::DisableMouseInputForThisPanel( bool bDisable )
@@ -958,7 +972,6 @@ inline bool	Panel::IsMouseInputDisabledForThisPanel() const
 	return _flags.IsFlagSet( IS_MOUSE_DISABLED_FOR_THIS_PANEL_ONLY );
 }
 
-#if 0
 // This function cannot be defined here because it requires on a full definition of
 // KeyValues (to call KeyValues::MakeCopy()) whereas the rest of this header file
 // assumes a forward declared definition of KeyValues.
@@ -983,7 +996,6 @@ inline void Panel::PostMessageToAllSiblingsOfType( KeyValues *msg, float delaySe
 
 	msg->deleteThis();
 }
-#endif
 
 class Button;
 

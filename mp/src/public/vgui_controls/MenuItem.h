@@ -106,6 +106,13 @@ public:
 
 	virtual void GetContentSize( int& cw, int &ch );
 
+	virtual void SetImage(int i);
+	virtual bool HasImage();
+	virtual int GetImage();
+
+	virtual bool ShouldIgnoreFirstClick();
+	virtual void SetIgnoreFirstClick(bool bEnable);
+
 protected:
 	void OnKeyCodeReleased(KeyCode code);
 	void OnMenuClose();
@@ -128,7 +135,10 @@ private:
 	TextImage	*m_pCurrentKeyBinding; // An optional indicator for the key currently bound to this menu item
 
 	KeyValues *m_pUserData;
-
+	
+	int m_iImage;
+	bool m_bIgnoreFirstClick;
+	bool m_bFirstClick;
 };
 
 } // namespace vgui

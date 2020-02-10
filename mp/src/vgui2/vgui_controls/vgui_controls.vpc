@@ -23,6 +23,10 @@ $Project "vgui_controls"
 {
 	$Folder	"Source Files"
 	{
+		$File	"ColorPicker.cpp"
+		$File	"PromptSimple.cpp"
+		$File	"TokenChannels.cpp"
+		$File	"Utilities.cpp"
 		$File	"AnalogBar.cpp"
 		$File	"AnimatingImagePanel.cpp"
 		$File	"AnimationController.cpp"

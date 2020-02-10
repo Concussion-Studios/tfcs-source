@@ -69,6 +69,7 @@ namespace
 
 			SetBlockDragChaining( true );
 		}
+		virtual ~GripPanel() {}
 		
 		// Purpose- handle window resizing
 		// Input- dx, dy, the offet of the mouse pointer from where we started dragging
@@ -265,6 +266,7 @@ namespace
 		CaptionGripPanel(Frame* frame, const char *name) : GripPanel(frame, name, 0, 0)
 		{
 		}
+		virtual ~CaptionGripPanel() {}
 		
 		void moved(int dx, int dy)
 		{
@@ -523,6 +525,7 @@ namespace vgui
 			SetTextInset(2, 1);
 			SetBlockDragChaining( true );
 		}
+		virtual ~FrameButton() {}
 		
 		virtual void ApplySchemeSettings(IScheme *pScheme)
 		{
@@ -628,6 +631,7 @@ public:
 		SetMouseClickEnabled( MOUSE_RIGHT, true );
 		SetBlockDragChaining( true );
 	}
+	virtual ~FrameSystemButton() {}
 	
 	void SetImages( const char *pEnabledImage, const char *pDisabledImage = NULL )
 	{
@@ -784,9 +788,6 @@ Frame::Frame(Panel *parent, const char *panelName, bool showTaskbarIcon /*=true*
 	m_hCustomTitleFont = INVALID_FONT;
 
 	SetTitle("#Frame_Untitled", parent ? false : true);
-	
-	// add ourselves to the build group
-	SetBuildGroup(GetBuildGroup());
 	
 	SetMinimumSize(128,66);
 	
@@ -1641,6 +1642,16 @@ void Frame::PaintBackground()
 	}
 }
 
+Color Frame::GetOutOfFocusColor()
+{
+	return m_OutOfFocusBgColor;
+}
+
+void Frame::SetOutOfFocusColor(Color col)
+{
+	m_OutOfFocusBgColor = col;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -1743,7 +1754,7 @@ void Frame::ApplySettings(KeyValues *inResourceData)
 	inResourceData->SetInt("visible", -1);
 	BaseClass::ApplySettings(inResourceData);
 
-	SetCloseButtonVisible( inResourceData->GetBool( "setclosebuttonvisible", true ) );
+	SetCloseButtonVisible( inResourceData->GetBool( "setclosebuttonvisible", false ) );
 
 	if( !inResourceData->GetInt("settitlebarvisible", 1 ) ) // if "title" is "0" then don't draw the title bar
 	{
@@ -2170,12 +2181,7 @@ void Frame::OnKeyCodeTyped(KeyCode code)
 		}
 	}
 
-	if ( ctrl && shift && alt && code == KEY_B)
-	{
-		// enable build mode
-		ActivateBuildMode();
-	}
-	else if (ctrl && shift && alt && code == KEY_R)
+	if (ctrl && shift && alt && code == KEY_R)
 	{
 		// reload the scheme
 		VPANEL top = surface()->GetEmbeddedPanel();

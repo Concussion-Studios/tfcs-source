@@ -1,0 +1,193 @@
+//-----------------------------------------------------------------------------
+//	GAMEUI.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$macro SRCDIR		".."
+$Macro GAMENAME   "tfcsource"
+
+$MacroRequired "GAMENAME"
+
+$Macro OUTBINNAME	"gameui"
+$Macro OUTBINDIR	"$SRCDIR\..\game\$GAMENAME\bin"
+
+$include "$SRCDIR\vpc_scripts\source_dll_base.vpc"	[$WIN32||$LINUX]
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$OutputDirectory			".\Debug_$GAMENAME"
+		$IntermediateDirectory		".\Debug_$GAMENAME"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$OutputDirectory			".\Release_$GAMENAME"
+		$IntermediateDirectory		".\Release_$GAMENAME"
+	}
+}
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.\;.\controls;.\swarm;$SRCDIR\game\shared;$SRCDIR\game\client;$SRCDIR\game\client\game_controls"
+		$PreprocessorDefinitions		"$BASE;SUPPRESS_INVALID_PARAMETER_NO_INFO;_CRT_NO_VA_START_VALIDATION;NO_STRING_T;CLIENT_DLL;VECTOR;VERSION_SAFE_STEAM_API_INTERFACES;DISABLE_PROTECTED_THINGS;strncpy=use_Q_strncpy_instead;_snprintf=use_Q_snprintf_instead" 
+		$PreprocessorDefinitions		"$BASE;GAMEUI_EXPORTS;GAMEUI_DLL"
+		$Create/UsePrecompiledHeader	"Use Precompiled Header (/Yu)"
+		$Create/UsePCHThroughFile		"cbase.h"
+		$PrecompiledHeaderFile			"$(IntDir)/gameui.pch"
+	}
+
+	$Linker
+	{
+		$IgnoreImportLibrary			"TRUE"
+		$AdditionalDependencies			"$BASE Ws2_32.lib odbc32.lib odbccp32.lib Shlwapi.lib winmm.lib" [$WIN32]
+		$IgnoreSpecificLibrary			"libc;libcd;libcmtd;msvcrt"
+	}
+}
+
+$Project "GameUI"
+{
+	$Folder	"Source Files"
+	{
+		$Folder	"Base GameUI"
+		{
+			$File	"$SRCDIR\game\client\vgui_video_player.cpp"
+
+			$File	"AchievementsDialog.cpp" \
+					"BitmapImagePanel.cpp" \
+					"CommandCheckButton.cpp" \
+					"CvarNegateCheckButton.cpp" \
+					"CvarToggleCheckButton.cpp" \
+					"CvarSlider.cpp" \
+					"CvarTextEntry.cpp" \
+					"CreateMultiplayerGameDialog.cpp" \
+					"CreateMultiplayerGameGameplayPage.cpp" \
+					"CreateMultiplayerGameServerPage.cpp" \
+					"GameConsole.cpp" \
+					"GameConsoleDialog.cpp" \
+					"GameUI_Interface.cpp" \
+					"KeyToggleCheckButton.cpp" \
+					"LabeledCommandComboBox.cpp" \
+					"LoadingDialog.cpp" \
+					"ModInfo.cpp" \
+					"MouseMessageForwardingPanel.cpp" \
+					"MultiplayerAdvancedDialog.cpp" \
+					"OptionsDialog.cpp" \
+					"OptionsSubAudio.cpp" \
+					"OptionsSubKeyboard.cpp" \
+					"OptionsSubMouse.cpp" \
+					"OptionsSubMultiplayer.cpp" \
+					"OptionsSubVideo.cpp" \
+					"OptionsSubVoice.cpp" \
+					"PanelListPanel.cpp" \
+					"PlayerListDialog.cpp" \
+					"RunGameEngine.cpp" \
+					"ScriptObject.cpp" \
+					"Sys_Utils.cpp" \
+					"TextEntryBox.cpp" \
+					"TGAImagePanel.cpp" \
+					"URLButton.cpp" \
+					"VControlsListPanel.cpp" \
+					"VGuiSystemModuleLoader.cpp" \
+					"$SRCDIR\common\language.cpp" \
+					"$SRCDIR\public\crtmemdebug.cpp" \
+					"$SRCDIR\public\filesystem_helpers.cpp" \
+					"$SRCDIR\common\randoverride.cpp" \
+					"$SRCDIR\public\vgui_controls\vgui_controls.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}	
+		}
+		
+		$Folder	"Swarm GameUI"
+		{
+			$File	"swarm\basemodframe.cpp"
+			$File	"swarm\basemodpanel.cpp"
+			$File	"swarm\uigamedata.cpp"
+			$File	"swarm\ui_defines.h"
+
+			$Folder	"VPanels"
+			{
+				$File	"swarm\vdropdownmenu.cpp" \
+						"swarm\vflyoutmenu.cpp" \
+						"swarm\vgenericconfirmation.cpp" \
+						"swarm\vgenericpanellist.cpp" \
+						"swarm\vhybridbutton.cpp" \
+						"swarm\vingamemainmenu.cpp" \
+						"swarm\vloadingprogress.cpp" \
+						"swarm\vmainmenu.cpp" \
+						"swarm\vmenubackground.cpp" \
+						"swarm\vslidercontrol.cpp"
+			}
+			
+			$Folder	"Buttons"
+			{
+				$File	"swarm\nb_header_footer.cpp"
+			}
+		}
+		
+		$Folder	"Controls"
+		{
+			$File	"controls\ExImageMenuButton.cpp"
+			$File	"controls\ExMenuButton.cpp"
+			$File	"controls\ExMenuImagePanel.cpp"
+			$File	"controls\ExMenuLabel.cpp"
+			$File	"controls\ExMenuRichText.cpp"
+		}
+	}
+
+	$Folder	"Precompiled Header"
+	{
+		$File "cbase.h"
+		$File "stdafx.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Create Precompiled Header (/Yc)"
+				}
+			}
+		}
+	}
+
+	$Folder	"Public Header Files"
+	{
+		$File	"$SRCDIR\public\iachievementmgr.h"
+		$File	"$SRCDIR\public\game\client\IGameClientExports.h"
+		$File	"$SRCDIR\common\GameUI\IGameUI.h"
+		$File	"$SRCDIR\public\IGameUIFuncs.h"
+		$File	"$SRCDIR\public\tier1\interface.h"
+		$File	"$SRCDIR\common\IRunGameEngine.h"
+		$File	"$SRCDIR\common\IVGuiModule.h"
+		$File	"$SRCDIR\common\IVGuiModuleLoader.h"
+		$File	"$SRCDIR\common\language.h"
+	}
+	
+	$Folder	"Link Libraries"
+	{
+		$Lib		bitmap
+		$Lib		dmxloader
+		$Lib		mathlib
+		$Lib		matsys_controls
+		$Lib		tier1
+		$Lib		tier2
+		$Lib		tier3
+		$Lib		vgui_controls
+		$Lib		vtf
+		$ImpLib		steam_api
+	}
+}

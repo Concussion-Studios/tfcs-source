@@ -32,6 +32,7 @@ DECLARE_BUILD_FACTORY( PanelListPanel );
 PanelListPanel::PanelListPanel( vgui::Panel *parent, char const *panelName ) : EditablePanel( parent, panelName )
 {
 	SetBounds( 0, 0, 100, 100 );
+	m_bInnerPanel = false;
 
 	m_vbar = new ScrollBar(this, "PanelListPanelVScroll", true);
 	m_vbar->SetVisible(false);
@@ -64,6 +65,11 @@ PanelListPanel::~PanelListPanel()
 {
 	// free data from table
 	DeleteAllItems();
+}
+
+void PanelListPanel::SetInnerPanel( bool bInner )
+{
+	m_bInnerPanel = bInner;
 }
 
 void PanelListPanel::SetVerticalBufferPixels( int buffer )
@@ -304,7 +310,7 @@ void PanelListPanel::PerformLayout()
 	m_pPanelEmbedded->SetPos( 0, -top );
 	m_pPanelEmbedded->SetSize( wide - m_vbar->GetWide(), vpixels );	// scrollbar will sit on top (zpos set explicitly)
 
-	bool bScrollbarVisible = true;
+	bool bScrollbarVisible = !m_bInnerPanel;
 	// If we're supposed to automatically hide the scrollbar when unnecessary, check it now
 	if ( m_bAutoHideScrollbar )
 	{
@@ -409,6 +415,13 @@ int PanelListPanel::GetNumColumns( void )
 //-----------------------------------------------------------------------------
 void PanelListPanel::OnMouseWheeled(int delta)
 {
+	if ( m_bInnerPanel )
+	{
+		if ( GetParent() )
+			GetParent()->OnMouseWheeled( delta );
+		return;
+	}
+
 	int val = m_vbar->GetValue();
 	val -= (delta * DEFAULT_HEIGHT);
 	m_vbar->SetValue(val);	

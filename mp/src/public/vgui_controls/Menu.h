@@ -260,6 +260,16 @@ public:
 
 	void SetUseFallbackFont( bool bState, HFont hFallback );
 
+	enum
+	{
+		DEFAULT_MENU_ITEM_HEIGHT = 22, // height of items in the menu
+		MENU_UP = -1, // used for moving up/down list of menu items in the menu
+		MENU_DOWN = 1
+	};
+
+	void MoveAlongMenuItemList(int direction, int loopCount, bool bArmItem = false);
+	int GetVisibleItemIndex(int sortedIndex);
+
 protected:
 	// helper functions	
 	int AddMenuItemCharCommand(MenuItem *item, const char *command, Panel *target, const KeyValues *userData);
@@ -297,15 +307,6 @@ protected:
 	void SetCurrentlySelectedItem(int itemID);
 	MESSAGE_FUNC_INT( OnCursorEnteredMenuItem, "CursorEnteredMenuItem", VPanel);
 	MESSAGE_FUNC_INT( OnCursorExitedMenuItem, "CursorExitedMenuItem", VPanel);
-
-	void MoveAlongMenuItemList(int direction, int loopCount); 
-
-	enum 
-	{
-		DEFAULT_MENU_ITEM_HEIGHT = 22, // height of items in the menu
-		MENU_UP = -1, // used for moving up/down list of menu items in the menu
-		MENU_DOWN = 1
-	};
 
 #ifdef DBGFLAG_VALIDATE
 	virtual void Validate( CValidator &validator, char *pchName );

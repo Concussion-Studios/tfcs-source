@@ -2394,7 +2394,7 @@ void Menu::OnCursorExitedMenuItem(int VPanel)
 // Purpose: Move up or down one in the list of items in the menu 
 //			Direction is MENU_UP or MENU_DOWN
 //-----------------------------------------------------------------------------
-void Menu::MoveAlongMenuItemList(int direction, int loopCount)
+void Menu::MoveAlongMenuItemList(int direction, int loopCount, bool bArmItem)
 {
 	// Early out if no menu items to scroll through
 	if (m_MenuItems.Count() <= 0)
@@ -2488,6 +2488,30 @@ void Menu::MoveAlongMenuItemList(int direction, int loopCount)
 			MoveAlongMenuItemList(direction, loopCount + 1);
 		}
 	}
+
+	if ( bArmItem )
+	{
+		if ( m_MenuItems.IsValidIndex( m_iCurrentlySelectedItemID ) )
+		{
+			m_MenuItems[m_iCurrentlySelectedItemID]->ArmItem();
+		}
+	}
+}
+
+int Menu::GetVisibleItemIndex( int sortedIndex )
+{
+	int numVisible = 0;
+	int findVisible = 0;
+
+	while ( m_SortedItems.IsValidIndex( findVisible ) && findVisible < sortedIndex )
+	{
+		if ( m_MenuItems.IsValidIndex( m_SortedItems[ findVisible ] ) && m_MenuItems[ m_SortedItems[ findVisible ] ]->IsVisible() )
+			numVisible++;
+
+		findVisible++;
+	}
+
+	return numVisible;
 }
 
 //-----------------------------------------------------------------------------
