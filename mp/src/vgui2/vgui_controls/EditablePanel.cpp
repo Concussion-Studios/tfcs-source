@@ -13,8 +13,6 @@
 #include <KeyValues.h>
 #include "vgui/IVGui.h"
 
-#include <vgui_controls/BuildGroup.h>
-#include <vgui_controls/BuildModeDialog.h>
 #include <vgui_controls/EditablePanel.h>
 
 // these includes are all for the virtual contruction factory Dialog::CreateControlByName()
@@ -53,14 +51,10 @@ DECLARE_BUILD_FACTORY( EditablePanel );
 
 EditablePanel::EditablePanel(Panel *parent, const char *panelName) : Panel(parent, panelName), m_NavGroup(this)
 {
-	_buildGroup = new BuildGroup(this, this);
 	m_pszConfigName = NULL;
 	m_iConfigID = 0;
 	m_pDialogVariables = NULL;
 	m_bShouldSkipAutoResize = false;
-
-	// add ourselves to the build group
-	SetBuildGroup(GetBuildGroup());
 }
 
 //-----------------------------------------------------------------------------
@@ -68,14 +62,10 @@ EditablePanel::EditablePanel(Panel *parent, const char *panelName) : Panel(paren
 //-----------------------------------------------------------------------------
 EditablePanel::EditablePanel(Panel *parent, const char *panelName, HScheme hScheme) : Panel(parent, panelName, hScheme), m_NavGroup(this)
 {
-	_buildGroup = new BuildGroup(this, this);
 	m_pszConfigName = NULL;
 	m_iConfigID = 0;
 	m_pDialogVariables = NULL;
 	m_bShouldSkipAutoResize = false;
-
-	// add ourselves to the build group
-	SetBuildGroup(GetBuildGroup());
 }
 
 #pragma warning( default : 4355 )
@@ -86,7 +76,6 @@ EditablePanel::EditablePanel(Panel *parent, const char *panelName, HScheme hSche
 EditablePanel::~EditablePanel()
 {
 	delete [] m_pszConfigName;
-	delete _buildGroup;
 
 	if (m_pDialogVariables)
 	{
@@ -105,7 +94,6 @@ void EditablePanel::OnChildAdded(VPANEL child)
 	Panel *panel = ipanel()->GetPanel(child, GetModuleName());
 	if (panel)
 	{
-		panel->SetBuildGroup(_buildGroup);
 		panel->AddActionSignalTarget(this);
 	}
 }
@@ -115,8 +103,7 @@ void EditablePanel::OnChildAdded(VPANEL child)
 //-----------------------------------------------------------------------------
 void EditablePanel::OnKeyCodePressed( KeyCode code )
 {
-	static ConVarRef vgui_nav_lock_default_button( "vgui_nav_lock_default_button" );
-	if ( !vgui_nav_lock_default_button.IsValid() || vgui_nav_lock_default_button.GetInt() == 0 )
+	if ( s_NavLock == 0 )
 	{
 		ButtonCode_t nButtonCode = GetBaseButtonCode( code );
 
@@ -144,7 +131,7 @@ void EditablePanel::OnKeyCodePressed( KeyCode code )
 			case KEY_RIGHT:
 			case KEY_XBUTTON_B:
 				// Navigating menus
-				vgui_nav_lock_default_button.SetValue( 1 );
+				s_NavLock = 1;
 				PostMessage( panel, new KeyValues( "KeyCodePressed", "code", code ) );
 				return;
 			
@@ -552,20 +539,12 @@ void EditablePanel::PaintBackground()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Activates the build mode dialog for editing panels.
-//-----------------------------------------------------------------------------
-void EditablePanel::ActivateBuildMode()
-{
-	_buildGroup->SetEnabled(true);
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Loads panel settings from a resource file.
 //-----------------------------------------------------------------------------
 void EditablePanel::LoadControlSettings(const char *resourceName, const char *pathID, KeyValues *pKeyValues, KeyValues *pConditions)
 {
 #if defined( DBGFLAG_ASSERT ) && !defined(OSX) && !defined(LINUX)
-	extern IFileSystem *g_pFullFileSystem;
+	//extern IFileSystem *g_pFullFileSystem;
 	// Since nobody wants to fix this assert, I'm making it a Msg instead:
 	//     editablepanel.cpp (535) : Resource file "resource\DebugOptionsPanel.res" not found on disk!
 	// AssertMsg( g_pFullFileSystem->FileExists( resourceName ), CFmtStr( "Resource file \"%s\" not found on disk!", resourceName ).Access() );
@@ -574,7 +553,7 @@ void EditablePanel::LoadControlSettings(const char *resourceName, const char *pa
 		Msg( "Resource file \"%s\" not found on disk!", resourceName );
 	}
 #endif
-	_buildGroup->LoadControlSettings(resourceName, pathID, pKeyValues, pConditions);
+	GetBuildGroup()->LoadControlSettings(resourceName, pathID, pKeyValues, pConditions);
 	ForceSubPanelsToUpdateWithNewDialogVariables();
 	InvalidateLayout();
 }
@@ -584,7 +563,7 @@ void EditablePanel::LoadControlSettings(const char *resourceName, const char *pa
 //-----------------------------------------------------------------------------
 void EditablePanel::RegisterControlSettingsFile(const char *resourceName, const char *pathID)
 {
-	_buildGroup->RegisterControlSettingsFile(resourceName, pathID);
+	GetBuildGroup()->RegisterControlSettingsFile(resourceName, pathID);
 }
 
 //-----------------------------------------------------------------------------
@@ -684,14 +663,7 @@ void EditablePanel::OnClose()
 //-----------------------------------------------------------------------------
 bool EditablePanel::RequestInfo(KeyValues *data)
 {
-	if (!stricmp(data->GetName(), "BuildDialog"))
-	{
-		// a build dialog is being requested, give it one
-		// a bit hacky, but this is a case where vgui.dll needs to reach out
-		data->SetPtr("PanelPtr", new BuildModeDialog( (BuildGroup *)data->GetPtr("BuildGroupPtr")));
-		return true;
-	}
-	else if (!stricmp(data->GetName(), "ControlFactory"))
+	if (!stricmp(data->GetName(), "ControlFactory"))
 	{
 		Panel *newPanel = CreateControlByName(data->GetString("ControlName"));
 		if (newPanel)
@@ -701,16 +673,6 @@ bool EditablePanel::RequestInfo(KeyValues *data)
 		}
 	}
 	return BaseClass::RequestInfo(data);
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Return the buildgroup that this panel is part of.
-// Input  : 
-// Output : BuildGroup
-//-----------------------------------------------------------------------------
-BuildGroup *EditablePanel::GetBuildGroup()
-{
-	return _buildGroup;
 }
 
 //-----------------------------------------------------------------------------
@@ -801,7 +763,7 @@ void EditablePanel::ApplySettings(KeyValues *inResourceData)
 {
 	BaseClass::ApplySettings(inResourceData);
 
-	_buildGroup->ApplySettings(inResourceData);
+	GetBuildGroup()->ApplySettings(inResourceData);
 
 	m_bShouldSkipAutoResize = inResourceData->GetBool( "skip_autoresize", false );
 }

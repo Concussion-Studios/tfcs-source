@@ -13,6 +13,7 @@
 #include <vgui_controls/AnimationController.h>
 #include "filesystem.h"
 #include "filesystem_helpers.h"
+#include "ModelPanel.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -384,6 +385,10 @@ bool AnimationController::ParseScriptFile(char *pMem, int length)
 
 					// Position Y goes into ".b"
 					SetupPosition( cmdAnimate, &cmdAnimate.target.b, psz, screenTall );
+				}
+				else if( cmdAnimate.variable == m_sModelPos )
+				{
+					sscanf(token, "%f %f %f", &cmdAnimate.target.a, &cmdAnimate.target.b, &cmdAnimate.target.c);
 				}
 				else if ( cmdAnimate.variable == m_sXPos )
 				{
@@ -1117,31 +1122,6 @@ void AnimationController::RunAnimationCommand(vgui::Panel *panel, const char *va
 	StartCmd_Animate(panel, 0, animateCmd);
 }
 
-// Purpose: Runs a custom command from code, not from a script file
-//-----------------------------------------------------------------------------
-void AnimationController::RunAnimationCommand(vgui::Panel *panel, const char *variable, PublicValue_t targetValue, float startDelaySeconds, float duration, Interpolators_e interpolator, float animParameter /* = 0 */)
-{
-	// clear any previous animations of this variable
-	UtlSymId_t var = g_ScriptSymbols.AddString(variable);
-	RemoveQueuedAnimationByType(panel, var, UTL_INVAL_SYMBOL);
-	
-	// build a new animation
-	AnimCmdAnimate_t animateCmd;
-	memset(&animateCmd, 0, sizeof(animateCmd));
-	animateCmd.panel = 0;
-	animateCmd.variable = var;
-	animateCmd.target.a = targetValue.a;
-	animateCmd.target.b = targetValue.b;
-	animateCmd.target.c = targetValue.c;
-	animateCmd.target.d = targetValue.d;
-	animateCmd.interpolationFunction = interpolator;
-	animateCmd.interpolationParameter = animParameter;
-	animateCmd.startTime = startDelaySeconds;
-	animateCmd.duration = duration;
-	// start immediately
-	StartCmd_Animate(panel, 0, animateCmd);
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: gets the length of an animation sequence, in seconds
 //-----------------------------------------------------------------------------
@@ -1477,6 +1457,14 @@ AnimationController::Value_t AnimationController::GetValue(ActiveAnimation_t& an
 		val.a = (float)(x - GetRelativeOffset( anim.align, true ) );
 		val.b = (float)(y - GetRelativeOffset( anim.align, false ) );
 	}
+	else if ( var == m_sModelPos )
+	{
+		float x, y, z;
+		panel->GetModelPos( x, y, z );
+		val.a = x;
+		val.b = y;
+		val.c = z;
+	}
 	else if (var == m_sSize)
 	{
 		int w, t;
@@ -1566,6 +1554,10 @@ void AnimationController::SetValue(ActiveAnimation_t& anim, Panel *panel, UtlSym
 		int x = (int)value.a + GetRelativeOffset( anim.align, true );
 		int y = (int)value.b + GetRelativeOffset( anim.align, false );
 		panel->SetPos(x, y);
+	}
+	else if ( var == m_sModelPos )
+	{
+		panel->SetModelPos( value.a, value.b, value.c );
 	}
 	else if (var == m_sSize)
 	{

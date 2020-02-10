@@ -1442,7 +1442,6 @@ void TextEntry::OnCursorMoved(int x, int y)
 	if (_mouseSelection)
 	{
 		// update the cursor position
-		int x, y;
 		input()->GetCursorPos(x, y);
 		ScreenToLocal(x, y);
 		_cursorPos = PixelToCursorSpace(x, y);
