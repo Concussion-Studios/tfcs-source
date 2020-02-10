@@ -120,6 +120,7 @@ public:
 	virtual int GetMaxArmorValue() { return m_MaxArmorValue; }
 
 	// Ammo and items
+	virtual int GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound = false);
 	void		DiscardAmmo(void);							//Chrits; discard unused ammo
 
 	// Health

@@ -27,7 +27,7 @@ void CSDKWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName 
 	Q_strncpy( m_szAnimExtension, pAnimEx, sizeof( m_szAnimExtension ) );
 
 	m_iAmmoToRemove		= pKeyValuesData->GetInt( "AmmoToRemove", 1 ); // How much ammo consumes this weapon?
-	m_iDefaultAmmoClips = pKeyValuesData->GetInt( "NumClips", 2 );
+	//m_iDefaultAmmoClips = pKeyValuesData->GetInt( "NumClips", 2 );
 	m_flWeaponFOV		= pKeyValuesData->GetFloat( "Fov", 74.0f );
 	m_flMeleeRange		= pKeyValuesData->GetFloat( "Range", 32.0f );
 	m_bDrawCosshair		= pKeyValuesData->GetBool( "DrawCrossHair", true );

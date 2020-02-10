@@ -608,6 +608,31 @@ void CSDKPlayer::CheatImpulseCommands( int iImpulse )
 }
 
 //=========================================================
+// Give ammo
+//=========================================================
+int CSDKPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
+{
+	int team = GetTeamNumber();
+	if (team != TEAM_SPECTATOR)
+	{
+		CSDKTeam *pTeam = GetGlobalSDKTeam(team);
+		const CSDKPlayerClassInfo &SDKInfo = pTeam->GetPlayerClassInfo(m_Shared.PlayerClass());
+
+		int iMaxAmmo = SDKInfo.m_aMaxAmmo[iAmmoIndex];
+		int iCurrentAmmo = GetAmmoCount(iAmmoIndex);
+		int iAmmoToAdd = min(iCount, iMaxAmmo - iCurrentAmmo);
+		
+		if (iAmmoToAdd == 0)
+			return 0;
+
+		return BaseClass::GiveAmmo(iCount, iAmmoIndex);
+	}
+
+	return 0;
+}
+
+
+//=========================================================
 // Discard unused ammo
 //=========================================================
 void CSDKPlayer::DiscardAmmo(void)

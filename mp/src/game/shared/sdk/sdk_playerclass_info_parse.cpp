@@ -44,7 +44,7 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	//Get max ammo carried by class
 	if (pKeyValuesAmmo)
 	{
-		for (int i = AMMO_NONE + 1; i < AMMO_LAST; i++)
+		for (int i = 1; i < AMMO_LAST; ++i)
 		{
 			m_aMaxAmmo[i] = pKeyValuesAmmo->GetInt(s_AmmoNames[i], 0);
 		}
@@ -53,9 +53,9 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	//Get ammo that player will spawn with
 	if (pKeyValuesSpawnAmmo)
 	{
-		for (int i = AMMO_NONE + 1; i < AMMO_LAST; i++)
+		for (int i = 1; i < AMMO_LAST; ++i)
 		{
-			m_aSpawnAmmo[i] = pKeyValuesAmmo->GetInt(s_AmmoNames[i], 0);
+			m_aSpawnAmmo[i] = pKeyValuesSpawnAmmo->GetInt(s_AmmoNames[i], 0);
 		}
 	}
 

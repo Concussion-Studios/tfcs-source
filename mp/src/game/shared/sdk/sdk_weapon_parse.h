@@ -26,7 +26,7 @@ public:
 	virtual void Parse( ::KeyValues *pKeyValuesData, const char *szWeaponName );
 
 	char m_szAnimExtension[16];		// string used to generate player animations with this weapon
-	int m_iDefaultAmmoClips;		//Tony; default number of clips the weapon comes with.
+	//int m_iDefaultAmmoClips;		//Tony; default number of clips the weapon comes with.
 	float m_flWeaponFOV;		//Tony; added weapon fov, SDK uses models from a couple different games, so FOV is different.
 	int m_iAmmoToRemove;
 	float m_flMeleeRange;

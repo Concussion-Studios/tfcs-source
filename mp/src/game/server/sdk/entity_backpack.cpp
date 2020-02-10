@@ -32,6 +32,8 @@ class CEntityBackPack : public CItem
 	int m_iammo_grenades1;
 	int m_iammo_grenades2;
 	int m_iammo_detpack;
+	int m_iarmor;
+	int m_ihealth;
 
 	//int m_ishouldwerespawn;
 	float m_flRespawnTime;
@@ -74,6 +76,16 @@ public:
 			pPlayer->GiveAmmo(m_iammo_grenades1, AMMO_GRENADES1);
 			pPlayer->GiveAmmo(m_iammo_grenades2, AMMO_GRENADES2);
 			pPlayer->GiveAmmo(m_iammo_detpack, AMMO_DETPACK);
+
+			if (m_ihealth > 0)
+			{
+				pPlayer->TakeHealth(m_iHealth, DMG_GENERIC);
+			}
+
+			if (m_iarmor > 0)
+			{
+				pPlayer->IncrementArmorValue(m_iarmor);
+			}
 			/*FillAmmo( pPlayer, m_iammo_shells, "shells" );
 			FillAmmo( pPlayer, m_iammo_cells, "cell" );
 			FillAmmo( pPlayer, m_iammo_nails, "nail" );

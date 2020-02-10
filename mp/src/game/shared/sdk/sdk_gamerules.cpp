@@ -823,9 +823,10 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 
 			char buf[64];
 			int bufsize = sizeof(buf);
+			
 
 			//Give ammo before weapons
-			for (int iAmmo = AMMO_NONE + 1; iAmmo < AMMO_LAST; iAmmo++)
+			for (int iAmmo = AMMO_NONE + 1; iAmmo < AMMO_LAST; ++iAmmo)
 			{
 				pPlayer->GiveAmmo(pClassInfo.m_aSpawnAmmo[iAmmo], iAmmo);
 			}
@@ -1039,9 +1040,10 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 			//}
 
 			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pWeapon1 );
-			pPlayer->AdjustArmor( pClassInfo.m_iMaxArmor );
+			pPlayer->AdjustArmor( pClassInfo.m_iSpawnArmor );
 			pPlayer->AdjustHealth( pClassInfo.m_iMaxHealth );
 			pPlayer->SetMaxSpeed( pClassInfo.m_flMaxSpeed );
+			pPlayer->SetMaxArmorValue(pClassInfo.m_iMaxArmor);
 		}
 		else
 		{
@@ -1904,7 +1906,7 @@ CAmmoDef* GetAmmoDef()
 		//	def.AddAmmoType( WeaponIDToAlias(i), DMG_BULLET, TRACER_LINE_AND_WHIZ, 0, 0, 200/*max carry*/, 1, 0 );
 		//}
 
-		for (int i = AMMO_NONE; i < AMMO_LAST; ++i)
+		for (int i = 1; i < AMMO_LAST; i++)
 		{
 			def.AddAmmoType(s_AmmoNames[i], DMG_BULLET, TRACER_NONE, 0, 0, 200, 1, 0);
 		}
@@ -1924,7 +1926,7 @@ CAmmoDef* GetAmmoDef()
 		//def.AddAmmoType( "emp",			DMG_NEVERGIB | DMG_PREVENT_PHYSICS_FORCE,					TRACER_NONE,			0, 0, 4/*max carry*/,	1, 0 );
 		//def.AddAmmoType( "plasma",		DMG_DISSOLVE | DMG_PLASMA | DMG_PREVENT_PHYSICS_FORCE,		TRACER_NONE,			0, 0, 200/*max carry*/,	1, 0 );
 
-		KeyValuesAD pAmmo( "AmmoDefs" );
+		/*KeyValuesAD pAmmo( "AmmoDefs" );
 		if ( pAmmo->LoadFromFile( filesystem, "scripts/ammo_defs.txt", "MOD" ) )
 		{
 			FOR_EACH_TRUE_SUBKEY( pAmmo, ammo )
@@ -1950,7 +1952,7 @@ CAmmoDef* GetAmmoDef()
 				
 				def.AddAmmoType( name, dmgBits, tracer, plr, npc, max, impulse, flags, minSplash, maxSplash );
 			}
-		}
+		}*/
 	}
 
 	return &def;

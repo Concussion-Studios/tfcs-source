@@ -113,7 +113,7 @@ const char *s_AmmoNames[] =
 	"AMMO_GRENADES1",
 	"AMMO_GRENADES2",
 	"AMMO_DETPACK",
-	NULL
+	"AMMO_LAST"
 };
 
 // Global Weapon Definitions

@@ -554,7 +554,7 @@ void CSDKGameMovement::LimitForwardVel(void)
 		{
 			// Scale the velocity back based on how far above the max speed the player is
 			// TODO: Rework this function!
-			mv->m_vecVelocity -= flDiff * 0.1;
+			mv->m_vecVelocity *= (flMax / (flVel * 1.25));
 		}
 	}
 }
