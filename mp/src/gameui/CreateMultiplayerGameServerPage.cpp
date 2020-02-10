@@ -29,6 +29,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 CCreateMultiplayerGameServerPage::CCreateMultiplayerGameServerPage(vgui::Panel *parent, const char *name) : PropertyPage(parent, name)
 {
+	SetScheme( vgui::scheme()->LoadSchemeFromFileEx( 0, "resource/SourceScheme.res", "SourceScheme" ) );
+
 	// we can use this if we decide we want to put "listen server" at the end of the game name
 	m_pMapList = new ComboBox(this, "MapList", 12, false);
 

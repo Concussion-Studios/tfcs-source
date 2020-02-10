@@ -459,6 +459,8 @@ void CAchievementsDialog::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 CAchievementDialogItemPanel::CAchievementDialogItemPanel( vgui::PanelListPanel *parent, const char* name, int iListItemID ) : BaseClass( parent, name )
 {
+	SetScheme( vgui::scheme()->LoadSchemeFromFileEx( 0, "resource/SourceScheme.res", "SourceScheme" ) );
+
 	m_iListItemID = iListItemID;
 	m_pParent = parent;
 	m_pSchemeSettings = NULL;
