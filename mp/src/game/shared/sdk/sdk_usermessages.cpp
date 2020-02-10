@@ -20,6 +20,7 @@ void RegisterUserMessages()
 	usermessages->Register( "SayText", -1 );	
 	usermessages->Register( "SayText2", -1 );	
 	usermessages->Register( "TextMsg", -1 );
+	usermessages->Register( "VoiceSubtitle", 3 );
 	usermessages->Register( "HudMsg", -1 );
 	usermessages->Register( "ResetHUD", 1 );	// called every respawn
 	usermessages->Register( "GameTitle", 0 );	// show game title

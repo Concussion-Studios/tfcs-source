@@ -121,7 +121,8 @@ public:
 	virtual bool  FlPlayerFallDeathDoesScreenFade( CBasePlayer *pl ) { return FALSE; }
 
 	virtual const char *GetChatPrefix( bool bTeamOnly, CBasePlayer *pPlayer );
-	virtual const char *GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer );
+	virtual const char* GetChatLocation( bool bTeamOnly, CBasePlayer* pPlayer );	// Location name shown in chat
+	virtual const char *GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer );	// VGUI format string for chat, if desired
 
 	CBaseEntity *GetPlayerSpawnSpot( CBasePlayer *pPlayer );
 	bool IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer );

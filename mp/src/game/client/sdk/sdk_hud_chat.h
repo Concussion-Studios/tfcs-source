@@ -60,6 +60,7 @@ public:
 	virtual Color	GetClientColor( int clientIndex );
 
 	virtual int		GetFilterForString( const char *pString );
+	virtual const char *GetDisplayedSubtitlePlayerName( int clientIndex );
 	virtual bool IsVisible();
 
 };

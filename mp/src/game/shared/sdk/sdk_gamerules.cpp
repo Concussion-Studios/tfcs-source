@@ -506,13 +506,10 @@ bool CSDKGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 
 	// Handle some player commands here as they relate more directly to gamerules state
 	if ( pPlayer->ClientCommand( args ) )
-	{
 		return true;
-	}
 	else if ( BaseClass::ClientCommand( pEdict, args ) )
-	{
 		return true;
-	}
+
 	return false;
 }
 
@@ -570,9 +567,7 @@ void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vec
 		{
 			// UNDONE: this should check a damage mask, not an ignore
 			if ( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
-			{// houndeyes don't hurt other houndeyes with their attack
-				continue;
-			}
+				continue;	// houndeyes don't hurt other houndeyes with their attack
 
 			// blast's don't tavel into or out of water
 			if (bInWater && pEntity->GetWaterLevel() == 0)
@@ -676,14 +671,14 @@ void CSDKGameRules::Think()
 		return;
 	}
 
-	if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
+	/*if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
 	{
 		DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
 		m_bNextMapVoteDone = true;
 		char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
 		szEmptyDetails[0] = '\0';
 		g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
-	}
+	}*/
 
 	if ( GetMapRemainingTime() < 0 )
 	{
@@ -769,18 +764,14 @@ CBaseEntity *CSDKGameRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
 bool CSDKGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer )
 {
 	if ( !pSpot->IsTriggered( pPlayer ) )
-	{
 		return false;
-	}
 
 	// Check if it is disabled by Enable/Disable
 	CSpawnPoint *pSpawnPoint = dynamic_cast< CSpawnPoint * >( pSpot );
 	if ( pSpawnPoint )
 	{
 		if ( pSpawnPoint->IsDisabled() )
-		{
 			return false;
-		}
 	}
 
 	Vector mins = GetViewVectors()->m_vHullMin;
@@ -1128,9 +1119,7 @@ void CSDKGameRules::ChooseRandomClass( CSDKPlayer *pPlayer )
 bool CSDKGameRules::CanPlayerJoinClass( CSDKPlayer *pPlayer, int cls )
 {
 	if( cls == PLAYERCLASS_RANDOM )
-	{
 		return mp_allowrandomclass.GetBool();
-	}
 
 	if( ReachedClassLimit( pPlayer->GetTeamNumber(), cls ) )
 		return false;
@@ -1150,9 +1139,7 @@ bool CSDKGameRules::ReachedClassLimit( int team, int cls )
 	int iClassExisting = CountPlayerClass( team, cls );
 
 	if( iClassLimit > -1 && iClassExisting >= iClassLimit )
-	{
 		return true;
-	}
 
 	return false;
 }
@@ -1965,6 +1952,25 @@ const char *CSDKGameRules::GetChatPrefix( bool bTeamOnly, CBasePlayer *pPlayer )
 {
 	//Tony; no prefix for now, it isn't needed.
 	return "";
+}
+
+const char *CSDKGameRules::GetChatLocation( bool bTeamOnly, CBasePlayer* pPlayer )
+{
+	if ( !pPlayer )  // dedicated server output
+		return NULL;
+
+	// only teammates see locations
+	if ( !bTeamOnly )
+		return NULL;
+
+	// only living players have locations
+	if ( pPlayer->GetTeamNumber() < FIRST_GAME_TEAM )
+		return NULL;
+
+	if ( !pPlayer->IsAlive() )
+		return NULL;
+
+	return pPlayer->GetLastKnownPlaceName();
 }
 
 const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
