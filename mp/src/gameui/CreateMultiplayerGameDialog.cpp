@@ -26,6 +26,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui::Panel *parent) : PropertyDialog(parent, "CreateMultiplayerGameDialog")
 {
+	SetScheme( vgui::scheme()->LoadSchemeFromFileEx( 0, "resource/SourceScheme.res", "SourceScheme" ) );
+
 	SetDeleteSelfOnClose(true);
 	SetSize(348, 460);
 	

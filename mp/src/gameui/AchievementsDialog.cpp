@@ -131,6 +131,8 @@ void UpdateProgressBar( vgui::EditablePanel* pPanel, IAchievement *pAchievement,
 //-----------------------------------------------------------------------------
 CAchievementsDialog::CAchievementsDialog(vgui::Panel *parent) : BaseClass(parent, "AchievementsDialog")
 {
+	SetScheme( vgui::scheme()->LoadSchemeFromFileEx( 0, "resource/SourceScheme.res", "SourceScheme" ) );
+
 	SetDeleteSelfOnClose(true);
 	SetBounds(0, 0, 512, 384);
 	SetMinimumSize( 256, 300 );

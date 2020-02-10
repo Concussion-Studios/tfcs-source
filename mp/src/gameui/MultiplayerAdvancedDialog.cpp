@@ -438,7 +438,7 @@ CInfoDescription::CInfoDescription( CPanelListPanel *panel )
 //-----------------------------------------------------------------------------
 void CInfoDescription::WriteScriptHeader( FileHandle_t fp )
 {
-    char am_pm[] = "AM";
+	char am_pm[] = "AM";
 
 	time_t timeVal;
 	time(&timeVal);
@@ -446,7 +446,7 @@ void CInfoDescription::WriteScriptHeader( FileHandle_t fp )
 	struct tm tmStruct;
 	struct tm newtime = *(Plat_localtime((const time_t*)&timeVal, &tmStruct));
 
-    if( newtime.tm_hour > 12 )        /* Set up extension. */
+	if( newtime.tm_hour > 12 )        /* Set up extension. */
 		Q_strncpy( am_pm, "PM", sizeof( am_pm ) );
 	if( newtime.tm_hour > 12 )        /* Convert from 24-hour */
 		newtime.tm_hour -= 12;    /*   to 12-hour clock.  */
@@ -471,7 +471,7 @@ void CInfoDescription::WriteScriptHeader( FileHandle_t fp )
 //-----------------------------------------------------------------------------
 void CInfoDescription::WriteFileHeader( FileHandle_t fp )
 {
-    char am_pm[] = "AM";
+	char am_pm[] = "AM";
    
 	time_t timeVal;
 	time(&timeVal);
@@ -479,7 +479,7 @@ void CInfoDescription::WriteFileHeader( FileHandle_t fp )
 	struct tm tmStruct;
 	struct tm newtime = *(Plat_localtime((const time_t*)&timeVal, &tmStruct));
 
-    if( newtime.tm_hour > 12 )        /* Set up extension. */
+	if( newtime.tm_hour > 12 )        /* Set up extension. */
 		Q_strncpy( am_pm, "PM", sizeof( am_pm ) );
 	if( newtime.tm_hour > 12 )        /* Convert from 24-hour */
 		newtime.tm_hour -= 12;    /*   to 12-hour clock.  */

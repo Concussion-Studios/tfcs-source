@@ -99,8 +99,8 @@ void InGameMainMenu::OnCommand( const char *command )
 	}
 	else if( !Q_strcmp( command, "ExitToMainMenu" ) )
 	{
-		MakeGenericDialog( "#TF_MM_Disconnect_Title", 
-						   "#TF_MM_Disconnect", 
+		MakeGenericDialog( "#MMenu_PromptDisconnect_Title", 
+						   "#MMenu_PromptDisconnect", 
 						   true, 
 						   &LeaveGameOkCallback,
 						   true,
