@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-#include "basedialog.h"
+#include "vgui_controls/Frame.h"
 #include "vgui_controls/PanelListPanel.h"
 #include "vgui_controls/Label.h"
 #include "tier1/KeyValues.h"
@@ -29,50 +29,8 @@ bool LoadAchievementIcon( vgui::ImagePanel* pIconPanel, IAchievement *pAchieveme
 void UpdateProgressBar( vgui::EditablePanel* pPanel, IAchievement *pAchievement, Color clrProgressBar );
 
 //-----------------------------------------------------------------------------
-// Purpose: Simple menu to choose a matchmaking session type
+// Purpose: Display a list of achievements for the current game
 //-----------------------------------------------------------------------------
-class CAchievementsDialog_XBox : public CBaseDialog
-{
-	DECLARE_CLASS_SIMPLE( CAchievementsDialog_XBox, CBaseDialog ); 
-
-public:
-	CAchievementsDialog_XBox(vgui::Panel *parent);
-	~CAchievementsDialog_XBox();
-
-	virtual void	ApplySchemeSettings( vgui::IScheme *pScheme );
-	virtual void	ApplySettings( KeyValues *pResourceData );
-	virtual void	PerformLayout();
-
-	virtual void	OnKeyCodePressed( vgui::KeyCode code );
-	virtual void	HandleKeyRepeated( vgui::KeyCode code );
-
-	virtual void	OnClose();
-
-
-private:
-	vgui::Panel	*m_pProgressBg;
-	vgui::Panel *m_pProgressBar;
-	vgui::Label *m_pProgressPercent;
-	vgui::Label *m_pNumbering;
-	vgui::Label	*m_pUpArrow;
-	vgui::Label	*m_pDownArrow;
-
-	KeyValues*	m_pResourceData;
-
-	CFooterPanel *m_pFooter;
-
-	bool		m_bCenterOnScreen;
-	int			m_iNumItems;
-	int			m_nTotalAchievements;	// Total achievements for this title
-	int			m_nUnlocked;
-	int			m_iSelection;
-	int			m_iScroll;
-};
-
-
-//////////////////////////////////////////////////////////////////////////// 
-// PC version
-//////////////////////////////////////////////////////////////////////////
 class CAchievementsDialog : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE ( CAchievementsDialog, vgui::Frame );
@@ -117,8 +75,9 @@ public:
 	achievement_group_t m_AchievementGroups[15];
 };
 
-//////////////////////////////////////////////////////////////////////////
-// Individual item panel, displaying stats for one achievement
+//-----------------------------------------------------------------------------
+// Purpose: Individual item panel, displaying stats for one achievement
+//-----------------------------------------------------------------------------
 class CAchievementDialogItemPanel : public vgui::EditablePanel
 {
 	DECLARE_CLASS_SIMPLE( CAchievementDialogItemPanel, vgui::EditablePanel );

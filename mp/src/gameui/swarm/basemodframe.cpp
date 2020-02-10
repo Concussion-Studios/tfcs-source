@@ -724,30 +724,6 @@ void CBaseModFrame::PopModalInputFocus()
 }
 
 //=============================================================================
-void CBaseModFrame::CheckAndDisplayErrorIfGameNotInstalled()
-{
-	// Steam Interface not found
-	if ( !steamapicontext )
-		return;
-
-	// Steam is not running
-	if ( !steamapicontext->SteamApps() )
-		return;
-
-	// If we don't have installed a game continue
-	if ( steamapicontext->SteamApps()->BIsAppInstalled( 440 ) )
-		return;
-
-	GenericConfirmation* confirmation = 
-		static_cast<GenericConfirmation*>( CBaseModPanel::GetSingleton().OpenWindow( WT_GENERICCONFIRMATION, false ) );
-	GenericConfirmation::Data_t data;
-	data.pWindowTitle = "#LFE_Warning_Title";
-	data.pMessageText = "#LFE_Warning_InstallTF2";
-	data.bOkButtonEnabled = true;
-	confirmation->SetUsageData( data );
-}
-
-//=============================================================================
 void CBaseModFrame::MakeGenericDialog( const char* title, const char* messge, bool okbutton, Callback_t command, bool cancelbutton, CBaseModFrame* caller )
 {
 	GenericConfirmation* confirmation = 

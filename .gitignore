@@ -50,6 +50,9 @@ obj*/
 client.pdb
 client.dll
 client.lib
+gameui.pdb
+gameui.dll
+gameui.lib
 server.pdb
 server.dll
 server.lib
@@ -61,6 +64,8 @@ vgui_controls.lib
 
 client.so
 client.so.dbg
+gameui.so
+gameui.so.dbg
 server.so
 server.so.dbg
 server_srv.so
@@ -68,6 +73,8 @@ server_srv.so.dbg
 
 client.dylib
 client.dylib.dSYM/
+gameui.dylib
+gameui.dylib.dSYM/
 server.dylib
 server.dylib.dSYM/
 

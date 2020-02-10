@@ -15,7 +15,6 @@
 
 class CCreateMultiplayerGameServerPage;
 class CCreateMultiplayerGameGameplayPage;
-class CCreateMultiplayerGameBotPage;
 
 //-----------------------------------------------------------------------------
 // Purpose: dialog for launching a listenserver
@@ -34,9 +33,6 @@ protected:
 private:
 	CCreateMultiplayerGameServerPage *m_pServerPage;
 	CCreateMultiplayerGameGameplayPage *m_pGameplayPage;
-	CCreateMultiplayerGameBotPage *m_pBotPage;
-
-	bool m_bBotsEnabled;
 
 	// for loading/saving game config
 	KeyValues *m_pSavedData;

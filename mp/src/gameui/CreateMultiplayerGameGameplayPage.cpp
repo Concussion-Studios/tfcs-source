@@ -5,21 +5,15 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
 #include <stdio.h>
 #include <time.h>
-
 #include "CreateMultiplayerGameGameplayPage.h"
-
-using namespace vgui;
-
 #include <KeyValues.h>
 #include <vgui/ILocalize.h>
 #include <vgui_controls/ComboBox.h>
 #include <vgui_controls/CheckButton.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/TextEntry.h>
-
 #include "FileSystem.h"
 #include "PanelListPanel.h"
 #include "ScriptObject.h"
@@ -27,6 +21,8 @@ using namespace vgui;
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
+
+using namespace vgui;
 
 #define OPTIONS_DIR "cfg"
 #define DEFAULT_OPTIONS_FILE OPTIONS_DIR "/settings_default.scr"
@@ -107,12 +103,12 @@ const char *CCreateMultiplayerGameGameplayPage::GetValue(const char *cvarName, c
 			static char buf[128];
 			if (control && control->RequestInfo(data))
 			{
-				strncpy(buf, data->GetString("text", defaultValue), sizeof(buf) - 1);
+				Q_strncpy(buf, data->GetString("text", defaultValue), sizeof(buf) - 1);
 			}
 			else
 			{
 				// no value found, copy in default text
-				strncpy(buf, defaultValue, sizeof(buf) - 1);
+				Q_strncpy(buf, defaultValue, sizeof(buf) - 1);
 			}
 
 			// ensure null termination of string
@@ -428,11 +424,11 @@ CServerDescription::CServerDescription(CPanelListPanel *panel) : CDescription(pa
 //-----------------------------------------------------------------------------
 void CServerDescription::WriteScriptHeader( FileHandle_t fp )
 {
-    char am_pm[] = "AM";
-    tm newtime;
+	char am_pm[] = "AM";
+	tm newtime;
 	VCRHook_LocalTime( &newtime );
 
-    if( newtime.tm_hour > 12 )        /* Set up extension. */
+	if( newtime.tm_hour > 12 )        /* Set up extension. */
 		Q_strncpy( am_pm, "PM", sizeof( am_pm ) );
 	if( newtime.tm_hour > 12 )        /* Convert from 24-hour */
 		newtime.tm_hour -= 12;    /*   to 12-hour clock.  */
@@ -456,11 +452,11 @@ void CServerDescription::WriteScriptHeader( FileHandle_t fp )
 //-----------------------------------------------------------------------------
 void CServerDescription::WriteFileHeader( FileHandle_t fp )
 {
-    char am_pm[] = "AM";
-    tm newtime;
+	char am_pm[] = "AM";
+	tm newtime;
 	VCRHook_LocalTime( &newtime );
 
-    if( newtime.tm_hour > 12 )        /* Set up extension. */
+	if( newtime.tm_hour > 12 )        /* Set up extension. */
 		Q_strncpy( am_pm, "PM", sizeof( am_pm ) );
 	if( newtime.tm_hour > 12 )        /* Convert from 24-hour */
 		newtime.tm_hour -= 12;    /*   to 12-hour clock.  */

@@ -8,44 +8,32 @@
 #include "CreateMultiplayerGameDialog.h"
 #include "CreateMultiplayerGameServerPage.h"
 #include "CreateMultiplayerGameGameplayPage.h"
-#include "CreateMultiplayerGameBotPage.h"
-
 #include "EngineInterface.h"
 #include "ModInfo.h"
 #include "GameUI_Interface.h"
-
 #include <stdio.h>
-
-using namespace vgui;
-
 #include <vgui/ILocalize.h>
-
 #include "FileSystem.h"
 #include <KeyValues.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
+using namespace vgui;
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
 CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui::Panel *parent) : PropertyDialog(parent, "CreateMultiplayerGameDialog")
 {
-	m_bBotsEnabled = false;
 	SetDeleteSelfOnClose(true);
 	SetSize(348, 460);
 	
 	SetTitle("#GameUI_CreateServer", true);
 	SetOKButtonText("#GameUI_Start");
 
-	if (!stricmp( ModInfo().GetGameName(), "Counter-Strike Source" ))
-	{
-		m_bBotsEnabled = true;
-	}
-
 	m_pServerPage = new CCreateMultiplayerGameServerPage(this, "ServerPage");
 	m_pGameplayPage = new CCreateMultiplayerGameGameplayPage(this, "GameplayPage");
-	m_pBotPage = NULL;
 
 	AddPage(m_pServerPage, "#GameUI_Server");
 	AddPage(m_pGameplayPage, "#GameUI_Game");
@@ -60,18 +48,7 @@ CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui::Panel *parent) 
 
 		const char *startMap = m_pSavedData->GetString("map", "");
 		if (startMap[0])
-		{
 			m_pServerPage->SetMap(startMap);
-		}
-	}
-
-	if ( m_bBotsEnabled )
-	{
-		// add a page of advanced bot controls
-		// NOTE: These controls will use the bot keys to initialize their values
-		m_pBotPage = new CCreateMultiplayerGameBotPage( this, "BotPage", m_pSavedData );
-		AddPage( m_pBotPage, "#GameUI_CPUPlayerOptions" );
-		m_pServerPage->EnableBots( m_pSavedData );
 	}
 }
 
@@ -106,22 +83,18 @@ bool CCreateMultiplayerGameDialog::OnOK(bool applyOnly)
 
 	// get these values from m_pServerPage and store them temporarily
 	char szMapName[64], szHostName[64], szPassword[64];
-	strncpy(szMapName, m_pServerPage->GetMapName(), sizeof( szMapName ));
-	strncpy(szHostName, m_pGameplayPage->GetHostName(), sizeof( szHostName ));
-	strncpy(szPassword, m_pGameplayPage->GetPassword(), sizeof( szPassword ));
+	Q_strncpy(szMapName, m_pServerPage->GetMapName(), sizeof( szMapName ));
+	Q_strncpy(szHostName, m_pGameplayPage->GetHostName(), sizeof( szHostName ));
+	Q_strncpy(szPassword, m_pGameplayPage->GetPassword(), sizeof( szPassword ));
 
 	// save the config data
 	if (m_pSavedData)
 	{
 		if (m_pServerPage->IsRandomMapSelected())
-		{
 			// it's set to random map, just save an
 			m_pSavedData->SetString("map", "");
-		}
 		else
-		{
 			m_pSavedData->SetString("map", szMapName);
-		}
 
 		// save config to a file
 		m_pSavedData->SaveToFile( g_pFullFileSystem, "ServerConfig.vdf", "GAME" );
@@ -130,7 +103,7 @@ bool CCreateMultiplayerGameDialog::OnOK(bool applyOnly)
 	char szMapCommand[1024];
 
 	// create the command to execute
-	Q_snprintf(szMapCommand, sizeof( szMapCommand ), "disconnect\nwait\nwait\nsv_lan 1\nsetmaster enable\nmaxplayers %i\nsv_password \"%s\"\nhostname \"%s\"\nprogress_enable\nmap %s\n",
+	Q_snprintf(szMapCommand, sizeof( szMapCommand ), "disconnect\nwait\nwait\nsetmaster enable\nmaxplayers %i\nsv_password \"%s\"\nhostname \"%s\"\nprogress_enable\nmap %s\n",
 		m_pGameplayPage->GetMaxPlayers(),
 		szPassword,
 		szHostName,

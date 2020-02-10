@@ -93,7 +93,6 @@ namespace BaseModUI {
 		void PushModalInputFocus();				// Makes this panel take modal input focus and maintains stack of previous panels with focus.  For PC only.
 		void PopModalInputFocus();				// Removes modal input focus and gives focus to previous panel on stack. For PC only.
 
-		void CheckAndDisplayErrorIfGameNotInstalled();	// Displays error if TF2 Isn't Installed
 		typedef void (*Callback_t)(void);
 		void MakeGenericDialog( const char* title, const char* messge, bool okbutton, Callback_t command, bool cancelbutton, CBaseModFrame* caller );	// Displays a generic dialog
 		void MakeGenericDialog( const char* title, const char* messge, bool okbutton, Callback_t command, bool cancelbutton );	// Displays a generic dialog

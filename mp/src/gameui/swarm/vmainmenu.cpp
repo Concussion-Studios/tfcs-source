@@ -12,25 +12,20 @@
 #include "vgenericconfirmation.h"
 #include "basemodpanel.h"
 #include "uigamedata.h"
-
 #include "vgui/ILocalize.h"
 #include "vgui_controls/Label.h"
 #include "vgui_controls/Button.h"
 #include "vgui_controls/Tooltip.h"
 #include "vgui_controls/ImagePanel.h"
 #include "vgui_controls/Image.h"
-
 #include "materialsystem/materialsystem_config.h"
-
 #include "ienginevgui.h"
 #include "basepanel.h"
 #include "vgui/ISurface.h"
 #include "tier0/icommandline.h"
 #include "fmtstr.h"
-
 #include "FileSystem.h"
 #include "engine/IEngineSound.h"
-
 #include "time.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -48,7 +43,6 @@ void AddSubKeyNamed( KeyValues *pKeys, const char *pszName )
 }
 
 ConVar ui_mainmenu_music( "ui_mainmenu_music", "1", FCVAR_ARCHIVE, "Toggle music in the main menu." );
-ConVar ui_mainmenu_music_type( "ui_mainmenu_music_type", "0", FCVAR_ARCHIVE, "Toggle between hl2/tf2 music in the main menu." );
 
 //=============================================================================
 MainMenu::MainMenu( Panel *parent, const char *panelName ):	BaseClass( parent, panelName, true, true, false, false )
@@ -86,25 +80,13 @@ void MainMenu::OnCommand( const char *command )
 
 	bool bOpeningFlyout = false;
 
-	if ( !Q_strcmp( command, "PlayerStats" ) )
+	if ( !Q_strcmp( command, "Achievements" ) )
 	{
-		engine->ClientCmd( "showstatsdlg" );
-	}
-	else if ( !Q_strcmp( command, "Achievements" ) )
-	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_ACHIEVEMENTS, this, true );
-	}
-	else if ( !Q_strcmp( command, "Loadout" ) )
-	{
-		engine->ClientCmd( "open_charinfo" );
+		CBaseModPanel::GetSingleton().OpenAchievementsDialog( this );
 	}
 	else if ( !Q_strcmp( command, "Credits" ) )
 	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_CREDITSSCREEN, this, true );
-	}
-	else if ( !Q_strcmp( command, "LatestNews" ) )
-	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_BLOGPANEL, this, true );
+		engine->ClientCmd( "WhatsNew" );
 	}
 	else if ( !Q_strcmp( command, "QuitGame" ) )
 	{
@@ -137,7 +119,7 @@ void MainMenu::OnCommand( const char *command )
 	}
 	else if( !Q_strcmp( command, "CreateGame" ) )
 	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_CREATEGAME, this, true );
+		CBaseModPanel::GetSingleton().OpenCreateMultiplayerGameDialog( this );
 	}
 	else if ( !Q_strcmp( command, "randommusic" ) )
 	{
@@ -216,20 +198,6 @@ void MainMenu::OnKeyCodeTyped( KeyCode code )
 void MainMenu::OnThink()
 {
 	BaseClass::OnThink();
-
-	CheckAndDisplayErrorIfGameNotInstalled();
-
-	ConVarRef pDXLevel( "mat_dxlevel" );
-	if( pDXLevel.GetInt() < 90 )
-	{
-		GenericConfirmation* confirmation = 
-			static_cast<GenericConfirmation*>( CBaseModPanel::GetSingleton().OpenWindow( WT_GENERICCONFIRMATION, false ) );
-		GenericConfirmation::Data_t data;
-		data.pWindowTitle = "#LFE_Warning_Title";
-		data.pMessageText = "#LFE_Warning_DXBelow";
-		data.bOkButtonEnabled = true;
-		confirmation->SetUsageData( data );
-	}
 }
 
 //=============================================================================
@@ -313,7 +281,7 @@ void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 		//m_pBGImage->SetVisible( false );
 	}
 
-	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "LFE_Logo" ) );
+	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "TFC_Logo" ) );
 
 	KeyValues *pConditions = new KeyValues( "conditions" );
 
@@ -344,46 +312,23 @@ void MainMenu::GetRandomMusic( char *pszBuf, int iBufLength )
 
 	char szPath[MAX_PATH];
 
-	if ( ui_mainmenu_music_type.GetInt() == 1 )
+	// Check that there's music available
+	if ( !g_pFullFileSystem->FileExists( "sound/ui/music/gamestartup1.mp3" ) )
 	{
-		// Check that there's music available
-		if ( !g_pFullFileSystem->FileExists( "sound/ui/gamestartup1.mp3" ) )
-		{
-			Assert(false);
-			*pszBuf = '\0';
-		}
-
-		// Discover tracks, 1 through n
-		int iLastTrack = 0;
-		do
-		{
-			Q_snprintf( szPath, sizeof(szPath), "sound/ui/gamestartup%d.mp3", ++iLastTrack );
-		} while ( g_pFullFileSystem->FileExists( szPath ) );
-
-		// Pick a random one
-		Q_snprintf( szPath, sizeof( szPath ), "ui/gamestartup%d.mp3", RandomInt( 1, iLastTrack - 1 ) );
-		Q_strncpy( pszBuf, szPath, iBufLength);
+		Assert(false);
+		*pszBuf = '\0';
 	}
-	else
+
+	// Discover tracks, 1 through n
+	int iLastTrack = 0;
+	do
 	{
-		// Check that there's music available
-		if ( !g_pFullFileSystem->FileExists( "sound/ui/gamestartup/gamestartup1.mp3" ) )
-		{
-			Assert(false);
-			*pszBuf = '\0';
-		}
+		Q_snprintf( szPath, sizeof(szPath), "sound/ui/music/gamestartup%d.mp3", ++iLastTrack );
+	} while ( g_pFullFileSystem->FileExists( szPath ) );
 
-		// Discover tracks, 1 through n
-		int iLastTrack = 0;
-		do
-		{
-			Q_snprintf( szPath, sizeof(szPath), "sound/ui/gamestartup/gamestartup%d.mp3", ++iLastTrack );
-		} while ( g_pFullFileSystem->FileExists( szPath ) );
-
-		// Pick a random one
-		Q_snprintf( szPath, sizeof( szPath ), "ui/gamestartup/gamestartup%d.mp3", RandomInt( 1, iLastTrack - 1 ) );
-		Q_strncpy( pszBuf, szPath, iBufLength);
-	}
+	// Pick a random one
+	Q_snprintf( szPath, sizeof( szPath ), "ui/music/gamestartup%d.mp3", RandomInt( 1, iLastTrack - 1 ) );
+	Q_strncpy( pszBuf, szPath, iBufLength);
 }
 
 //=============================================================================

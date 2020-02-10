@@ -64,6 +64,7 @@ $Project "GameUI"
 					"BitmapImagePanel.cpp" \
 					"CommandCheckButton.cpp" \
 					"CvarNegateCheckButton.cpp" \
+					"CvarToggleCheckButton.cpp" \
 					"CvarSlider.cpp" \
 					"CvarTextEntry.cpp" \
 					"CreateMultiplayerGameDialog.cpp" \

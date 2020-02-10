@@ -16,6 +16,8 @@
 #include "OptionsDialog.h"
 #include "OptionsSubAudio.h"
 #include "PlayerListDialog.h"
+#include "AchievementsDialog.h"
+#include "CreateMultiplayerGameDialog.h"
 #include "igameevents.h"
 
 class COptionsDialog;
@@ -32,15 +34,11 @@ namespace BaseModUI
 	enum WINDOW_TYPE 
 	{
 		WT_NONE = 0,
-		WT_ACHIEVEMENTS,
 		WT_GENERICCONFIRMATION,
 		WT_INGAMEMAINMENU,
 		WT_LOADINGPROGRESSBKGND,
 		WT_LOADINGPROGRESS,
 		WT_MAINMENU,
-		WT_CREATEGAME,
-		WT_CREDITSSCREEN,
-		WT_BLOGPANEL,
 		WT_WINDOW_COUNT // WT_WINDOW_COUNT must be last in the list!
 	};
 
@@ -76,7 +74,7 @@ namespace BaseModUI
 		CBaseModPanel();
 		~CBaseModPanel();
 
-    void	FireGameEvent( IGameEvent* event ) OVERRIDE;
+	void	FireGameEvent( IGameEvent* event ) OVERRIDE;
 
 	public:
 		static CBaseModPanel& GetSingleton();
@@ -126,6 +124,8 @@ namespace BaseModUI
 
 		void OpenOptionsDialog( Panel *parent );
 		void OpenPlayerListDialog( Panel *parent );
+		void OpenCreateMultiplayerGameDialog( Panel *parent );
+		void OpenAchievementsDialog( Panel *parent );
 		void OpenServerBrowser();
 
 		MESSAGE_FUNC_CHARPTR( OnNavigateTo, "OnNavigateTo", panelName );
@@ -157,7 +157,10 @@ namespace BaseModUI
 		WINDOW_TYPE m_ActiveWindow[WPRI_COUNT];
 		bool m_LevelLoading;
 		vgui::HScheme m_UIScheme;
-		vgui::DHANDLE<COptionsDialog> m_hOptionsDialog;	// standalone options dialog - PC only
+
+		vgui::DHANDLE<COptionsDialog> m_hOptionsDialog;
+		vgui::DHANDLE<CAchievementsDialog> m_hAchievementsDialog;
+
 		int m_lastActiveUserId;
 
 		vgui::HFont m_hDefaultFont;

@@ -7,11 +7,6 @@
 ///////////////////////
 // Group definitions //
 ///////////////////////
-$Group "gamedlls"
-{
-	"client"
-	"server"
-}
 
 $Group "game"
 {
@@ -21,6 +16,7 @@ $Group "game"
 	"server"
 	"tier1"
 	"vgui_controls"
+	"gameui"
 }
 
 $Group "shaders"

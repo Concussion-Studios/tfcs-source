@@ -64,10 +64,6 @@ void InGameMainMenu::OnCommand( const char *command )
 	{
 		CBaseModPanel::GetSingleton().OpenPlayerListDialog( this );
 	}
-	else if ( !Q_strcmp( command, "PlayerStats" ) )
-	{
-		engine->ClientCmd( "showstatsdlg" );
-	}
 	else if ( !Q_stricmp( command, "DevConsole" ) )
 	{
 		engine->ClientCmd_Unrestricted( "toggleconsole" );
@@ -86,23 +82,15 @@ void InGameMainMenu::OnCommand( const char *command )
 	}
 	else if( !Q_strcmp( command, "CreateGame" ) )
 	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_CREATEGAME, this, true );
+		CBaseModPanel::GetSingleton().OpenCreateMultiplayerGameDialog( this );
 	}
 	else if ( !Q_strcmp( command, "Achievements" ) )
 	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_ACHIEVEMENTS, this, true );
-	}
-	else if ( !Q_strcmp( command, "Loadout" ) )
-	{
-		engine->ClientCmd( "open_charinfo" );
+		CBaseModPanel::GetSingleton().OpenAchievementsDialog( this );
 	}
 	else if ( !Q_strcmp( command, "Credits" ) )
 	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_CREDITSSCREEN, this, true );
-	}
-	else if ( !Q_strcmp( command, "LatestNews" ) )
-	{
-		CBaseModPanel::GetSingleton().OpenWindow( WT_BLOGPANEL, this, true );
+		engine->ClientCmd( "WhatsNew" );
 	}
 	else if ( !Q_strcmp( command, "CallVote" ) )
 	{
@@ -185,7 +173,7 @@ void InGameMainMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 
-	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "LFE_Logo" ) );
+	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "TFC_Logo" ) );
 
 	KeyValues *pConditions = new KeyValues( "conditions" );
 

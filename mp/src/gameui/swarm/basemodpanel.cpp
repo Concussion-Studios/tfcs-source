@@ -33,14 +33,11 @@
 #include "VGuiSystemModuleLoader.h"
 
 // BaseModUI High-level windows
-#include "vachievements.h"
+
 #include "vgenericconfirmation.h"
 #include "vingamemainmenu.h"
 #include "vloadingprogress.h"
 #include "vmainmenu.h"
-#include "vcreategame.h"
-#include "vcreditsscreen.h"
-#include "vblogpanel.h"
 #include "nb_header_footer.h"
 
 // UI defines. Include if you want to implement some of them [str]
@@ -188,10 +185,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow(const WINDOW_TYPE & wt, CBaseModFrame *
 	{
 		switch ( wt )
 		{
-		case WT_ACHIEVEMENTS:
-			m_Frames[wt] = new Achievements( this, "Achievements" );
-			break;
-
 		case WT_GENERICCONFIRMATION:
 			m_Frames[wt] = new GenericConfirmation( this, "GenericConfirmation" );
 			break;
@@ -210,18 +203,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow(const WINDOW_TYPE & wt, CBaseModFrame *
 
 		case WT_MAINMENU:
 			m_Frames[wt] = new MainMenu( this, "MainMenu" );
-			break;
-
-		case WT_CREATEGAME:
-			m_Frames[wt] = new CreateGame( this, "CreateGame" );
-			break;
-
-		case WT_CREDITSSCREEN:
-			m_Frames[wt] = new CreditsScreen( this, "CreditsScreen" );
-			break;
-
-		case WT_BLOGPANEL:
-			m_Frames[wt] = new BlogScreen( this, "BlogScreen" );
 			break;
 
 		default:
@@ -548,18 +529,20 @@ void CBaseModPanel::CloseAllWindows( int ePolicyFlags )
 void CBaseModPanel::OnGameUIActivated()
 {
 	if ( UI_IsDebug() )
-	{
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] CBaseModPanel::OnGameUIActivated( delay = %d )\n", m_DelayActivation );
-	}
 
 	if ( m_DelayActivation )
-	{
 		return;
-	}
 
 	COM_TimestampedLog( "CBaseModPanel::OnGameUIActivated()" );
 
 	SetVisible( true );
+
+	// Achievement dialog refreshes it's data if the player looks at the pause menu
+	if ( m_hAchievementsDialog.Get() )
+		//m_hAchievementsDialog->OnCommand( "OnGameUIActivated" );
+		PostMessage( m_hAchievementsDialog.Get(), new KeyValues( "GameUIActivated" ) );
+
 	if ( WT_LOADINGPROGRESS == GetActiveWindowType() )
 	{
 		// Ignore UI activations when loading poster is up
@@ -606,30 +589,23 @@ void CBaseModPanel::OnGameUIActivated()
 void CBaseModPanel::OnGameUIHidden()
 {
 	if ( UI_IsDebug() )
-	{
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] CBaseModPanel::OnGameUIHidden()\n" );
-	}
 
 	SetVisible(false);
 	
 	// Notify the options dialog that game UI is closing
 	if ( m_hOptionsDialog.Get() )
-	{
 		PostMessage( m_hOptionsDialog.Get(), new KeyValues( "GameUIHidden" ) );
-	}
+
+	// Notify the achievements dialog that game UI is closing
+	if ( m_hAchievementsDialog.Get() )
+		PostMessage( m_hAchievementsDialog.Get(), new KeyValues( "GameUIHidden" ) );
 
 	// Notify the in game menu that game UI is closing
 	CBaseModFrame *pInGameMainMenu = GetWindow( WT_INGAMEMAINMENU );
 	if ( pInGameMainMenu )
-	{
 		PostMessage( pInGameMainMenu, new KeyValues( "GameUIHidden" ) );
-	}
 
-	// Close achievements
-	if ( CBaseModFrame *pFrame = GetWindow( WT_ACHIEVEMENTS ) )
-	{
-		pFrame->Close();
-	}
 }
 
 void CBaseModPanel::OpenFrontScreen()
@@ -652,9 +628,7 @@ void CBaseModPanel::OpenFrontScreen()
 void CBaseModPanel::RunFrame()
 {
 	if ( s_NavLock > 0 )
-	{
 		--s_NavLock;
-	}
 
 	GetAnimationController()->UpdateAnimations( Plat_FloatTime() );
 
@@ -668,9 +642,8 @@ void CBaseModPanel::RunFrame()
 		if ( !m_LevelLoading && !m_DelayActivation )
 		{
 			if ( UI_IsDebug() )
-			{
 				ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] Executing delayed UI activation\n");
-			}
+
 			OnGameUIActivated();
 		}
 	}
@@ -716,23 +689,15 @@ void CBaseModPanel::OnLevelLoadingStarted( bool bShowProgressDialog )
 	CloseAllWindows();
 
 	if ( UI_IsDebug() )
-	{
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] OnLevelLoadingStarted - opening loading progress (%s)...\n" );
-	}
 
 	LoadingProgress *pLoadingProgress = static_cast<LoadingProgress*>( OpenWindow( WT_LOADINGPROGRESS, 0 ) );
 	LoadingProgress::LoadingType type;
 
 	if ( GameUI().IsInLevel() && !GameUI().IsInBackgroundLevel() )
-	{
-		// Transitions between levels 
-		type = LoadingProgress::LT_TRANSITION;
-	}
+		type = LoadingProgress::LT_TRANSITION;	// Transitions between levels 
 	else
-	{
-		// Loading the menu the first time
-		type = LoadingProgress::LT_MAINMENU;
-	}
+		type = LoadingProgress::LT_MAINMENU;	// Loading the menu the first time
 
 	if ( UI_IsDebug() )
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] Loading Map with %i...\n", type);
@@ -770,9 +735,7 @@ void CBaseModPanel::OnEngineLevelLoadingSession( void )
 	}*/
 
 	if ( UI_IsDebug() )
-	{
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] CBaseModPanel::OnEngineLevelLoadingSession...\n");
-	}
 }
 
 //=============================================================================
@@ -784,9 +747,7 @@ void CBaseModPanel::OnLevelLoadingFinished( KeyValues *kvEvent )
 	Assert( m_LevelLoading );
 
 	if ( UI_IsDebug() )
-	{
 		ConColorMsg( Color( 77, 116, 85, 255 ),  "[GAMEUI] CBaseModPanel::OnLevelLoadingFinished( %s, %s )\n", bError ? "Had Error" : "No Error", failureReason );
-	}
 
 	LoadingProgress *pLoadingProgress = static_cast<LoadingProgress*>( GetWindow( WT_LOADINGPROGRESS ) );
 	if ( pLoadingProgress )
@@ -801,19 +762,14 @@ void CBaseModPanel::OnLevelLoadingFinished( KeyValues *kvEvent )
 
 	CBaseModFrame *pFrame = CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION );
 	if ( !pFrame )
-	{
-		// no confirmation up, hide the UI
-		GameUI().HideGameUI();
-	}
+		GameUI().HideGameUI();	// no confirmation up, hide the UI
 }
 
 void CBaseModPanel::FireGameEvent( IGameEvent* event )
 {
 	char const *szEvent = event->GetName();
 	if ( !Q_stricmp( "server_spawn", szEvent ) )
-	{
 		OnEngineLevelLoadingSession();
-	}
 }
 
 //=============================================================================
@@ -909,6 +865,36 @@ void CBaseModPanel::OpenOptionsDialog( Panel *parent )
 	x -= options->GetWide() / 2;
 	y -= options->GetTall() / 2;
 	options->SetPos(x, y);
+}
+
+//=============================================================================
+void CBaseModPanel::OpenCreateMultiplayerGameDialog( Panel *parent )
+{
+	CCreateMultiplayerGameDialog *create = new CCreateMultiplayerGameDialog( this );
+	create->Activate();
+
+	//Put this thing in the middle of the screen
+	int x, y;
+	x = GetWide() / 2;
+	y = GetTall() / 2;
+	x -= create->GetWide() / 2;
+	y -= create->GetTall() / 2;
+	create->SetPos( x, y );
+}
+
+//=============================================================================
+void CBaseModPanel::OpenAchievementsDialog( Panel *parent )
+{
+	CAchievementsDialog *ach = new CAchievementsDialog( this );
+	ach->Activate();
+
+	//Put this thing in the middle of the screen
+	int x, y;
+	x = GetWide() / 2;
+	y = GetTall() / 2;
+	x -= ach->GetWide() / 2;
+	y -= ach->GetTall() / 2;
+	ach->SetPos( x, y );
 }
 
 //=============================================================================

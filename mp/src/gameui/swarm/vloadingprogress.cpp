@@ -60,7 +60,7 @@ LoadingProgress::LoadingProgress(Panel *parent, const char *panelName, LoadingWi
 	m_pBGImage = NULL;
 	m_pFooter = NULL;
 
-    // Listen for game events
+	// Listen for game events
 	if ( gameeventmanager )
 		gameeventmanager->AddListener( this, "player_disconnect", false );
 
@@ -86,7 +86,7 @@ LoadingProgress::LoadingProgress(Panel *parent, const char *panelName, LoadingWi
 //=============================================================================
 LoadingProgress::~LoadingProgress()
 {
-    // Stop listening for events
+	// Stop listening for events
 	if ( gameeventmanager )
 		gameeventmanager->RemoveListener( this );
 }
@@ -358,7 +358,7 @@ void LoadingProgress::SetupControlStates()
 		break;
 	}
 
-	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "LFE_Logo" ) );
+	m_pLogoImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "TFC_Logo" ) );
 	m_pLoadingProgress = dynamic_cast< vgui::Label* >( FindChildByName( "LoadingProgressText" ) );
 	m_pCancelButton = dynamic_cast< CExMenuButton* >( FindChildByName( "Cancel" ) );
 	m_pFooter = dynamic_cast< vgui::Panel* >( FindChildByName( "Footer" ) );
@@ -569,267 +569,20 @@ struct s_LMapTypeInfo
 	const char	*pGameType;
 };
 
-static s_LMapInfo s_LMaps[] = {
-	//---------------------- CTF maps ----------------------
-	"ctf_2fort",			"2Fort",				"#Gametype_CTF",				"Valve",		"",
-	"ctf_well",				"Well",					"#Gametype_CTF",				"Valve",		"",
-	"ctf_doublecross",		"Double Cross",			"#Gametype_CTF",				"Valve",		"",
-	"ctf_turbine",			"Turbine",				"#Gametype_CTF",				"Flobster",		"",
-	"ctf_landfall",			"Landfall",				"#Gametype_CTF",				"Dr. Spud",		"",
-	//---------------------- CP maps ----------------------
-	"cp_dustbowl",			"Dustbowl",				"#Gametype_AttackDefense",		"Valve",		"",
-	"cp_gravelpit",			"Gravel Pit",			"#Gametype_AttackDefense",		"Valve",		"",
-	"cp_gorge",				"Gorge",				"#Gametype_AttackDefense",		"Valve",		"",
-	"cp_mountainlab",		"Mountain Lab",			"#Gametype_AttackDefense",		"Valve, 3Dnj",	"",
-	"cp_granary",			"Granary",				"#Gametype_CP",					"Valve",		"",
-	"cp_well",				"Well",					"#Gametype_CP",					"Valve",		"",
-	"cp_foundry",			"Foundry",				"#Gametype_CP",					"Valve",		"",
-	"cp_badlands",			"Badlands",				"#Gametype_CP",					"Valve",		"",
-	"cp_powerhouse",		"Powerhouse",			"#Gametype_CP",					"Valve",		"",
-	//---------------------- TC maps ----------------------
-	"tc_hydro",				"Hydro",				"#TF_TerritoryControl",			"Valve",		"",
-	//---------------------- PL maps ----------------------
-	"pl_goldrush",			"Gold Rush",			"#Gametype_Escort",				"Valve",		"",
-	"pl_badwater",			"Badwater Basin",		"#Gametype_Escort",				"Valve",		"",
-	"pl_thundermountain",	"Thunder Mountain",		"#Gametype_Escort",				"Valve",		"",
-	"pl_barnblitz",			"Barnblitz",			"#Gametype_Escort",				"Valve",		"",
-	"pl_upward",			"Upward",				"#Gametype_EscortRace",			"Valve",		"",
-	"plr_pipeline",			"Pipeline",				"#Gametype_EscortRace",			"Valve",		"",
-	"plr_hightower",		"Hightower",			"#Gametype_EscortRace",			"Valve",		"",
-	//---------------------- KOTH maps ----------------------
-	"koth_king",			"Kong King",			"#Gametype_Koth",				"3Dnj",			"",
-	"koth_nucleus",			"Nucleus",				"#Gametype_Koth",				"Valve",		"",
-	"koth_sawmill",			"Sawmill (KOTH)",		"#Gametype_Koth",				"Valve",		"",
-	//---------------------- ARENA maps ----------------------
-	"arena_sawmill",		"Sawmill (Arena)",		"#Gametype_Arena",				"Valve",		"",
-	//---------------------- HL1 maps ----------------------
-	"t0a0",					"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 1",
-	"t0a0a",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 2",
-	"t0a0b",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 3",
-	"t0a0b1",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 4",
-	"t0a0b2",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 5",
-	"t0a0c",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 6",
-	"t0a0d",				"Hazard Course",		"#Gametype_Training",			"Valve",		"Part 7",
-	"c0a0",					"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c0a0a",				"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c0a0b",				"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c0a0c",				"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c0a0d",				"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c0a0e",				"Black Mesa Inbound",	"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c1a0",					"Anomalous Materials",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c1a0d",				"Anomalous Materials",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c1a0a",				"Anomalous Materials",	"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c1a0b",				"Anomalous Materials",	"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c1a0e",				"Anomalous Materials",	"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c1a1a",				"Unforseen Consequences",	"#Gametype_CoOp",			"Valve",		"Part 1",
-	"c1a1f",				"Unforseen Consequences",	"#Gametype_CoOp",			"Valve",		"Part 2",
-	"c1a1b",				"Unforseen Consequences",	"#Gametype_CoOp",			"Valve",		"Part 3",
-	"c1a1c",				"Unforseen Consequences",	"#Gametype_CoOp",			"Valve",		"Part 4",
-	"c1a1d",				"Unforseen Consequences",	"#Gametype_CoOp",			"Valve",		"Part 5",
-	"c1a2",					"Office Complex",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c1a2a",				"Office Complex",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c1a2b",				"Office Complex",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c1a2c",				"Office Complex",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c1a2d",				"Office Complex",		"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c1a3",					"We've Got Hostiles",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c1a3a",				"We've Got Hostiles",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c1a3b",				"We've Got Hostiles",	"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c1a3c",				"We've Got Hostiles",	"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c1a3d",				"We've Got Hostiles",	"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c1a4",					"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c1a4k",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c1a4b",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c1a4f",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c1a4d",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c1a4e",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c1a4i",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 7",
-	"c1a4g",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 8",
-	"c1a4j",				"Blast Pit",			"#Gametype_CoOp",				"Valve",		"Part 9",
-	"c2a1",					"Power Up",				"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a1a",				"Power Up",				"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a1b",				"Power Up",				"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a2",					"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a2a",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a2b1",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a2b2",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c2a2c",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c2a2d",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c2a2f",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 7",
-	"c2a2g",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 8",
-	"c2a2h",				"On A Rail",			"#Gametype_CoOp",				"Valve",		"Part 9",
-	"c2a3",					"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a3a",				"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a3b",				"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a3c",				"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c2a3d",				"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c2a3e",				"Apprehension",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c2a4",					"Residue Processing",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a4a",				"Residue Processing",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a4b",				"Residue Processing",	"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a4c",				"Residue Processing",	"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c2a4d",				"Questionable Ethics",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a4e",				"Questionable Ethics",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a4f",				"Questionable Ethics",	"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a4g",				"Questionable Ethics",	"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c2a5",					"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c2a5w",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c2a5x",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c2a5a",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c2a5b",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c2a5c",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c2a5d",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 7",
-	"c2a5e",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 8",
-	"c2a5f",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 9",
-	"c2a5g",				"Surface Tension",		"#Gametype_CoOp",				"Valve",		"Part 10",
-	"c3a1",					"Forget About Red Team!",	"#Gametype_CoOp",			"Valve",		"Part 1",
-	"c3a1a",				"Forget About Red Team!",	"#Gametype_CoOp",			"Valve",		"Part 2",
-	"c3a1b",				"Forget About Red Team!",	"#Gametype_CoOp",			"Valve",		"Part 3",
-	"c3a2e",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c3a2",					"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c3a2a",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c3a2b",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c3a2c",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c3a2d",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c3a2f",				"Lambda Core",			"#Gametype_CoOp",				"Valve",		"Part 7",
-	"c4a1",					"Xen",					"#Gametype_CoOp",				"Valve",		"",
-	"c4a2",					"Gonarch's Lair",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c4a2a",				"Gonarch's Lair",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c4a2b",				"Gonarch's Lair",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c4a1a",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"c4a1b",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"c4a1c",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"c4a1d",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"c4a1e",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"c4a1f",				"Interloper",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"c4a3",					"Nihilanth",			"#Gametype_CoOp",				"Valve",		"Finale",
-	"c5a1",					"Outro",				"#Gametype_CoOp",				"Valve",		"Ending",
-	//---------------------- HL2 maps ----------------------
-	"d1_trainstation_01",	"Point Insertion",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d1_trainstation_02",	"Point Insertion",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d1_trainstation_03",	"Point Insertion",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d1_trainstation_04",	"Point Insertion",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d1_trainstation_05",	"A Red Letter Day",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d1_trainstation_06",	"A Red Letter Day",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d1_canals_01",			"Route Kanal",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d1_canals_01a",		"Route Kanal",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d1_canals_02",			"Route Kanal",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d1_canals_03",			"Route Kanal",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d1_canals_04",			"What the FUCK?",		"#Gametype_CoOp",				"what?",		"Impossible",
-	"d1_canals_05",			"Route Kanal",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d1_canals_06",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d1_canals_07",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d1_canals_08",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d1_canals_09",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d1_canals_10",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d1_canals_11",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"d1_canals_12",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 7",
-	"d1_canals_13",			"Water Hazard",			"#Gametype_CoOp",				"Valve",		"Part 8",
-	"d1_eli_01",			"Black Mesa East",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d1_eli_02",			"Black Mesa East",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d1_town_01",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 1",
-	"d1_town_01a",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 2",
-	"d1_town_02",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 3",
-	"d1_town_03",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 4",
-	"d1_town_02_p2",        "We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 5",
-	"d1_town_02a",          "We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 6",
-	"d1_town_04",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 7",
-	"d1_town_05",			"We don't go to Ravenholm", "#Gametype_CoOp",			"Valve",		"Part 8",
-	"d2_coast_01",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d2_lostcoast",			"Lost Coast",			"#Gametype_CoOp",				"Valve",		"",
-	"d2_coast_02",			"What the FUCK?",		"#Gametype_CoOp",				"???",			"Nani",
-	"d2_coast_03",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d2_coast_04",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d2_coast_05",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d2_coast_06",			"What the FUCK?",		"#Gametype_CoOp",				"U?",			"is this illegal"
-	"d2_coast_07",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d2_coast_08",			"Highway 17",			"#Gametype_CoOp",				"Valve",		"Part 6",
-	"d2_coast_07_p2",       "Highway 17",			"#Gametype_CoOp",   	        "Valve",		"Part 7",
-	"d2_coast_09",			"Sandtraps",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d2_coast_10",			"Sandtraps",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d2_coast_11",			"Sandtraps",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d2_coast_12",			"Sandtraps",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d2_prison_01",			"Sandtraps",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d2_prison_02",			"Nova Prospekt",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d2_prison_03",			"Nova Prospekt",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d2_prison_04",			"Nova Prospekt",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d2_prison_05",			"Nova Prospekt",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d2_prison_06",			"Entanglement",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d2_prison_07",			"Entanglement",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d2_prison_08",			"Entanglement",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d3_c17_01",			"Entanglement",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d3_c17_02",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d3_c17_03",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d3_c17_04",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d3_c17_05",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d3_c17_06a",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d3_c17_06b",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 6",
-	"d3_c17_07",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 7",
-	"d3_c17_08",			"Anticitizen One",		"#Gametype_CoOp",				"Valve",		"Part 8",
-	"d3_c17_09",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d3_c17_10a",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d3_c17_10b",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d3_c17_11",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d3_c17_12",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d3_c17_12b",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 6",
-	"d3_c17_13",			"Follow Freeman!",		"#Gametype_CoOp",				"Valve",		"Part 7",
-	"d3_citadel_01",		"Our Benefactors",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"d3_citadel_02",		"Our Benefactors",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"d3_citadel_03",		"Our Benefactors",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"d3_citadel_04",		"Our Benefactors",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"d3_citadel_05",		"Our Benefactors",		"#Gametype_CoOp",				"Valve",		"Part 5",
-	"d3_breen_01",			"Dark Energy",			"#Gametype_CoOp",				"Valve",		"Finale",
-	//---------------------- EP1 maps ----------------------
-	"ep1_citadel_00",		"Undue Alarm",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep1_citadel_01",		"Undue Alarm",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep1_citadel_02",		"Undue Alarm",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep1_citadel_02b",		"Undue Alarm",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"ep1_citadel_03",		"Direct Intervention",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep1_citadel_04",		"Direct Intervention",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep1_c17_00",			"Lowlife",				"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep1_c17_00a",			"Lowlife",				"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep1_c17_01",			"Urban Flight",			"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep1_c17_01a",			"Urban Flight",			"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep1_c17_02",			"Urban Flight",			"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep1_c17_02b",			"Urban Flight",			"#Gametype_CoOp",				"Valve",		"Part 4",
-	"ep1_c17_02a",			"Urban Flight",			"#Gametype_CoOp",				"Valve",		"Part 5",
-	"ep1_c17_05",			"Exit 17",				"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep1_c17_06",			"Exit 17",				"#Gametype_CoOp",				"Valve",		"Finale",
-	//---------------------- EP2 maps ----------------------
-	"ep2_outland_01",		"To The White Forest",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_01a",		"To The White Forest",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep2_outland_02",		"This Vortal Coil",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_02_p2",	"This Vortal Coil",		"#Gametype_CoOp",				"Valve",		"Part 3.5",
-	"ep2_outland_03",		"This Vortal Coil",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep2_outland_04",		"This Vortal Coil",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"ep2_outland_05",		"Red Team Pontifex",	"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_06",		"Red Team Pontifex",	"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep2_outland_06a",		"Riding Shotgun",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_07",		"Riding Shotgun",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep2_outland_08",		"Riding Shotgun",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep2_outland_09",		"Under The Radar",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_10",		"Under The Radar",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep2_outland_10a",		"Under The Radar",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep2_outland_11",		"Our Mutual Fiend",		"#Gametype_CoOp",				"Valve",		"Part 1",
-	"ep2_outland_11a",		"Our Mutual Fiend",		"#Gametype_CoOp",				"Valve",		"Part 2",
-	"ep2_outland_11b",		"Our Mutual Fiend",		"#Gametype_CoOp",				"Valve",		"Part 3",
-	"ep2_outland_12",		"Our Mutual Fiend",		"#Gametype_CoOp",				"Valve",		"Part 4",
-	"ep2_outland_12a",		"T-Minus One (Finale)",	"#Gametype_CoOp",				"Valve",		"Finale",
+static s_LMapInfo s_LMaps[] = 
+{
+	"dummy",			"aaaa",				"aaaa",				"aaa",		"aaaa",
 };
 
-static s_LMapTypeInfo s_MapTypes[] = {
+static s_LMapTypeInfo s_MapTypes[] = 
+{
 	"cp_",		3, "#Gametype_CP",
 	"ctf_",		4, "#Gametype_CTF",
 	"pl_",		3, "#Gametype_Escort",
 	"plr_",		4, "#Gametype_EscortRace",
 	"koth_",	5, "#Gametype_Koth",
 	"arena_",	6, "#Gametype_Arena",
-	"tr_",		3, "#Gametype_Training",
-	"tc_",		3, "#TF_TerritoryControl",
-	"d1_",		3, "#Gametype_CoOp",
-	"d2_",		3, "#Gametype_CoOp",
-	"d3_",		3, "#Gametype_CoOp",
-	"ep1_",		4, "#Gametype_CoOp",
-	"ep2_",		4, "#Gametype_CoOp",
+	"tc_",		3, "#Gametype_TerritoryControl",
 };
 
 //-----------------------------------------------------------------------------
@@ -846,21 +599,6 @@ const char *GetMapDisplayName( const char *mapName )
 	if ( !mapName )
 		return szDisplayName;
 
-	/*
-	// check the worldspawn entity to see if the map author has specified a name
-	if ( GetClientWorldEntity() )
-	{
-	const char *pszMapDescription = GetClientWorldEntity()->m_iszMapDescription;
-	if ( Q_strlen( pszMapDescription ) > 0 )
-	{
-	Q_strncpy( szDisplayName, pszMapDescription, sizeof( szDisplayName ) );
-	Q_strupr( szDisplayName );
-
-	return szDisplayName;
-	}
-	}
-	*/
-
 	// check our lookup table
 	Q_strncpy( szTempName, mapName, sizeof( szTempName ) );
 	Q_strlower( szTempName );
@@ -868,9 +606,7 @@ const char *GetMapDisplayName( const char *mapName )
 	for ( int i = 0; i < ARRAYSIZE(s_LMaps); ++i )
 	{
 		if ( !Q_stricmp( s_LMaps[i].pDiskName, szTempName ) )
-		{
 			return s_LMaps[i].pDisplayName;
-		}
 	}
 
 	// we haven't found a "friendly" map name, so let's just clean up what we have
