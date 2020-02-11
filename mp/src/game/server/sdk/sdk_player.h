@@ -118,6 +118,8 @@ public:
 	virtual void SetMaxArmorValue( int MaxArmorValue );
 	virtual int GetArmorValue()	{ return m_ArmorValue; }
 	virtual int GetMaxArmorValue() { return m_MaxArmorValue; }
+	virtual void SetArmorClass(float value) { m_flArmorClass = value; };
+	virtual float GetArmorClass() { return m_flArmorClass; }
 
 	// Ammo and items
 	virtual int GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound = false);
@@ -262,9 +264,9 @@ private:
 	float m_flHealthRegenDelay;
 
 	virtual void	Weapon_Equip( CBaseCombatWeapon *pWeapon );		//Tony; override so diethink can be cleared
-	virtual void	ThrowActiveWeapon( void );
+	/*virtual void	ThrowActiveWeapon( void );
 	virtual void	SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  );
-	virtual void	SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir );
+	virtual void	SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir );*/
 
 	// When the player joins, it cycles their view between trigger_camera entities.
 	// This is the current camera, and the time that we'll switch to the next one.
@@ -275,11 +277,12 @@ private:
 	void CreateRagdollEntity();
 	void DestroyRagdoll( void );
 
-
+	
 	CSDKPlayerAnimState *m_PlayerAnimState;
 
 	CNetworkVar( bool, m_bSpawnInterpCounter );
 
+	float m_flArmorClass;
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_ArmorValue );
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iHealth );
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_iMaxHealth );

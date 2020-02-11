@@ -7,8 +7,8 @@
 #include "cbase.h"
 #include "props.h"
 
-#define BOLT_AIR_VELOCITY	3500
-#define BOLT_WATER_VELOCITY	1500
+#define BOLT_AIR_VELOCITY	1200
+#define BOLT_WATER_VELOCITY	1200
 
 //=============================================================================
 //

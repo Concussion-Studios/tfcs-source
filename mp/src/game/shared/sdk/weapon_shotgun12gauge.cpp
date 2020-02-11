@@ -161,7 +161,7 @@ bool CWeapon12Gauge::Reload(void)
 	SendWeaponAnim(ACT_VM_RELOAD);
 
 	pOwner->m_flNextAttack = gpGlobals->curtime;
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
+	m_flNextPrimaryAttack = gpGlobals->curtime + 0.25; //SequenceDuration();
 
 	return true;
 }
@@ -237,9 +237,6 @@ void CWeapon12Gauge::Pump(void)
 
 	// Finish reload animation
 	SendWeaponAnim(ACT_SHOTGUN_PUMP);
-
-	pOwner->m_flNextAttack = gpGlobals->curtime + SequenceDuration();
-	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
 }
 
 //-----------------------------------------------------------------------------
@@ -445,7 +442,7 @@ CWeapon12Gauge::CWeapon12Gauge(void)
 	m_bDelayedFire = false;
 
 	m_fMinRange1 = 0.0;
-	m_fMaxRange1 = 500;
+	m_fMaxRange1 = 2048;
 }
 
 //-----------------------------------------------------------------------------
@@ -462,18 +459,18 @@ void CWeapon12Gauge::ItemHolsterFrame(void)
 		return;
 
 	// If it's been longer than three seconds, reload
-	if ( (gpGlobals->curtime) > 3 )
-	{
-		if (GetOwner() == NULL)
-			return;
+	//if ( (gpGlobals->curtime) > 3 )
+	//{
+	//	if (GetOwner() == NULL)
+	//		return;
 
-		if (m_iClip1 == GetMaxClip1())
-			return;
+	//	if (m_iClip1 == GetMaxClip1())
+	//		return;
 
-		// Just load the clip with no animations
-		int ammoFill = MIN((GetMaxClip1() - m_iClip1), GetOwner()->GetAmmoCount(GetPrimaryAmmoType()));
+	//	// Just load the clip with no animations
+	//	int ammoFill = MIN((GetMaxClip1() - m_iClip1), GetOwner()->GetAmmoCount(GetPrimaryAmmoType()));
 
-		GetOwner()->RemoveAmmo(ammoFill, GetPrimaryAmmoType());
-		m_iClip1 += ammoFill;
-	}
+	//	GetOwner()->RemoveAmmo(ammoFill, GetPrimaryAmmoType());
+	//	m_iClip1 += ammoFill;
+	//}
 }

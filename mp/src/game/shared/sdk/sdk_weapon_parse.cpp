@@ -53,6 +53,7 @@ void CSDKWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName 
 	m_iBullets			= pKeyValuesData->GetInt( "Bullets", 1 );
 	m_flSpread			= pKeyValuesData->GetFloat( "Spread", 0.01 );
 	m_flCycleTime		= pKeyValuesData->GetFloat( "CycleTime", 0.15 );
+	m_flReloadTime		= pKeyValuesData->GetFloat("ReloadTime", 0.3);
 
 	// New accuracy model parameters
 }

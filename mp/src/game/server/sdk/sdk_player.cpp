@@ -824,8 +824,6 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	CTakeDamageInfo info = inputInfo;
 	CBaseEntity *pInflictor = info.GetInflictor();
 	CBaseEntity *pAttacker = info.GetAttacker();
-	float flArmorBonus = 0.5f;
-	float flArmorRatio = 0.5f;
 	float flDamage = info.GetDamage();
 	bool bFriendlyFire = friendlyfire.GetBool();
 
@@ -898,8 +896,8 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		return 0;
 
 	// blasts damage armor more unless whe aren't Heavy or soldier.
-	if ( ( info.GetDamageType() & DMG_BLAST ) && !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY || m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER ) )
-		flArmorBonus *= 2;
+	//if ( ( info.GetDamageType() & DMG_BLAST ) && !( m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY || m_Shared.DesiredPlayerClass() == PLAYERCLASS_SOLDIER ) )
+	//	flArmorBonus *= 2;
 
 	if ( bFriendlyFire ||
 		info.GetAttacker()->GetTeamNumber() != GetTeamNumber() ||
@@ -923,32 +921,12 @@ int CSDKPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		// Deal with Armour
 		if ( GetArmorValue() && !( info.GetDamageType() & ( DMG_FALL | DMG_DROWN | DMG_POISON | DMG_RADIATION ) ) )	// armor doesn't protect against fall or drown damage!
 		{
-			float flNew = flDamage * flArmorRatio;
-			float flArmor = (flDamage - flNew) * flArmorBonus;
-
-			// Does this use more armor than we have?
-			if ( flArmor > GetArmorValue() )
-			{
-				//armorHit = (int)(flArmor);
-
-				flArmor = GetArmorValue();
-				flArmor *= (1/flArmorBonus);
-				flNew = flDamage - flArmor;
-				SetArmorValue( 0 );
-			}
-			else
-			{
-				int oldValue = (int)( GetArmorValue() );
+			float flArmorDamage = flDamage * m_flArmorClass;
+			float flCurrentArmor = GetArmorValue();
+			flDamage = flDamage * (1 - m_flArmorClass) - min(0, flCurrentArmor - flArmorDamage);
 			
-				if ( flArmor < 0 )
-					 flArmor = 1;
+			SetArmorValue(max(0, flCurrentArmor - flArmorDamage));
 
-				SetArmorValue( oldValue - flArmor );
-				//armorHit = oldValue - (int)(pev->armorvalue);
-			}
-			
-			flDamage = flNew;
-			
 			info.SetDamage( flDamage );
 		}
 
@@ -1117,7 +1095,7 @@ void CSDKPlayer::Event_Killed( const CTakeDamageInfo &info )
 	CTakeDamageInfo subinfo = info;
 	subinfo.SetDamageForce( m_vecTotalBulletForce );
 
-	ThrowActiveWeapon();
+	//ThrowActiveWeapon();
 
 	FlashlightTurnOff();
 
@@ -1233,75 +1211,75 @@ void CSDKPlayer::AddDamagerToHistory(EHANDLE hDamager)
 	m_DamagerHistory[0].flTimeDamage = gpGlobals->curtime;
 }
 
-void CSDKPlayer::ThrowActiveWeapon( void )
-{
-	CWeaponSDKBase *pWeapon = (CWeaponSDKBase *)GetActiveWeapon();
-
-	if( pWeapon && pWeapon->CanWeaponBeDropped() )
-	{
-		QAngle gunAngles;
-		VectorAngles( BodyDirection2D(), gunAngles );
-
-		Vector vecForward;
-		AngleVectors( gunAngles, &vecForward, NULL, NULL );
-
-		float flDiameter = sqrt( CollisionProp()->OBBSize().x * CollisionProp()->OBBSize().x + CollisionProp()->OBBSize().y * CollisionProp()->OBBSize().y );
-
-		pWeapon->Holster(NULL);
-		SwitchToNextBestWeapon( pWeapon );
-		SDKThrowWeapon( pWeapon, vecForward, gunAngles, flDiameter );
-	}
-}
+//void CSDKPlayer::ThrowActiveWeapon( void )
+//{
+//	CWeaponSDKBase *pWeapon = (CWeaponSDKBase *)GetActiveWeapon();
+//
+//	if( pWeapon && pWeapon->CanWeaponBeDropped() )
+//	{
+//		QAngle gunAngles;
+//		VectorAngles( BodyDirection2D(), gunAngles );
+//
+//		Vector vecForward;
+//		AngleVectors( gunAngles, &vecForward, NULL, NULL );
+//
+//		float flDiameter = sqrt( CollisionProp()->OBBSize().x * CollisionProp()->OBBSize().x + CollisionProp()->OBBSize().y * CollisionProp()->OBBSize().y );
+//
+//		pWeapon->Holster(NULL);
+//		SwitchToNextBestWeapon( pWeapon );
+//		SDKThrowWeapon( pWeapon, vecForward, gunAngles, flDiameter );
+//	}
+//}
 void CSDKPlayer::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 {
 	BaseClass::Weapon_Equip( pWeapon );
 	dynamic_cast<CWeaponSDKBase*>(pWeapon)->SetDieThink( false );	//Make sure the context think for removing is gone!!
 
 }
-void CSDKPlayer::SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  )
-{
-	Vector vecOrigin;
-	CollisionProp()->RandomPointInBounds( Vector( 0.5f, 0.5f, 0.5f ), Vector( 0.5f, 0.5f, 1.0f ), &vecOrigin );
+//void CSDKPlayer::SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  )
+//{
+//	Vector vecOrigin;
+//	CollisionProp()->RandomPointInBounds( Vector( 0.5f, 0.5f, 0.5f ), Vector( 0.5f, 0.5f, 1.0f ), &vecOrigin );
+//
+//	// Nowhere in particular; just drop it.
+//	Vector vecThrow;
+//	SDKThrowWeaponDir( pWeapon, vecForward, &vecThrow );
+//
+//	Vector vecOffsetOrigin;
+//	VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
+//
+//	trace_t	tr;
+//	UTIL_TraceLine( vecOrigin, vecOffsetOrigin, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
+//		
+//	if ( tr.startsolid || tr.allsolid || ( tr.fraction < 1.0f && tr.m_pEnt != pWeapon ) )
+//	{
+//		//FIXME: Throw towards a known safe spot?
+//		vecThrow.Negate();
+//		VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
+//	}
+//
+//	vecThrow *= random->RandomFloat( 150.0f, 240.0f );
+//
+//	pWeapon->SetAbsOrigin( vecOrigin );
+//	pWeapon->SetAbsAngles( vecAngles );
+//	pWeapon->Drop( vecThrow );
+//	pWeapon->SetRemoveable( false );
+//	Weapon_Detach( pWeapon );
+//
+//	pWeapon->SetDieThink( true );
+//}
 
-	// Nowhere in particular; just drop it.
-	Vector vecThrow;
-	SDKThrowWeaponDir( pWeapon, vecForward, &vecThrow );
-
-	Vector vecOffsetOrigin;
-	VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
-
-	trace_t	tr;
-	UTIL_TraceLine( vecOrigin, vecOffsetOrigin, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
-		
-	if ( tr.startsolid || tr.allsolid || ( tr.fraction < 1.0f && tr.m_pEnt != pWeapon ) )
-	{
-		//FIXME: Throw towards a known safe spot?
-		vecThrow.Negate();
-		VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
-	}
-
-	vecThrow *= random->RandomFloat( 150.0f, 240.0f );
-
-	pWeapon->SetAbsOrigin( vecOrigin );
-	pWeapon->SetAbsAngles( vecAngles );
-	pWeapon->Drop( vecThrow );
-	pWeapon->SetRemoveable( false );
-	Weapon_Detach( pWeapon );
-
-	pWeapon->SetDieThink( true );
-}
-
-void CSDKPlayer::SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir )
-{
-	VMatrix zRot;
-	MatrixBuildRotateZ( zRot, random->RandomFloat( -60.0f, 60.0f ) );
-
-	Vector vecThrow;
-	Vector3DMultiply( zRot, vecForward, *pVecThrowDir );
-
-	pVecThrowDir->z = random->RandomFloat( -0.5f, 0.5f );
-	VectorNormalize( *pVecThrowDir );
-}
+//void CSDKPlayer::SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir )
+//{
+//	VMatrix zRot;
+//	MatrixBuildRotateZ( zRot, random->RandomFloat( -60.0f, 60.0f ) );
+//
+//	Vector vecThrow;
+//	Vector3DMultiply( zRot, vecForward, *pVecThrowDir );
+//
+//	pVecThrowDir->z = random->RandomFloat( -0.5f, 0.5f );
+//	VectorNormalize( *pVecThrowDir );
+//}
 
 void CSDKPlayer::PlayerDeathThink()
 {

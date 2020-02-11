@@ -36,7 +36,7 @@ void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeapon
 	m_iMaxHealth = pKeyValuesData->GetInt( "health_max", 100 );
 	m_iMaxArmor = pKeyValuesData->GetInt( "armor_max", 100 );
 	m_iSpawnArmor = pKeyValuesData->GetInt("armor_spawn", 0);
-	m_flArmorClass = pKeyValuesData->GetInt("armor_class", 0.3f);
+	m_flArmorClass = pKeyValuesData->GetFloat("armor_class", 0.3f);
 
 	KeyValues *pKeyValuesAmmo = pKeyValuesData->FindKey("MaxAmmo");
 	KeyValues *pKeyValuesSpawnAmmo = pKeyValuesData->FindKey("SpawnAmmo");

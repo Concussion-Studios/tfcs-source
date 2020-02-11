@@ -52,6 +52,7 @@ public:
 	int m_iDamage;
 	int m_iBullets;
 	float m_flCycleTime;
+	float m_flReloadTime;
 	float m_flSpread;
 
 	// New accuracy model parameters
