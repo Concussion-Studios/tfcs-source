@@ -33,6 +33,7 @@ public:
 	virtual void ProjectileStickTo( CBaseEntity *pOther, trace_t &tr ) { Assert( 0 && "ProjectileBubbleThink should not be called. Make sure to implement this in your subclass!\n" ); }
 	virtual void ProjectileTouch( CBaseEntity* pOther ) { Assert( 0 && "ProjectileTouch should not be called. Make sure to implement this in your subclass!\n" ); }
 	virtual void ProjectileThink( void ) { Assert( 0 && "ProjectileThink should not be called. Make sure to implement this in your subclass!\n" ); }
+	virtual float GetGravity(void) { return 0.001f; }
 
 protected:
 	float flDamage;

@@ -32,6 +32,7 @@ public:
 	virtual void RocketTouch( CBaseEntity *pOther );
 	virtual void Explode( void );
 	virtual void Fire( void );
+	virtual float GetGravity(void) { return 0.001f; }
 	
 	virtual float GetDamage() { return m_flDamage; }
 	virtual void SetDamage(float flDamage) { m_flDamage = flDamage; }

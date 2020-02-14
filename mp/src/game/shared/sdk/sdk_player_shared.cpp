@@ -425,6 +425,11 @@ const Vector CSDKPlayer::GetPlayerMaxs( void ) const
 	}
 }
 
+//CSDKPlayerClassInfo *CSDKPlayer::GetClassInfo(void)
+//{
+//	
+//}
+
 CWeaponSDKBase *CSDKPlayer::GetWeaponOwnerID( int iID )
 {
 	for (int i = 0;i < WeaponCount(); i++) 

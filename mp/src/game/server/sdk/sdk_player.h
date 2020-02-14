@@ -110,6 +110,7 @@ public:
 
 	// custom player functions
 	virtual void CheatImpulseCommands( int iImpulse );
+	//CSDKPlayerClassInfo* GetClassInfo(void);
 
 	// Armor
 	virtual void IncrementArmorValue( int nCount, int nMaxValue = -1 );
@@ -123,7 +124,7 @@ public:
 
 	// Ammo and items
 	virtual int GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound = false);
-	void		DiscardAmmo(void);							//Chrits; discard unused ammo
+	void		DiscardAmmo(bool bDead = false);							//Chrits; discard unused ammo
 
 	// Health
 	virtual void SetHealth( int value );

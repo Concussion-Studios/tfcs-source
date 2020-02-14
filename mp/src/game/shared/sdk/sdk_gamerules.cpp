@@ -13,35 +13,35 @@
 #include "filesystem.h"
 
 #ifdef CLIENT_DLL
-	#include "precache_register.h"
-	#include "c_sdk_player.h"
-	#include "c_sdk_team.h"
+#include "precache_register.h"
+#include "c_sdk_player.h"
+#include "c_sdk_team.h"
 #else
-	#include "voice_gamemgr.h"
-	#include "sdk_player.h"
-	#include "sdk_team.h"
-	#include "sdk_playerclass_info_parse.h"
-	#include "player_resource.h"
-	#include "mapentities.h"
-	#include "sdk_basegrenade_projectile.h"
-	#include "vote_controller.h"
-	#include "eventqueue.h"
-	#include "game.h"
-	#include "items.h"
-	#include "entitylist.h"
-	#include "in_buttons.h"
-	#include <ctype.h>
-	#include "iscorer.h"
-	#include "gameinterface.h"
+#include "voice_gamemgr.h"
+#include "sdk_player.h"
+#include "sdk_team.h"
+#include "sdk_playerclass_info_parse.h"
+#include "player_resource.h"
+#include "mapentities.h"
+#include "sdk_basegrenade_projectile.h"
+#include "vote_controller.h"
+#include "eventqueue.h"
+#include "game.h"
+#include "items.h"
+#include "entitylist.h"
+#include "in_buttons.h"
+#include <ctype.h>
+#include "iscorer.h"
+#include "gameinterface.h"
 
-	// when we are within this close to running out of entities,  items 
-	// marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
-	#define ENTITY_INTOLERANCE	100
+// when we are within this close to running out of entities,  items 
+// marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
+#define ENTITY_INTOLERANCE	100
 
-	#define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
+#define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
 
-	ConVar sv_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
-	ConVar sv_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+ConVar sv_weapon_respawn_time("sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY);
+ConVar sv_item_respawn_time("sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY);
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -52,8 +52,8 @@ class CSpawnPoint : public CPointEntity
 {
 public:
 	bool IsDisabled() { return m_bDisabled; }
-	void InputEnable( inputdata_t &inputdata ) { m_bDisabled = false; }
-	void InputDisable( inputdata_t &inputdata ) { m_bDisabled = true; }
+	void InputEnable(inputdata_t &inputdata) { m_bDisabled = false; }
+	void InputDisable(inputdata_t &inputdata) { m_bDisabled = true; }
 
 private:
 	bool m_bDisabled;
@@ -62,92 +62,92 @@ private:
 
 BEGIN_DATADESC(CSpawnPoint)
 
-	// Keyfields
-	DEFINE_KEYFIELD( m_bDisabled,	FIELD_BOOLEAN,	"StartDisabled" ),
+// Keyfields
+DEFINE_KEYFIELD(m_bDisabled, FIELD_BOOLEAN, "StartDisabled"),
 
-	// Inputs
-	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
+// Inputs
+DEFINE_INPUTFUNC(FIELD_VOID, "Disable", InputDisable),
+DEFINE_INPUTFUNC(FIELD_VOID, "Enable", InputEnable),
 
 END_DATADESC();
 
-LINK_ENTITY_TO_CLASS( info_player_deathmatch, CSpawnPoint );
-LINK_ENTITY_TO_CLASS( info_player_blue, CSpawnPoint );
-LINK_ENTITY_TO_CLASS( info_player_red, CSpawnPoint );
-LINK_ENTITY_TO_CLASS( info_player_yellow, CSpawnPoint );
-LINK_ENTITY_TO_CLASS( info_player_green, CSpawnPoint );
+LINK_ENTITY_TO_CLASS(info_player_deathmatch, CSpawnPoint);
+LINK_ENTITY_TO_CLASS(info_player_blue, CSpawnPoint);
+LINK_ENTITY_TO_CLASS(info_player_red, CSpawnPoint);
+LINK_ENTITY_TO_CLASS(info_player_yellow, CSpawnPoint);
+LINK_ENTITY_TO_CLASS(info_player_green, CSpawnPoint);
 #endif
 
-REGISTER_GAMERULES_CLASS( CSDKGameRules );
+REGISTER_GAMERULES_CLASS(CSDKGameRules);
 
-BEGIN_NETWORK_TABLE_NOBASE( CSDKGameRules, DT_SDKGameRules )
+BEGIN_NETWORK_TABLE_NOBASE(CSDKGameRules, DT_SDKGameRules)
 #if defined ( CLIENT_DLL )
-	RecvPropFloat( RECVINFO( m_flGameStartTime ) ),
-	RecvPropInt( RECVINFO( m_nGamemode ) ),
+RecvPropFloat(RECVINFO(m_flGameStartTime)),
+RecvPropInt(RECVINFO(m_nGamemode)),
 #else
-	SendPropFloat( SENDINFO( m_flGameStartTime ), 32, SPROP_NOSCALE ),
-	SendPropInt( SENDINFO( m_nGamemode ), GAMEMODE_LAST, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+SendPropFloat(SENDINFO(m_flGameStartTime), 32, SPROP_NOSCALE),
+SendPropInt(SENDINFO(m_nGamemode), GAMEMODE_LAST, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN),
 #endif
 END_NETWORK_TABLE()
 
-ConVar mp_allowrandomclass( "mp_allowrandomclass", "1", FCVAR_REPLICATED, "Allow players to select random class" );
-ConVar mp_allowspecialclass( "mp_allowspecialclass", "0", FCVAR_REPLICATED, "Allow players to select civilian class" );
-ConVar mp_ignorefriendlyjustheal( "mp_ignorefriendlyjustheal", "0", FCVAR_REPLICATED, "Allow players to ignore if they heal a friendly" );
-ConVar mp_4team( "mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random." );
-ConVar mp_deathmatch( "mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn." );
-ConVar mp_teamfull_spawnpoints( "mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>" );
-ConVar mp_limitteams( 
-	"mp_limitteams", 
-	"2", 
+ConVar mp_allowrandomclass("mp_allowrandomclass", "1", FCVAR_REPLICATED, "Allow players to select random class");
+ConVar mp_allowspecialclass("mp_allowspecialclass", "0", FCVAR_REPLICATED, "Allow players to select civilian class");
+ConVar mp_ignorefriendlyjustheal("mp_ignorefriendlyjustheal", "0", FCVAR_REPLICATED, "Allow players to ignore if they heal a friendly");
+ConVar mp_4team("mp_4team", "0", FCVAR_REPLICATED, "Allow players to choose between four teams, or random.");
+ConVar mp_deathmatch("mp_deathmatch", "0", FCVAR_REPLICATED, "Is DeathMatch enabled? If <0,1> 0 use normal spawn, 1 use deathmatch spawn.");
+ConVar mp_teamfull_spawnpoints("mp_teamfull_spawnpoints", "0", FCVAR_GAMEDLL, "Should teams being full be based on SpawnPoints? <0, 1>");
+ConVar mp_limitteams(
+	"mp_limitteams",
+	"2",
 	FCVAR_REPLICATED | FCVAR_NOTIFY,
 	"Max # of players 1 team can have over another (0 disables check)",
 	true, 0,	// min value
 	true, 30	// max value
-);
+	);
 
-LINK_ENTITY_TO_CLASS( sdk_gamerules, CSDKGameRulesProxy );
-IMPLEMENT_NETWORKCLASS_ALIASED( SDKGameRulesProxy, DT_SDKGameRulesProxy )
+LINK_ENTITY_TO_CLASS(sdk_gamerules, CSDKGameRulesProxy);
+IMPLEMENT_NETWORKCLASS_ALIASED(SDKGameRulesProxy, DT_SDKGameRulesProxy)
 
 #ifdef CLIENT_DLL
-void RecvProxy_SDKGameRules( const RecvProp *pProp, void **pOut, void *pData, int objectID )
+void RecvProxy_SDKGameRules(const RecvProp *pProp, void **pOut, void *pData, int objectID)
 {
 	CSDKGameRules *pRules = SDKGameRules();
-	Assert( pRules );
+	Assert(pRules);
 	*pOut = pRules;
 }
 
-BEGIN_RECV_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
-	RecvPropDataTable( "sdk_gamerules_data", 0, 0, &REFERENCE_RECV_TABLE( DT_SDKGameRules ), RecvProxy_SDKGameRules )
+BEGIN_RECV_TABLE(CSDKGameRulesProxy, DT_SDKGameRulesProxy)
+RecvPropDataTable("sdk_gamerules_data", 0, 0, &REFERENCE_RECV_TABLE(DT_SDKGameRules), RecvProxy_SDKGameRules)
 END_RECV_TABLE()
 #else
-void *SendProxy_SDKGameRules( const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID )
+void *SendProxy_SDKGameRules(const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID)
 {
 	CSDKGameRules *pRules = SDKGameRules();
-	Assert( pRules );
+	Assert(pRules);
 	pRecipients->SetAllRecipients();
 	return pRules;
 }
 
-BEGIN_SEND_TABLE( CSDKGameRulesProxy, DT_SDKGameRulesProxy )
-	SendPropDataTable( "sdk_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_SDKGameRules ), SendProxy_SDKGameRules )
+BEGIN_SEND_TABLE(CSDKGameRulesProxy, DT_SDKGameRulesProxy)
+SendPropDataTable("sdk_gamerules_data", 0, &REFERENCE_SEND_TABLE(DT_SDKGameRules), SendProxy_SDKGameRules)
 END_SEND_TABLE()
 #endif
 
 static CSDKViewVectors g_SDKViewVectors(
 
-	Vector( 0, 0, 58 ),			//VEC_VIEW
-								
-	Vector(-16, -16, 0 ),		//VEC_HULL_MIN
-	Vector( 16,  16,  72 ),		//VEC_HULL_MAX
-													
-	Vector(-16, -16, 0 ),		//VEC_DUCK_HULL_MIN
-	Vector( 16,  16, 45 ),		//VEC_DUCK_HULL_MAX
-	Vector( 0, 0, 34 ),			//VEC_DUCK_VIEW
-													
-	Vector(-10, -10, -10 ),		//VEC_OBS_HULL_MIN
-	Vector( 10,  10,  10 ),		//VEC_OBS_HULL_MAX
-													
-	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT
+Vector(0, 0, 58),			//VEC_VIEW
+
+Vector(-16, -16, 0),		//VEC_HULL_MIN
+Vector(16, 16, 72),		//VEC_HULL_MAX
+
+Vector(-16, -16, 0),		//VEC_DUCK_HULL_MIN
+Vector(16, 16, 45),		//VEC_DUCK_HULL_MAX
+Vector(0, 0, 34),			//VEC_DUCK_VIEW
+
+Vector(-10, -10, -10),		//VEC_OBS_HULL_MIN
+Vector(10, 10, 10),		//VEC_OBS_HULL_MAX
+
+Vector(0, 0, 14)			//VEC_DEAD_VIEWHEIGHT
 );
 
 const CViewVectors* CSDKGameRules::GetViewVectors() const
@@ -166,7 +166,7 @@ const CSDKViewVectors *CSDKGameRules::GetSDKViewVectors() const
 CSDKGameRules::CSDKGameRules()
 {
 #ifndef CLIENT_DLL
-	ConColorMsg( Color( 86, 156, 143, 255 ), "[C_SDKGameRules] Creating Gamerules....\n" );
+	ConColorMsg(Color(86, 156, 143, 255), "[C_SDKGameRules] Creating Gamerules....\n");
 
 	InitTeams();
 
@@ -186,19 +186,19 @@ CSDKGameRules::CSDKGameRules()
 
 	m_flGameStartTime = 0;
 
-	if ( filesystem->FileExists( UTIL_VarArgs( "maps/cfg/%s.cfg", STRING(gpGlobals->mapname) ) ) )
+	if (filesystem->FileExists(UTIL_VarArgs("maps/cfg/%s.cfg", STRING(gpGlobals->mapname))))
 	{
 		// Execute a map specific cfg file
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing map %s config file\n",  STRING( gpGlobals->mapname )  );
-		engine->ServerCommand( UTIL_VarArgs( "exec %s.cfg */maps\n", STRING(gpGlobals->mapname) ) );
+		ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Executing map %s config file\n", STRING(gpGlobals->mapname));
+		engine->ServerCommand(UTIL_VarArgs("exec %s.cfg */maps\n", STRING(gpGlobals->mapname)));
 		engine->ServerExecute();
 	}
 	else
 	{
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Could not load map %s config file skiping...\n",  STRING( gpGlobals->mapname )  );
+		ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Could not load map %s config file skiping...\n", STRING(gpGlobals->mapname));
 	}
 #else
-	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Creating Gamerules....\n" );
+	ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Creating Gamerules....\n");
 #endif
 }
 
@@ -208,41 +208,41 @@ CSDKGameRules::CSDKGameRules()
 CSDKGameRules::~CSDKGameRules()
 {
 #ifndef CLIENT_DLL
-	ConColorMsg( Color( 86, 156, 143, 255 ), "[CSDKGameRules] Destroying Gamerules....\n" );
+	ConColorMsg(Color(86, 156, 143, 255), "[CSDKGameRules] Destroying Gamerules....\n");
 
 	// Note, don't delete each team since they are in the gEntList and will 
 	// automatically be deleted from there, instead.
 	g_Teams.Purge();
 #else
-	ConColorMsg( Color( 86, 156, 143, 255 ), "[C_SDKGameRules] Destroying Gamerules....\n" );
+	ConColorMsg(Color(86, 156, 143, 255), "[C_SDKGameRules] Destroying Gamerules....\n");
 #endif
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns the game mode whe are currently
 //-----------------------------------------------------------------------------
-bool CSDKGameRules::InGameMode( int nGamemode )
-{	
-	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
-	return ( ( m_nGamemode & (1<<nGamemode) ) != 0 );
+bool CSDKGameRules::InGameMode(int nGamemode)
+{
+	Assert(nGamemode >= 0 && nGamemode < GAMEMODE_LAST);
+	return ((m_nGamemode & (1 << nGamemode)) != 0);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Change this gamemode
 //-----------------------------------------------------------------------------
-void CSDKGameRules::AddGameMode( int nGamemode )
+void CSDKGameRules::AddGameMode(int nGamemode)
 {
-	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
-	m_nGamemode |= (1<<nGamemode);
+	Assert(nGamemode >= 0 && nGamemode < GAMEMODE_LAST);
+	m_nGamemode |= (1 << nGamemode);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Remove this gamemode
 //-----------------------------------------------------------------------------
-void CSDKGameRules::RemoveGameMode( int nGamemode )
+void CSDKGameRules::RemoveGameMode(int nGamemode)
 {
-	Assert( nGamemode >= 0 && nGamemode < GAMEMODE_LAST );
-	m_nGamemode &= ~(1<<nGamemode);
+	Assert(nGamemode >= 0 && nGamemode < GAMEMODE_LAST);
+	m_nGamemode &= ~(1 << nGamemode);
 }
 
 #ifndef CLIENT_DLL
@@ -252,18 +252,18 @@ void CSDKGameRules::RemoveGameMode( int nGamemode )
 class CVoiceGameMgrHelper : public IVoiceGameMgrHelper
 {
 public:
-	virtual bool		CanPlayerHearPlayer( CBasePlayer *pListener, CBasePlayer *pTalker, bool &bProximity )
+	virtual bool		CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pTalker, bool &bProximity)
 	{
 		// Dead players can only be heard by other dead team mates
-		if ( pTalker->IsAlive() == false )
+		if (pTalker->IsAlive() == false)
 		{
-			if ( pListener->IsAlive() == false )
-				return ( pListener->InSameTeam( pTalker ) );
+			if (pListener->IsAlive() == false)
+				return (pListener->InSameTeam(pTalker));
 
 			return false;
 		}
 
-		return ( pListener->InSameTeam( pTalker ) );
+		return (pListener->InSameTeam(pTalker));
 	}
 };
 CVoiceGameMgrHelper g_VoiceGameMgrHelper;
@@ -325,76 +325,76 @@ static const char *s_PreserveEnts[] =
 //-----------------------------------------------------------------------------
 void CSDKGameRules::CheckGameMode()
 {
-	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server global gamemode config file\n" );
-	engine->ServerCommand( "exec config_default_global.cfg\n" );
+	ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Executing server global gamemode config file\n");
+	engine->ServerCommand("exec config_default_global.cfg\n");
 	engine->ServerExecute();
 
 	// TODO
 	/*CCaptureFlag *pFlag = dynamic_cast<CCaptureFlag*> ( gEntList.FindEntityByClassname( NULL, "item_teamflag" ) );
 	if ( pFlag )
 	{
-		AddGameMode( GAMEMODE_CTF );
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CTF gamemode config file\n" );
-		engine->ServerCommand( "exec config_default_ctf.cfg \n" );
-		engine->ServerExecute();
+	AddGameMode( GAMEMODE_CTF );
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CTF gamemode config file\n" );
+	engine->ServerCommand( "exec config_default_ctf.cfg \n" );
+	engine->ServerExecute();
 	}*/
-	
+
 	/*if ( g_hControlPointMasters.Count() )
 	{
-		// We use a logic for tc for controlling stuffs like cap unlock, caps locket at start ect
-		if ( !Q_strncmp( STRING( gpGlobals->mapname ), "tc_", 3 ) && gEntList.FindEntityByClassname( NULL, "logic_tc" ) )
-		{
-			AddGameMode( GAMEMODE_TC );
-			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TC gamemode config file\n" );
-			engine->ServerCommand( "exec config_default_tc.cfg \n" );
-			engine->ServerExecute();
-		}
-		// Same for above but controls the time need for taking the point, the number of players ect.
-		else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "cp_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_cp" ) )
-		{
-			AddGameMode( GAMEMODE_CP );
-			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
-			engine->ServerCommand( "exec config_default_cp.cfg \n" );
-			engine->ServerExecute();
-		}
-		// same story but defines what of the cp will be lock/unlock
-		else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "ad_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_ad" ) )
-		{
-			AddGameMode( GAMEMODE_AD );
-			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server AD gamemode config file\n" );
-			engine->ServerCommand( "exec config_default_cp.cfg \n" );
-			engine->ServerExecute();	
-		}
-		else // this is a normal cp but will be define some default stuffs
-		{
-			AddGameMode( GAMEMODE_CP );
-			ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
-			engine->ServerCommand( "exec config_default_cp.cfg \n" );
-			engine->ServerExecute();	
-		}
+	// We use a logic for tc for controlling stuffs like cap unlock, caps locket at start ect
+	if ( !Q_strncmp( STRING( gpGlobals->mapname ), "tc_", 3 ) && gEntList.FindEntityByClassname( NULL, "logic_tc" ) )
+	{
+	AddGameMode( GAMEMODE_TC );
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TC gamemode config file\n" );
+	engine->ServerCommand( "exec config_default_tc.cfg \n" );
+	engine->ServerExecute();
+	}
+	// Same for above but controls the time need for taking the point, the number of players ect.
+	else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "cp_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_cp" ) )
+	{
+	AddGameMode( GAMEMODE_CP );
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
+	engine->ServerCommand( "exec config_default_cp.cfg \n" );
+	engine->ServerExecute();
+	}
+	// same story but defines what of the cp will be lock/unlock
+	else if ( !Q_strncmp( STRING( gpGlobals->mapname ), "ad_", 3 )  && gEntList.FindEntityByClassname( NULL, "logic_ad" ) )
+	{
+	AddGameMode( GAMEMODE_AD );
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server AD gamemode config file\n" );
+	engine->ServerCommand( "exec config_default_cp.cfg \n" );
+	engine->ServerExecute();
+	}
+	else // this is a normal cp but will be define some default stuffs
+	{
+	AddGameMode( GAMEMODE_CP );
+	ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server CP gamemode config file\n" );
+	engine->ServerCommand( "exec config_default_cp.cfg \n" );
+	engine->ServerExecute();
+	}
 	}*/
 
-	if ( ( gEntList.FindEntityByClassname( NULL, "logic_tdm" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "tdm_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "dm_", 3 ) ) || mp_4team.GetBool() )
+	if ((gEntList.FindEntityByClassname(NULL, "logic_tdm") || !Q_strncmp(STRING(gpGlobals->mapname), "tdm_", 4) || !Q_strncmp(STRING(gpGlobals->mapname), "dm_", 3)) || mp_4team.GetBool())
 	{
-		AddGameMode( GAMEMODE_TDM );
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server TDM gamemode config file\n" );
-		engine->ServerCommand( "exec config_default_tdm.cfg \n" );
+		AddGameMode(GAMEMODE_TDM);
+		ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Executing server TDM gamemode config file\n");
+		engine->ServerCommand("exec config_default_tdm.cfg \n");
 		engine->ServerExecute();
 	}
 
-	if ( gEntList.FindEntityByClassname( NULL, "logic_esc" ) || !Q_strncmp( STRING( gpGlobals->mapname ), "esc_", 4 ) || !Q_strncmp( STRING( gpGlobals->mapname ), "vip_", 4 ) )
+	if (gEntList.FindEntityByClassname(NULL, "logic_esc") || !Q_strncmp(STRING(gpGlobals->mapname), "esc_", 4) || !Q_strncmp(STRING(gpGlobals->mapname), "vip_", 4))
 	{
-		AddGameMode( GAMEMODE_ESC );
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server Escort/VIP gamemode config file\n" );
-		engine->ServerCommand( "exec config_default_esc.cfg \n" );
+		AddGameMode(GAMEMODE_ESC);
+		ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Executing server Escort/VIP gamemode config file\n");
+		engine->ServerCommand("exec config_default_esc.cfg \n");
 		engine->ServerExecute();
 	}
 
-	if ( gEntList.FindEntityByClassname( NULL, "logic_dom" ) || !Q_strncmp ( STRING( gpGlobals->mapname ), "dom_", 4 ) )
+	if (gEntList.FindEntityByClassname(NULL, "logic_dom") || !Q_strncmp(STRING(gpGlobals->mapname), "dom_", 4))
 	{
-		AddGameMode( GAMEMODE_DOM );
-		ConColorMsg( Color( 86, 156, 143, 255 ), "[SDKGameRules] Executing server Domination gamemode config file\n" );
-		engine->ServerCommand( "exec config_default_dom.cfg \n" );
+		AddGameMode(GAMEMODE_DOM);
+		ConColorMsg(Color(86, 156, 143, 255), "[SDKGameRules] Executing server Domination gamemode config file\n");
+		engine->ServerCommand("exec config_default_dom.cfg \n");
 		engine->ServerExecute();
 	}
 }
@@ -409,49 +409,49 @@ void CSDKGameRules::ServerActivate()
 
 	//Tony; do any post stuff
 	m_flGameStartTime = gpGlobals->curtime;
-	if ( !IsFinite( m_flGameStartTime.Get() ) )
+	if (!IsFinite(m_flGameStartTime.Get()))
 	{
-		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Trying to set a NaN game start time!\n" );
+		ConColorMsg(Color(255, 215, 0, 255), "[SDKGameRules] Trying to set a NaN game start time!\n");
 		m_flGameStartTime.GetForModify() = 0.0f;
 	}
 }
 
 void CSDKGameRules::CheckLevelInitialized()
 {
-	if ( !m_bLevelInitialized )
+	if (!m_bLevelInitialized)
 	{
 		// Count the number of spawn points for each team
 		// This determines the maximum number of players allowed on each
 		CBaseEntity* ent = NULL;
 
-		m_iSpawnPointCount_Blue		= 0;
-		m_iSpawnPointCount_Red		= 0;
-		m_iSpawnPointCount_Yellow	= 0;
-		m_iSpawnPointCount_Green	= 0;
+		m_iSpawnPointCount_Blue = 0;
+		m_iSpawnPointCount_Red = 0;
+		m_iSpawnPointCount_Yellow = 0;
+		m_iSpawnPointCount_Green = 0;
 		m_iSpawnPointCount_deathmatch = 0;
 
-		while ( ( ent = gEntList.FindEntityByClassname( ent, "info_player_blue" ) ) != NULL )
+		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_blue")) != NULL)
 		{
-			if ( IsSpawnPointValid( ent, NULL ) )
+			if (IsSpawnPointValid(ent, NULL))
 			{
 				m_iSpawnPointCount_Blue++;
 			}
 			else
 			{
 				Warning("Invalid blue spawnpoint at (%.1f,%.1f,%.1f)\n",
-					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
+					ent->GetAbsOrigin()[0], ent->GetAbsOrigin()[2], ent->GetAbsOrigin()[2]);
 			}
 		}
-		while ( ( ent = gEntList.FindEntityByClassname(ent, "info_player_red")) != NULL)
+		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_red")) != NULL)
 		{
-			if ( IsSpawnPointValid( ent, NULL ) ) 
+			if (IsSpawnPointValid(ent, NULL))
 			{
 				m_iSpawnPointCount_Red++;
 			}
 			else
 			{
 				Warning("Invalid red spawnpoint at (%.1f,%.1f,%.1f)\n",
-					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
+					ent->GetAbsOrigin()[0], ent->GetAbsOrigin()[2], ent->GetAbsOrigin()[2]);
 			}
 		}
 		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_yellow")) != NULL)
@@ -480,14 +480,14 @@ void CSDKGameRules::CheckLevelInitialized()
 		}
 		while ((ent = gEntList.FindEntityByClassname(ent, "info_player_deathmatch")) != NULL)
 		{
-			if ( IsSpawnPointValid( ent, NULL ) ) 
+			if (IsSpawnPointValid(ent, NULL))
 			{
 				m_iSpawnPointCount_deathmatch++;
 			}
 			else
 			{
 				Warning("Invalid deathmatch spawnpoint at (%.1f,%.1f,%.1f)\n",
-					ent->GetAbsOrigin()[0],ent->GetAbsOrigin()[2],ent->GetAbsOrigin()[2] );
+					ent->GetAbsOrigin()[0], ent->GetAbsOrigin()[2], ent->GetAbsOrigin()[2]);
 			}
 		}
 
@@ -500,14 +500,14 @@ void CSDKGameRules::CheckLevelInitialized()
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-bool CSDKGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
+bool CSDKGameRules::ClientCommand(CBaseEntity *pEdict, const CCommand &args)
 {
-	CSDKPlayer *pPlayer = ToSDKPlayer( pEdict );
+	CSDKPlayer *pPlayer = ToSDKPlayer(pEdict);
 
 	// Handle some player commands here as they relate more directly to gamerules state
-	if ( pPlayer->ClientCommand( args ) )
+	if (pPlayer->ClientCommand(args))
 		return true;
-	else if ( BaseClass::ClientCommand( pEdict, args ) )
+	else if (BaseClass::ClientCommand(pEdict, args))
 		return true;
 
 	return false;
@@ -516,31 +516,31 @@ bool CSDKGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
+void CSDKGameRules::ClientSettingsChanged(CBasePlayer *pPlayer)
 {
-	BaseClass::ClientSettingsChanged( pPlayer );
+	BaseClass::ClientSettingsChanged(pPlayer);
 
 	CSDKPlayer *pSDKPlayer = (CSDKPlayer*)pPlayer;
 
-	if ( pSDKPlayer->IsFakeClient() )
+	if (pSDKPlayer->IsFakeClient())
 		return;
 
-	const char *pszFov = engine->GetClientConVarValue( pPlayer->entindex(), "fov_desired" );
-	int iFov = atoi( pszFov );
-	iFov = clamp( iFov, 75, MAX_FOV );
-	pSDKPlayer->SetDefaultFOV( iFov );
+	const char *pszFov = engine->GetClientConVarValue(pPlayer->entindex(), "fov_desired");
+	int iFov = atoi(pszFov);
+	iFov = clamp(iFov, 75, MAX_FOV);
+	pSDKPlayer->SetDefaultFOV(iFov);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Player has just spawned. Equip them.
 //-----------------------------------------------------------------------------
-void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore )
+void CSDKGameRules::RadiusDamage(const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore)
 {
-	RadiusDamage( info, vecSrcIn, flRadius, iClassIgnore, false );
+	RadiusDamage(info, vecSrcIn, flRadius, iClassIgnore, false);
 }
 
 // Add the ability to ignore the world trace
-void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore, bool bIgnoreWorld )
+void CSDKGameRules::RadiusDamage(const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore, bool bIgnoreWorld)
 {
 	CBaseEntity *pEntity = NULL;
 	trace_t		tr;
@@ -551,22 +551,22 @@ void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vec
 
 	Vector vecSrc = vecSrcIn;
 
-	if ( flRadius )
+	if (flRadius)
 		falloff = info.GetDamage() / flRadius;
 	else
 		falloff = 1.0;
 
-	int bInWater = (UTIL_PointContents ( vecSrc ) & MASK_WATER) ? true : false;
+	int bInWater = (UTIL_PointContents(vecSrc) & MASK_WATER) ? true : false;
 
 	vecSrc.z += 1;// in case grenade is lying on the ground
 
 	// iterate on all entities in the vicinity.
-	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); ( pEntity = sphere.GetCurrentEntity() ) != NULL; sphere.NextEntity() )
+	for (CEntitySphereQuery sphere(vecSrc, flRadius); (pEntity = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity())
 	{
-		if ( pEntity->m_takedamage != DAMAGE_NO )
+		if (pEntity->m_takedamage != DAMAGE_NO)
 		{
 			// UNDONE: this should check a damage mask, not an ignore
-			if ( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
+			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
 				continue;	// houndeyes don't hurt other houndeyes with their attack
 
 			// blast's don't tavel into or out of water
@@ -576,20 +576,20 @@ void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vec
 				continue;
 
 			// radius damage can only be blocked by the world
-			vecSpot = pEntity->BodyTarget( vecSrc );
+			vecSpot = pEntity->BodyTarget(vecSrc);
 
 
 
 			bool bHit = false;
 
-			if( bIgnoreWorld )
+			if (bIgnoreWorld)
 			{
 				vecEndPos = vecSpot;
 				bHit = true;
 			}
 			else
 			{
-				UTIL_TraceLine( vecSrc, vecSpot, MASK_SOLID_BRUSHONLY, info.GetInflictor(), COLLISION_GROUP_NONE, &tr );
+				UTIL_TraceLine(vecSrc, vecSpot, MASK_SOLID_BRUSHONLY, info.GetInflictor(), COLLISION_GROUP_NONE, &tr);
 
 				if (tr.startsolid)
 				{
@@ -600,47 +600,47 @@ void CSDKGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vec
 
 				vecEndPos = tr.endpos;
 
-				if( tr.fraction == 1.0 || tr.m_pEnt == pEntity )
+				if (tr.fraction == 1.0 || tr.m_pEnt == pEntity)
 				{
 					bHit = true;
 				}
 			}
 
-			if ( bHit )
+			if (bHit)
 			{
 				// the explosion can 'see' this entity, so hurt them!
 				//vecToTarget = ( vecSrc - vecEndPos );
-				vecToTarget = ( vecEndPos - vecSrc );
+				vecToTarget = (vecEndPos - vecSrc);
 
 				// decrease damage for an ent that's farther from the bomb.
 				flAdjustedDamage = vecToTarget.Length() * falloff;
 				flAdjustedDamage = info.GetDamage() - flAdjustedDamage;
 
-				if ( flAdjustedDamage > 0 )
+				if (flAdjustedDamage > 0)
 				{
 					CTakeDamageInfo adjustedInfo = info;
-					adjustedInfo.SetDamage( flAdjustedDamage );
+					adjustedInfo.SetDamage(flAdjustedDamage);
 
 					Vector dir = vecToTarget;
-					VectorNormalize( dir );
+					VectorNormalize(dir);
 
 					// If we don't have a damage force, manufacture one
-					if ( adjustedInfo.GetDamagePosition() == vec3_origin || adjustedInfo.GetDamageForce() == vec3_origin )
+					if (adjustedInfo.GetDamagePosition() == vec3_origin || adjustedInfo.GetDamageForce() == vec3_origin)
 					{
-						CalculateExplosiveDamageForce( &adjustedInfo, dir, vecSrc, 1.5	/* explosion scale! */ );
+						CalculateExplosiveDamageForce(&adjustedInfo, dir, vecSrc, 1.5	/* explosion scale! */);
 					}
 					else
 					{
 						// Assume the force passed in is the maximum force. Decay it based on falloff.
 						float flForce = adjustedInfo.GetDamageForce().Length() * falloff;
-						adjustedInfo.SetDamageForce( dir * flForce );
-						adjustedInfo.SetDamagePosition( vecSrc );
+						adjustedInfo.SetDamageForce(dir * flForce);
+						adjustedInfo.SetDamagePosition(vecSrc);
 					}
 
-					pEntity->TakeDamage( adjustedInfo );
+					pEntity->TakeDamage(adjustedInfo);
 
 					// Now hit all triggers along the way that respond to damage... 
-					pEntity->TraceAttackToTriggers( adjustedInfo, vecSrc, vecEndPos, dir );
+					pEntity->TraceAttackToTriggers(adjustedInfo, vecSrc, vecEndPos, dir);
 				}
 			}
 		}
@@ -651,18 +651,18 @@ void CSDKGameRules::Think()
 {
 	BaseClass::Think();
 
-	if ( g_fGameOver )   // someone else quit the game already
+	if (g_fGameOver)   // someone else quit the game already
 	{
 		// Check to see if the intermission time is over
-		if ( m_flIntermissionEndTime >= gpGlobals->curtime )
+		if (m_flIntermissionEndTime >= gpGlobals->curtime)
 			return;
 
 		// Check to see if there is still a vote running
-		if ( g_voteController->IsVoteActive() )
+		if (g_voteController->IsVoteActive())
 			return;
 
 		// Did we already change the level?
-		if ( m_bChangelevelDone )
+		if (m_bChangelevelDone)
 			return;
 
 		ChangeLevel(); // intermission is over
@@ -673,104 +673,104 @@ void CSDKGameRules::Think()
 
 	/*if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
 	{
-		DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
-		m_bNextMapVoteDone = true;
-		char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
-		szEmptyDetails[0] = '\0';
-		g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
+	DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
+	m_bNextMapVoteDone = true;
+	char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
+	szEmptyDetails[0] = '\0';
+	g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
 	}*/
 
-	if ( GetMapRemainingTime() < 0 )
+	if (GetMapRemainingTime() < 0)
 	{
 		GoToIntermission();
 		return;
 	}
 }
 
-Vector DropToGround( 
-					CBaseEntity *pMainEnt, 
-					const Vector &vPos, 
-					const Vector &vMins, 
-					const Vector &vMaxs )
+Vector DropToGround(
+	CBaseEntity *pMainEnt,
+	const Vector &vPos,
+	const Vector &vMins,
+	const Vector &vMaxs)
 {
 	trace_t trace;
-	UTIL_TraceHull( vPos, vPos + Vector( 0, 0, -500 ), vMins, vMaxs, MASK_SOLID, pMainEnt, COLLISION_GROUP_NONE, &trace );
+	UTIL_TraceHull(vPos, vPos + Vector(0, 0, -500), vMins, vMaxs, MASK_SOLID, pMainEnt, COLLISION_GROUP_NONE, &trace);
 	return trace.endpos;
 }
 
 
-void TestSpawnPointType( const char *pEntClassName )
+void TestSpawnPointType(const char *pEntClassName)
 {
 	// Find the next spawn spot.
-	CBaseEntity *pSpot = gEntList.FindEntityByClassname( NULL, pEntClassName );
+	CBaseEntity *pSpot = gEntList.FindEntityByClassname(NULL, pEntClassName);
 
-	while( pSpot )
+	while (pSpot)
 	{
 		// check if pSpot is valid
-		if( g_pGameRules->IsSpawnPointValid( pSpot, NULL ) )
+		if (g_pGameRules->IsSpawnPointValid(pSpot, NULL))
 		{
 			// the successful spawn point's location
-			NDebugOverlay::Box( pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX, 0, 255, 0, 100, 60 );
+			NDebugOverlay::Box(pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX, 0, 255, 0, 100, 60);
 
 			// drop down to ground
-			Vector GroundPos = DropToGround( NULL, pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX );
+			Vector GroundPos = DropToGround(NULL, pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX);
 
 			// the location the player will spawn at
-			NDebugOverlay::Box( GroundPos, VEC_HULL_MIN, VEC_HULL_MAX, 0, 0, 255, 100, 60 );
+			NDebugOverlay::Box(GroundPos, VEC_HULL_MIN, VEC_HULL_MAX, 0, 0, 255, 100, 60);
 
 			// draw the spawn angles
 			QAngle spotAngles = pSpot->GetLocalAngles();
 			Vector vecForward;
-			AngleVectors( spotAngles, &vecForward );
-			NDebugOverlay::HorzArrow( pSpot->GetAbsOrigin(), pSpot->GetAbsOrigin() + vecForward * 32, 10, 255, 0, 0, 255, true, 60 );
+			AngleVectors(spotAngles, &vecForward);
+			NDebugOverlay::HorzArrow(pSpot->GetAbsOrigin(), pSpot->GetAbsOrigin() + vecForward * 32, 10, 255, 0, 0, 255, true, 60);
 		}
 		else
 		{
 			// failed spawn point location
-			NDebugOverlay::Box( pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX, 255, 0, 0, 100, 60 );
+			NDebugOverlay::Box(pSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX, 255, 0, 0, 100, 60);
 		}
 
 		// increment pSpot
-		pSpot = gEntList.FindEntityByClassname( pSpot, pEntClassName );
+		pSpot = gEntList.FindEntityByClassname(pSpot, pEntClassName);
 	}
 }
 
 void TestSpawns()
 {
-	TestSpawnPointType( "info_player_deathmatch" );
-	TestSpawnPointType( "info_player_blue" );
-	TestSpawnPointType( "info_player_red" );
-	TestSpawnPointType( "info_player_yellow" );
-	TestSpawnPointType( "info_player_green" );
+	TestSpawnPointType("info_player_deathmatch");
+	TestSpawnPointType("info_player_blue");
+	TestSpawnPointType("info_player_red");
+	TestSpawnPointType("info_player_yellow");
+	TestSpawnPointType("info_player_green");
 }
-ConCommand cc_TestSpawns( "map_showspawnpoints", TestSpawns, "Dev - test the spawn points, draws for 60 seconds", FCVAR_CHEAT );
+ConCommand cc_TestSpawns("map_showspawnpoints", TestSpawns, "Dev - test the spawn points, draws for 60 seconds", FCVAR_CHEAT);
 
-CBaseEntity *CSDKGameRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
+CBaseEntity *CSDKGameRules::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 {
 	// get valid spawn point
 	CBaseEntity *pSpawnSpot = pPlayer->EntSelectSpawnPoint();
 
 	// drop down to ground
-	Vector GroundPos = DropToGround( pPlayer, pSpawnSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX );
+	Vector GroundPos = DropToGround(pPlayer, pSpawnSpot->GetAbsOrigin(), VEC_HULL_MIN, VEC_HULL_MAX);
 
 	// Move the player to the place it said.
-	pPlayer->Teleport( &GroundPos, &pSpawnSpot->GetLocalAngles(), &vec3_origin );
+	pPlayer->Teleport(&GroundPos, &pSpawnSpot->GetLocalAngles(), &vec3_origin);
 	pPlayer->m_Local.m_vecPunchAngle = vec3_angle;
 
 	return pSpawnSpot;
 }
 
 // checks if the spot is clear of players
-bool CSDKGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer )
+bool CSDKGameRules::IsSpawnPointValid(CBaseEntity *pSpot, CBasePlayer *pPlayer)
 {
-	if ( !pSpot->IsTriggered( pPlayer ) )
+	if (!pSpot->IsTriggered(pPlayer))
 		return false;
 
 	// Check if it is disabled by Enable/Disable
-	CSpawnPoint *pSpawnPoint = dynamic_cast< CSpawnPoint * >( pSpot );
-	if ( pSpawnPoint )
+	CSpawnPoint *pSpawnPoint = dynamic_cast< CSpawnPoint * >(pSpot);
+	if (pSpawnPoint)
 	{
-		if ( pSpawnPoint->IsDisabled() )
+		if (pSpawnPoint->IsDisabled())
 			return false;
 	}
 
@@ -781,40 +781,40 @@ bool CSDKGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer 
 	Vector vTestMaxs = pSpot->GetAbsOrigin() + maxs;
 
 	// First test the starting origin.
-	return UTIL_IsSpaceEmpty( pPlayer, vTestMins, vTestMaxs );
+	return UTIL_IsSpaceEmpty(pPlayer, vTestMins, vTestMaxs);
 }
 
-void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
-{	
-	CSDKPlayer *pPlayer = ToSDKPlayer( p );
+void CSDKGameRules::PlayerSpawn(CBasePlayer *p)
+{
+	CSDKPlayer *pPlayer = ToSDKPlayer(p);
 
 	int team = pPlayer->GetTeamNumber();
 
-	if( team != TEAM_SPECTATOR )
+	if (team != TEAM_SPECTATOR)
 	{
-		if( pPlayer->m_Shared.DesiredPlayerClass() == PLAYERCLASS_RANDOM )
+		if (pPlayer->m_Shared.DesiredPlayerClass() == PLAYERCLASS_RANDOM)
 		{
-			ChooseRandomClass( pPlayer );
-			ClientPrint( pPlayer, HUD_PRINTTALK, "#game_now_as", GetPlayerClassName( pPlayer->m_Shared.PlayerClass(), team ) );
+			ChooseRandomClass(pPlayer);
+			ClientPrint(pPlayer, HUD_PRINTTALK, "#game_now_as", GetPlayerClassName(pPlayer->m_Shared.PlayerClass(), team));
 		}
 		else
 		{
-			pPlayer->m_Shared.SetPlayerClass( pPlayer->m_Shared.DesiredPlayerClass() );
+			pPlayer->m_Shared.SetPlayerClass(pPlayer->m_Shared.DesiredPlayerClass());
 		}
 
 		int playerclass = pPlayer->m_Shared.PlayerClass();
 
-		if( playerclass != PLAYERCLASS_UNDEFINED )
+		if (playerclass != PLAYERCLASS_UNDEFINED)
 		{
-			CSDKTeam *pTeam = GetGlobalSDKTeam( team );
-			const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( playerclass );
+			CSDKTeam *pTeam = GetGlobalSDKTeam(team);
+			const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo(playerclass);
 
-			pPlayer->SetModel( pClassInfo.m_szPlayerModel );
-			pPlayer->SetHitboxSet( 0 );
+			pPlayer->SetModel(pClassInfo.m_szPlayerModel);
+			pPlayer->SetHitboxSet(0);
 
 			char buf[64];
 			int bufsize = sizeof(buf);
-			
+
 
 			//Give ammo before weapons
 			for (int iAmmo = AMMO_NONE + 1; iAmmo < AMMO_LAST; ++iAmmo)
@@ -904,55 +904,55 @@ void CSDKGameRules::PlayerSpawn( CBasePlayer *p )
 				pWeapon10 = pPlayer->GiveNamedItem(buf);
 			}
 
-			pPlayer->Weapon_Switch( (CBaseCombatWeapon *)pWeapon1 );
-			pPlayer->AdjustArmor( pClassInfo.m_iSpawnArmor );
-			pPlayer->AdjustHealth( pClassInfo.m_iMaxHealth );
-			pPlayer->SetMaxSpeed( pClassInfo.m_flMaxSpeed );
+			pPlayer->Weapon_Switch((CBaseCombatWeapon *)pWeapon1);
+			pPlayer->AdjustArmor(pClassInfo.m_iSpawnArmor);
+			pPlayer->AdjustHealth(pClassInfo.m_iMaxHealth);
+			pPlayer->SetMaxSpeed(pClassInfo.m_flMaxSpeed);
 			pPlayer->SetMaxArmorValue(pClassInfo.m_iMaxArmor);
 			pPlayer->SetArmorClass(pClassInfo.m_flArmorClass);
 		}
 		else
 		{
-			Assert( !"Player spawning with PLAYERCLASS_UNDEFINED" );
+			Assert(!"Player spawning with PLAYERCLASS_UNDEFINED");
 		}
 	}
 }
 
-void CSDKGameRules::ChooseRandomClass( CSDKPlayer *pPlayer )
+void CSDKGameRules::ChooseRandomClass(CSDKPlayer *pPlayer)
 {
 	int i;
 	int numChoices = 0;
 	int choices[16];
 	int firstclass = 0;
 
-	CSDKTeam *pTeam = GetGlobalSDKTeam( pPlayer->GetTeamNumber() );
+	CSDKTeam *pTeam = GetGlobalSDKTeam(pPlayer->GetTeamNumber());
 
 	int lastclass = pTeam->GetNumPlayerClasses();
 
 	int previousClass = pPlayer->m_Shared.PlayerClass();
 
 	// Compile a list of the classes that aren't full
-	for( i=firstclass;i<lastclass;i++ )
+	for (i = firstclass; i<lastclass; i++)
 	{
 		// don't join the same class twice in a row
-		if ( i == previousClass )
+		if (i == previousClass)
 			continue;
 
-		if( CanPlayerJoinClass( pPlayer, i ) )
-		{	
+		if (CanPlayerJoinClass(pPlayer, i))
+		{
 			choices[numChoices] = i;
 			numChoices++;
 		}
 	}
 
 	// If ALL the classes are full
-	if( numChoices == 0 )
+	if (numChoices == 0)
 	{
-		ConColorMsg( Color( 255, 215, 0, 255 ), "[SDKGameRules] Random class found that all classes were full - ignoring class limits for this spawn!\n" );
+		ConColorMsg(Color(255, 215, 0, 255), "[SDKGameRules] Random class found that all classes were full - ignoring class limits for this spawn!\n");
 
 		// TEST TEST
 		//pPlayer->m_Shared.SetPlayerClass( random->RandomFloat( firstclass, lastclass ) );
-		if ( mp_allowspecialclass.GetBool() )
+		if (mp_allowspecialclass.GetBool())
 		{
 			pPlayer->m_Shared.SetPlayerClass(random->RandomFloat(firstclass, lastclass));
 		}
@@ -967,10 +967,9 @@ void CSDKGameRules::ChooseRandomClass( CSDKPlayer *pPlayer )
 		//TEST TEST
 		// Choose a slot randomly
 		/*i = random->RandomInt( 0, numChoices-1 );
-
 		// We are now the class that was in that slot
 		pPlayer->m_Shared.SetPlayerClass( choices[i] );*/
-	
+
 		if (mp_allowspecialclass.GetBool())
 		{
 			// Choose a slot randomly
@@ -991,74 +990,74 @@ void CSDKGameRules::ChooseRandomClass( CSDKPlayer *pPlayer )
 	}
 }
 
-bool CSDKGameRules::CanPlayerJoinClass( CSDKPlayer *pPlayer, int cls )
+bool CSDKGameRules::CanPlayerJoinClass(CSDKPlayer *pPlayer, int cls)
 {
-	if( cls == PLAYERCLASS_RANDOM )
+	if (cls == PLAYERCLASS_RANDOM)
 		return mp_allowrandomclass.GetBool();
 
-	if( ReachedClassLimit( pPlayer->GetTeamNumber(), cls ) )
+	if (ReachedClassLimit(pPlayer->GetTeamNumber(), cls))
 		return false;
 
 	return true;
 }
 
-bool CSDKGameRules::ReachedClassLimit( int team, int cls )
+bool CSDKGameRules::ReachedClassLimit(int team, int cls)
 {
-	Assert( cls != PLAYERCLASS_UNDEFINED );
-	Assert( cls != PLAYERCLASS_RANDOM );
+	Assert(cls != PLAYERCLASS_UNDEFINED);
+	Assert(cls != PLAYERCLASS_RANDOM);
 
 	// get the cvar
-	int iClassLimit = GetClassLimit( team, cls );
+	int iClassLimit = GetClassLimit(team, cls);
 
 	// count how many are active
-	int iClassExisting = CountPlayerClass( team, cls );
+	int iClassExisting = CountPlayerClass(team, cls);
 
-	if( iClassLimit > -1 && iClassExisting >= iClassLimit )
+	if (iClassLimit > -1 && iClassExisting >= iClassLimit)
 		return true;
 
 	return false;
 }
 
-int CSDKGameRules::CountPlayerClass( int team, int cls )
+int CSDKGameRules::CountPlayerClass(int team, int cls)
 {
 	int num = 0;
 	CSDKPlayer *pSDKPlayer;
 
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		pSDKPlayer = ToSDKPlayer( UTIL_PlayerByIndex( i ) );
+		pSDKPlayer = ToSDKPlayer(UTIL_PlayerByIndex(i));
 
 		if (pSDKPlayer == NULL)
 			continue;
 
-		if (FNullEnt( pSDKPlayer->edict() ))
+		if (FNullEnt(pSDKPlayer->edict()))
 			continue;
 
-		if( pSDKPlayer->GetTeamNumber() != team )
+		if (pSDKPlayer->GetTeamNumber() != team)
 			continue;
 
-		if( pSDKPlayer->m_Shared.DesiredPlayerClass() == cls )
+		if (pSDKPlayer->m_Shared.DesiredPlayerClass() == cls)
 			num++;
 	}
 
 	return num;
 }
 
-int CSDKGameRules::GetClassLimit( int team, int cls )
+int CSDKGameRules::GetClassLimit(int team, int cls)
 {
-	CSDKTeam *pTeam = GetGlobalSDKTeam( team );
+	CSDKTeam *pTeam = GetGlobalSDKTeam(team);
 
-	Assert( pTeam );
+	Assert(pTeam);
 
-	const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( cls );
+	const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo(cls);
 
 	int iClassLimit;
 
-	ConVar *pLimitCvar = ( ConVar * )cvar->FindVar( pClassInfo.m_szLimitCvar );
+	ConVar *pLimitCvar = (ConVar *)cvar->FindVar(pClassInfo.m_szLimitCvar);
 
-	Assert( pLimitCvar );
+	Assert(pLimitCvar);
 
-	if( pLimitCvar )
+	if (pLimitCvar)
 		iClassLimit = pLimitCvar->GetInt();
 	else
 		iClassLimit = -1;
@@ -1066,20 +1065,20 @@ int CSDKGameRules::GetClassLimit( int team, int cls )
 	return iClassLimit;
 }
 
-bool CSDKGameRules::IsPlayerClassOnTeam( int cls, int team )
+bool CSDKGameRules::IsPlayerClassOnTeam(int cls, int team)
 {
-	if( cls == PLAYERCLASS_RANDOM )
+	if (cls == PLAYERCLASS_RANDOM)
 		return true;
 
-	CSDKTeam *pTeam = GetGlobalSDKTeam( team );
+	CSDKTeam *pTeam = GetGlobalSDKTeam(team);
 
-	return ( cls >= 0 && cls < pTeam->GetNumPlayerClasses() );
+	return (cls >= 0 && cls < pTeam->GetNumPlayerClasses());
 }
 
 
-void CSDKGameRules::InitTeams( void )
+void CSDKGameRules::InitTeams(void)
 {
-	Assert( g_Teams.Count() == 0 );
+	Assert(g_Teams.Count() == 0);
 
 	g_Teams.Purge();	// just in case
 
@@ -1089,28 +1088,28 @@ void CSDKGameRules::InitTeams( void )
 	// Create the team managers
 
 	//Tony; we have a special unassigned team incase our mod is using classes but not teams.
-	CTeam *pUnassigned = static_cast<CTeam*>(CreateEntityByName( "sdk_team_unassigned" ));
-	Assert( pUnassigned );
-	pUnassigned->Init( pszTeamNames[TEAM_UNASSIGNED], TEAM_UNASSIGNED );
-	g_Teams.AddToTail( pUnassigned );
+	CTeam *pUnassigned = static_cast<CTeam*>(CreateEntityByName("sdk_team_unassigned"));
+	Assert(pUnassigned);
+	pUnassigned->Init(pszTeamNames[TEAM_UNASSIGNED], TEAM_UNASSIGNED);
+	g_Teams.AddToTail(pUnassigned);
 
 	//Tony; just use a plain ole sdk_team_manager for spectators
-	CTeam *pSpectator = static_cast<CTeam*>(CreateEntityByName( "sdk_team_manager" ));
-	Assert( pSpectator );
-	pSpectator->Init( pszTeamNames[TEAM_SPECTATOR], TEAM_SPECTATOR );
-	g_Teams.AddToTail( pSpectator );
+	CTeam *pSpectator = static_cast<CTeam*>(CreateEntityByName("sdk_team_manager"));
+	Assert(pSpectator);
+	pSpectator->Init(pszTeamNames[TEAM_SPECTATOR], TEAM_SPECTATOR);
+	g_Teams.AddToTail(pSpectator);
 
 	//Tony; create the blue team
-	CTeam *pBlue = static_cast<CTeam*>(CreateEntityByName( "sdk_team_blue" ));
-	Assert( pBlue );
-	pBlue->Init( pszTeamNames[SDK_TEAM_BLUE], SDK_TEAM_BLUE );
-	g_Teams.AddToTail( pBlue );
+	CTeam *pBlue = static_cast<CTeam*>(CreateEntityByName("sdk_team_blue"));
+	Assert(pBlue);
+	pBlue->Init(pszTeamNames[SDK_TEAM_BLUE], SDK_TEAM_BLUE);
+	g_Teams.AddToTail(pBlue);
 
 	//Tony; create the red team
-	CTeam *pRed = static_cast<CTeam*>(CreateEntityByName( "sdk_team_red" ));
-	Assert( pRed );
-	pRed->Init( pszTeamNames[SDK_TEAM_RED], SDK_TEAM_RED );
-	g_Teams.AddToTail( pRed ); 
+	CTeam *pRed = static_cast<CTeam*>(CreateEntityByName("sdk_team_red"));
+	Assert(pRed);
+	pRed->Init(pszTeamNames[SDK_TEAM_RED], SDK_TEAM_RED);
+	g_Teams.AddToTail(pRed);
 
 	//Anthony; create the yellow team
 	CTeam *pYellow = static_cast<CTeam*>(CreateEntityByName("sdk_team_yellow"));
@@ -1129,14 +1128,14 @@ void CSDKGameRules::InitTeams( void )
 void CSDKGameRules::CreateStandardEntities()
 {
 	// Create the player resource
-	g_pPlayerResource = (CPlayerResource*)CBaseEntity::Create( "sdk_player_manager", vec3_origin, vec3_angle );
+	g_pPlayerResource = (CPlayerResource*)CBaseEntity::Create("sdk_player_manager", vec3_origin, vec3_angle);
 
 	// Create the entity that will send our data to the client.
 #ifdef _DEBUG
-	CBaseEntity *pEnt = 
+	CBaseEntity *pEnt =
 #endif
-		CBaseEntity::Create( "sdk_gamerules", vec3_origin, vec3_angle );
-	Assert( pEnt );
+		CBaseEntity::Create("sdk_gamerules", vec3_origin, vec3_angle);
+	Assert(pEnt);
 }
 
 int CSDKGameRules::SelectDefaultTeam()
@@ -1154,61 +1153,61 @@ int CSDKGameRules::SelectDefaultTeam()
 	int iNumGreen = pGreen->GetNumPlayers();
 
 	int iBluePoints = pBlue->GetScore();
-	int iRedPoints  = pRed->GetScore();
+	int iRedPoints = pRed->GetScore();
 	int iYellowPoints = pYellow->GetScore();
 	int iGreenPoints = pGreen->GetScore();
 
 	// Choose the team that's lacking players
-	if ( iNumBlue < iNumRed )
+	if (iNumBlue < iNumRed)
 	{
 		team = SDK_TEAM_BLUE;
 	}
-	else if ( iNumBlue > iNumRed )
+	else if (iNumBlue > iNumRed)
 	{
 		team = SDK_TEAM_RED;
 	}
-	else if ( iNumYellow < iNumGreen )
+	else if (iNumYellow < iNumGreen)
 	{
 		team = SDK_TEAM_YELLOW;
 	}
-	else if ( iNumGreen > iNumYellow )
+	else if (iNumGreen > iNumYellow)
 	{
 		team = SDK_TEAM_GREEN;
 	}
 	// choose the team with fewer points
-	else if ( iBluePoints < iRedPoints )
+	else if (iBluePoints < iRedPoints)
 	{
 		team = SDK_TEAM_BLUE;
 	}
-	else if ( iBluePoints > iRedPoints )
+	else if (iBluePoints > iRedPoints)
 	{
 		team = SDK_TEAM_RED;
 	}
-	else if ( iYellowPoints < iGreenPoints )
+	else if (iYellowPoints < iGreenPoints)
 	{
 		team = SDK_TEAM_YELLOW;
 	}
-	else if ( iYellowPoints > iGreenPoints )
+	else if (iYellowPoints > iGreenPoints)
 	{
 		team = SDK_TEAM_GREEN;
 	}
 	else
 	{
 		// if our cvar allows 4teams then randomize between the four else just pick between two.
-		if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
-			team = ( random->RandomInt( 0, 3 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED ? SDK_TEAM_YELLOW : SDK_TEAM_GREEN;
+		if (SDKGameRules() && SDKGameRules()->IsTDMGamemode())
+			team = (random->RandomInt(0, 3) == 0) ? SDK_TEAM_BLUE : SDK_TEAM_RED ? SDK_TEAM_YELLOW : SDK_TEAM_GREEN;
 		else
-			team = ( random->RandomInt( 0, 1 ) == 0 ) ? SDK_TEAM_BLUE : SDK_TEAM_RED;
+			team = (random->RandomInt(0, 1) == 0) ? SDK_TEAM_BLUE : SDK_TEAM_RED;
 	}
 
-	if ( TeamFull( team ) )
+	if (TeamFull(team))
 	{
 		// Pick the opposite team
-		if ( team == SDK_TEAM_BLUE )
+		if (team == SDK_TEAM_BLUE)
 		{
 			team = SDK_TEAM_RED;
 		}
-		else if ( team == SDK_TEAM_RED )
+		else if (team == SDK_TEAM_RED)
 		{
 			team = SDK_TEAM_YELLOW;
 		}
@@ -1218,7 +1217,7 @@ int CSDKGameRules::SelectDefaultTeam()
 		}
 
 		// No choices left
-		if ( TeamFull( team ) )
+		if (TeamFull(team))
 			return TEAM_UNASSIGNED;
 	}
 
@@ -1226,88 +1225,88 @@ int CSDKGameRules::SelectDefaultTeam()
 }
 
 //Tony; we only check this when using teams, unassigned can never get full.
-bool CSDKGameRules::TeamFull( int team_id )
+bool CSDKGameRules::TeamFull(int team_id)
 {
-	if ( mp_teamfull_spawnpoints.GetBool() || !mp_deathmatch.GetBool() )
+	if (mp_teamfull_spawnpoints.GetBool() || !mp_deathmatch.GetBool())
 		return false;
 
-	switch ( team_id )
+	switch (team_id)
 	{
 	case SDK_TEAM_BLUE:
-		{
-			int iNumBlue = GetGlobalSDKTeam(SDK_TEAM_BLUE)->GetNumPlayers();
-			return iNumBlue >= m_iSpawnPointCount_Blue;
-		}
+	{
+		int iNumBlue = GetGlobalSDKTeam(SDK_TEAM_BLUE)->GetNumPlayers();
+		return iNumBlue >= m_iSpawnPointCount_Blue;
+	}
 	case SDK_TEAM_RED:
-		{
-			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_RED)->GetNumPlayers();
-			return iNumRed >= m_iSpawnPointCount_Red;
-		}
+	{
+		int iNumRed = GetGlobalSDKTeam(SDK_TEAM_RED)->GetNumPlayers();
+		return iNumRed >= m_iSpawnPointCount_Red;
+	}
 	case SDK_TEAM_YELLOW:
-		{
-			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_YELLOW)->GetNumPlayers();
-			return iNumRed >= m_iSpawnPointCount_Yellow;
-		}
+	{
+		int iNumRed = GetGlobalSDKTeam(SDK_TEAM_YELLOW)->GetNumPlayers();
+		return iNumRed >= m_iSpawnPointCount_Yellow;
+	}
 	case SDK_TEAM_GREEN:
-		{
-			int iNumRed = GetGlobalSDKTeam(SDK_TEAM_GREEN)->GetNumPlayers();
-			return iNumRed >= m_iSpawnPointCount_Green;
-		}
+	{
+		int iNumRed = GetGlobalSDKTeam(SDK_TEAM_GREEN)->GetNumPlayers();
+		return iNumRed >= m_iSpawnPointCount_Green;
+	}
 	}
 	return false;
 }
 
 //checks to see if the desired team is stacked, returns true if it is
-bool CSDKGameRules::TeamStacked( int iNewTeam, int iCurTeam  )
+bool CSDKGameRules::TeamStacked(int iNewTeam, int iCurTeam)
 {
 	//players are allowed to change to their own team
-	if(iNewTeam == iCurTeam)
+	if (iNewTeam == iCurTeam)
 		return false;
 
 	int iTeamLimit = mp_limitteams.GetInt();
 
 	// Tabulate the number of players on each team.
-	int iNumBlue = GetGlobalTeam( SDK_TEAM_BLUE )->GetNumPlayers();
-	int iNumRed = GetGlobalTeam( SDK_TEAM_RED )->GetNumPlayers();
-	int iNumYellow = GetGlobalTeam( SDK_TEAM_YELLOW )->GetNumPlayers();
-	int iNumGreen = GetGlobalTeam( SDK_TEAM_GREEN )->GetNumPlayers();
+	int iNumBlue = GetGlobalTeam(SDK_TEAM_BLUE)->GetNumPlayers();
+	int iNumRed = GetGlobalTeam(SDK_TEAM_RED)->GetNumPlayers();
+	int iNumYellow = GetGlobalTeam(SDK_TEAM_YELLOW)->GetNumPlayers();
+	int iNumGreen = GetGlobalTeam(SDK_TEAM_GREEN)->GetNumPlayers();
 
-	switch ( iNewTeam )
+	switch (iNewTeam)
 	{
 	case SDK_TEAM_BLUE:
-		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		if (iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR)
 		{
-			if((iNumBlue + 1) > (iNumRed + iTeamLimit - 1))
+			if ((iNumBlue + 1) > (iNumRed + iTeamLimit - 1))
 				return true;
 			else
 				return false;
 		}
 		else
 		{
-			if((iNumBlue + 1) > (iNumRed + iTeamLimit))
+			if ((iNumBlue + 1) > (iNumRed + iTeamLimit))
 				return true;
 			else
 				return false;
 		}
 		break;
 	case SDK_TEAM_RED:
-		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		if (iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR)
 		{
-			if((iNumRed + 1) > (iNumBlue + iTeamLimit - 1))
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit - 1))
 				return true;
 			else
 				return false;
 		}
 		else
 		{
-			if((iNumRed + 1) > (iNumBlue + iTeamLimit))
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit))
 				return true;
 			else
 				return false;
 		}
 		break;
 	case SDK_TEAM_YELLOW:
-		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		if (iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR)
 		{
 			if ((iNumBlue + 1) > (iNumRed + iTeamLimit - 1) && (iNumYellow + 1) > (iNumGreen + iTeamLimit - 1))
 				return true;
@@ -1323,16 +1322,16 @@ bool CSDKGameRules::TeamStacked( int iNewTeam, int iCurTeam  )
 		}
 		break;
 	case SDK_TEAM_GREEN:
-		if( iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR )
+		if (iCurTeam != TEAM_UNASSIGNED && iCurTeam != TEAM_SPECTATOR)
 		{
-			if ((iNumRed + 1) > (iNumBlue + iTeamLimit - 1) && (iNumGreen + 1) > (iNumYellow + iTeamLimit - 1) )
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit - 1) && (iNumGreen + 1) > (iNumYellow + iTeamLimit - 1))
 				return true;
 			else
 				return false;
 		}
 		else
 		{
-			if ((iNumRed + 1) > (iNumBlue + iTeamLimit) && (iNumGreen+ 1) > (iNumYellow + iTeamLimit))
+			if ((iNumRed + 1) > (iNumBlue + iTeamLimit) && (iNumGreen + 1) > (iNumYellow + iTeamLimit))
 				return true;
 			else
 				return false;
@@ -1346,40 +1345,40 @@ bool CSDKGameRules::TeamStacked( int iNewTeam, int iCurTeam  )
 //-----------------------------------------------------------------------------
 // Purpose: determine the class name of the weapon that got a kill
 //-----------------------------------------------------------------------------
-const char *CSDKGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CSDKPlayer *pVictim, int *iWeaponID )
+const char *CSDKGameRules::GetKillingWeaponName(const CTakeDamageInfo &info, CSDKPlayer *pVictim, int *iWeaponID)
 {
 	CBaseEntity *pInflictor = info.GetInflictor();
 	CBaseEntity *pKiller = info.GetAttacker();
-	CBasePlayer *pScorer = SDKGameRules()->GetDeathScorer( pKiller, pInflictor, pVictim );
+	CBasePlayer *pScorer = SDKGameRules()->GetDeathScorer(pKiller, pInflictor, pVictim);
 
 	const char *killer_weapon_name = "world";
 	*iWeaponID = SDK_WEAPON_NONE;
 
-	if ( pScorer && pInflictor && ( pInflictor == pScorer ) )
+	if (pScorer && pInflictor && (pInflictor == pScorer))
 	{
 		// If the inflictor is the killer,  then it must be their current weapon doing the damage
-		if ( pScorer->GetActiveWeapon() )
+		if (pScorer->GetActiveWeapon())
 		{
-			killer_weapon_name = pScorer->GetActiveWeapon()->GetClassname(); 
-			if ( pScorer->IsPlayer() )
+			killer_weapon_name = pScorer->GetActiveWeapon()->GetClassname();
+			if (pScorer->IsPlayer())
 			{
 				*iWeaponID = ToSDKPlayer(pScorer)->GetActiveSDKWeapon()->GetWeaponID();
 			}
 		}
 	}
-	else if ( pInflictor )
+	else if (pInflictor)
 	{
-		killer_weapon_name = STRING( pInflictor->m_iClassname );
+		killer_weapon_name = STRING(pInflictor->m_iClassname);
 
-		CWeaponSDKBase *pWeapon = dynamic_cast< CWeaponSDKBase * >( pInflictor );
-		if ( pWeapon )
+		CWeaponSDKBase *pWeapon = dynamic_cast< CWeaponSDKBase * >(pInflictor);
+		if (pWeapon)
 		{
 			*iWeaponID = pWeapon->GetWeaponID();
 		}
 		else
 		{
-			CBaseGrenadeProjectile *pBaseGrenade = dynamic_cast<CBaseGrenadeProjectile*>( pInflictor );
-			if ( pBaseGrenade )
+			CBaseGrenadeProjectile *pBaseGrenade = dynamic_cast<CBaseGrenadeProjectile*>(pInflictor);
+			if (pBaseGrenade)
 			{
 				*iWeaponID = pBaseGrenade->GetWeaponID();
 			}
@@ -1388,11 +1387,11 @@ const char *CSDKGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CS
 
 	// strip certain prefixes from inflictor's classname
 	const char *prefix[] = { "weapon_", "NPC_", "func_" };
-	for ( int i = 0; i< ARRAYSIZE( prefix ); i++ )
+	for (int i = 0; i< ARRAYSIZE(prefix); i++)
 	{
 		// if prefix matches, advance the string pointer past the prefix
-		int len = Q_strlen( prefix[i] );
-		if ( strncmp( killer_weapon_name, prefix[i], len ) == 0 )
+		int len = Q_strlen(prefix[i]);
+		if (strncmp(killer_weapon_name, prefix[i], len) == 0)
 		{
 			killer_weapon_name += len;
 			break;
@@ -1400,7 +1399,7 @@ const char *CSDKGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CS
 	}
 
 	// grenade projectiles need to be translated to 'grenade' 
-	if ( 0 == Q_strcmp( killer_weapon_name, "grenade_projectile" ) )
+	if (0 == Q_strcmp(killer_weapon_name, "grenade_projectile"))
 	{
 		killer_weapon_name = "grenade";
 	}
@@ -1449,70 +1448,70 @@ CBasePlayer *CSDKGameRules::GetAssister(CBasePlayer *pVictim, CBasePlayer *pScor
 //			*pKiller - 
 //			*pInflictor - 
 //-----------------------------------------------------------------------------
-void CSDKGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info )
+void CSDKGameRules::DeathNotice(CBasePlayer *pVictim, const CTakeDamageInfo &info)
 {
 	int killer_ID = 0;
 
 	// Find the killer & the scorer
-	CSDKPlayer *pSDKPlayerVictim = ToSDKPlayer( pVictim );
+	CSDKPlayer *pSDKPlayerVictim = ToSDKPlayer(pVictim);
 	CBaseEntity *pInflictor = info.GetInflictor();
 	CBaseEntity *pKiller = info.GetAttacker();
-	CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
-	CSDKPlayer *pAssister = ToSDKPlayer( GetAssister( pVictim, pScorer, pInflictor ) );
+	CBasePlayer *pScorer = GetDeathScorer(pKiller, pInflictor, pVictim);
+	CSDKPlayer *pAssister = ToSDKPlayer(GetAssister(pVictim, pScorer, pInflictor));
 
 	// Work out what killed the player, and send a message to all clients about it
 	int iWeaponID;
-	const char *killer_weapon_name = GetKillingWeaponName( info, pSDKPlayerVictim, &iWeaponID );
+	const char *killer_weapon_name = GetKillingWeaponName(info, pSDKPlayerVictim, &iWeaponID);
 
-	if ( pScorer )	// Is the killer a client?
+	if (pScorer)	// Is the killer a client?
 	{
 		killer_ID = pScorer->GetUserID();
 	}
 
-	IGameEvent * event = gameeventmanager->CreateEvent( "player_death" );
+	IGameEvent * event = gameeventmanager->CreateEvent("player_death");
 
-	if ( event )
+	if (event)
 	{
-		event->SetInt( "userid", pVictim->GetUserID() );
-		event->SetInt( "attacker", killer_ID );
-		event->SetInt( "assister", pAssister ? pAssister->GetUserID() : -1 );
-		event->SetString( "weapon", killer_weapon_name );
-		event->SetInt( "weaponid", iWeaponID );
-		event->SetInt( "damagebits", info.GetDamageType() );
-		event->SetInt( "customkill", info.GetDamageCustom() );
-		event->SetInt( "priority", 7 );	// HLTV event priority, not transmitted
-		gameeventmanager->FireEvent( event );
-	}		
+		event->SetInt("userid", pVictim->GetUserID());
+		event->SetInt("attacker", killer_ID);
+		event->SetInt("assister", pAssister ? pAssister->GetUserID() : -1);
+		event->SetString("weapon", killer_weapon_name);
+		event->SetInt("weaponid", iWeaponID);
+		event->SetInt("damagebits", info.GetDamageType());
+		event->SetInt("customkill", info.GetDamageCustom());
+		event->SetInt("priority", 7);	// HLTV event priority, not transmitted
+		gameeventmanager->FireEvent(event);
+	}
 }
 
 
-CItem* IsManagedObjectAnItem( CBaseEntity *pObject )
+CItem* IsManagedObjectAnItem(CBaseEntity *pObject)
 {
-	return dynamic_cast< CItem*>( pObject );
+	return dynamic_cast< CItem*>(pObject);
 }
 
-CWeaponSDKBase* IsManagedObjectAWeapon( CBaseEntity *pObject )
+CWeaponSDKBase* IsManagedObjectAWeapon(CBaseEntity *pObject)
 {
-	return dynamic_cast< CWeaponSDKBase*>( pObject );
+	return dynamic_cast< CWeaponSDKBase*>(pObject);
 }
 
-bool GetObjectsOriginalParameters( CBaseEntity *pObject, Vector &vOriginalOrigin, QAngle &vOriginalAngles )
+bool GetObjectsOriginalParameters(CBaseEntity *pObject, Vector &vOriginalOrigin, QAngle &vOriginalAngles)
 {
-	if ( CItem *pItem = IsManagedObjectAnItem( pObject ) )
+	if (CItem *pItem = IsManagedObjectAnItem(pObject))
 	{
-		if ( pItem->m_flNextResetCheckTime > gpGlobals->curtime )
-			 return false;
-		
+		if (pItem->m_flNextResetCheckTime > gpGlobals->curtime)
+			return false;
+
 		vOriginalOrigin = pItem->GetOriginalSpawnOrigin();
 		vOriginalAngles = pItem->GetOriginalSpawnAngles();
 
 		pItem->m_flNextResetCheckTime = gpGlobals->curtime + sv_item_respawn_time.GetFloat();
 		return true;
 	}
-	else if ( CWeaponSDKBase *pWeapon = IsManagedObjectAWeapon( pObject )) 
+	else if (CWeaponSDKBase *pWeapon = IsManagedObjectAWeapon(pObject))
 	{
-		if ( pWeapon->m_flNextResetCheckTime > gpGlobals->curtime )
-			 return false;
+		if (pWeapon->m_flNextResetCheckTime > gpGlobals->curtime)
+			return false;
 
 		vOriginalOrigin = pWeapon->GetOriginalSpawnOrigin();
 		vOriginalAngles = pWeapon->GetOriginalSpawnAngles();
@@ -1524,42 +1523,42 @@ bool GetObjectsOriginalParameters( CBaseEntity *pObject, Vector &vOriginalOrigin
 	return false;
 }
 
-void CSDKGameRules::ManageObjectRelocation( void )
+void CSDKGameRules::ManageObjectRelocation(void)
 {
 	int iTotal = m_hRespawnableItemsAndWeapons.Count();
 
-	if ( iTotal > 0 )
+	if (iTotal > 0)
 	{
-		for ( int i = 0; i < iTotal; i++ )
+		for (int i = 0; i < iTotal; i++)
 		{
 			CBaseEntity *pObject = m_hRespawnableItemsAndWeapons[i].Get();
-			
-			if ( pObject )
+
+			if (pObject)
 			{
 				Vector vSpawOrigin;
 				QAngle vSpawnAngles;
 
-				if ( GetObjectsOriginalParameters( pObject, vSpawOrigin, vSpawnAngles ) == true )
+				if (GetObjectsOriginalParameters(pObject, vSpawOrigin, vSpawnAngles) == true)
 				{
-					float flDistanceFromSpawn = (pObject->GetAbsOrigin() - vSpawOrigin ).Length();
+					float flDistanceFromSpawn = (pObject->GetAbsOrigin() - vSpawOrigin).Length();
 
-					if ( flDistanceFromSpawn > WEAPON_MAX_DISTANCE_FROM_SPAWN )
+					if (flDistanceFromSpawn > WEAPON_MAX_DISTANCE_FROM_SPAWN)
 					{
 						bool shouldReset = false;
 						IPhysicsObject *pPhysics = pObject->VPhysicsGetObject();
 
-						if ( pPhysics )
+						if (pPhysics)
 							shouldReset = pPhysics->IsAsleep();
 						else
 							shouldReset = (pObject->GetFlags() & FL_ONGROUND) ? true : false;
 
-						if ( shouldReset )
+						if (shouldReset)
 						{
-							pObject->Teleport( &vSpawOrigin, &vSpawnAngles, NULL );
-							pObject->EmitSound( "BaseCombatWeapon.WeaponMaterialize" );
+							pObject->Teleport(&vSpawOrigin, &vSpawnAngles, NULL);
+							pObject->EmitSound("BaseCombatWeapon.WeaponMaterialize");
 
 							IPhysicsObject *pPhys = pObject->VPhysicsGetObject();
-							if ( pPhys )
+							if (pPhys)
 								pPhys->Wake();
 						}
 					}
@@ -1572,26 +1571,26 @@ void CSDKGameRules::ManageObjectRelocation( void )
 //=========================================================
 //AddLevelDesignerPlacedWeapon
 //=========================================================
-void CSDKGameRules::AddLevelDesignerPlacedObject( CBaseEntity *pEntity )
+void CSDKGameRules::AddLevelDesignerPlacedObject(CBaseEntity *pEntity)
 {
-	if ( m_hRespawnableItemsAndWeapons.Find( pEntity ) == -1 )
-		m_hRespawnableItemsAndWeapons.AddToTail( pEntity );
+	if (m_hRespawnableItemsAndWeapons.Find(pEntity) == -1)
+		m_hRespawnableItemsAndWeapons.AddToTail(pEntity);
 }
 
 //=========================================================
 //RemoveLevelDesignerPlacedWeapon
 //=========================================================
-void CSDKGameRules::RemoveLevelDesignerPlacedObject( CBaseEntity *pEntity )
+void CSDKGameRules::RemoveLevelDesignerPlacedObject(CBaseEntity *pEntity)
 {
-	if ( m_hRespawnableItemsAndWeapons.Find( pEntity ) != -1 )
-		m_hRespawnableItemsAndWeapons.FindAndRemove( pEntity );
+	if (m_hRespawnableItemsAndWeapons.Find(pEntity) != -1)
+		m_hRespawnableItemsAndWeapons.FindAndRemove(pEntity);
 }
 
 //=========================================================
 // Where should this item respawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CSDKGameRules::VecItemRespawnSpot( CItem *pItem )
+Vector CSDKGameRules::VecItemRespawnSpot(CItem *pItem)
 {
 	return pItem->GetOriginalSpawnOrigin();
 }
@@ -1599,7 +1598,7 @@ Vector CSDKGameRules::VecItemRespawnSpot( CItem *pItem )
 //=========================================================
 // What angles should this item use to respawn?
 //=========================================================
-QAngle CSDKGameRules::VecItemRespawnAngles( CItem *pItem )
+QAngle CSDKGameRules::VecItemRespawnAngles(CItem *pItem)
 {
 	return pItem->GetOriginalSpawnAngles();
 }
@@ -1607,7 +1606,7 @@ QAngle CSDKGameRules::VecItemRespawnAngles( CItem *pItem )
 //=========================================================
 // At what time in the future may this Item respawn?
 //=========================================================
-float CSDKGameRules::FlItemRespawnTime( CItem *pItem )
+float CSDKGameRules::FlItemRespawnTime(CItem *pItem)
 {
 	return sv_item_respawn_time.GetFloat();
 }
@@ -1618,13 +1617,13 @@ float CSDKGameRules::FlItemRespawnTime( CItem *pItem )
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?
 //=========================================================
-float CSDKGameRules::FlWeaponRespawnTime( CBaseCombatWeapon *pWeapon )
+float CSDKGameRules::FlWeaponRespawnTime(CBaseCombatWeapon *pWeapon)
 {
 #ifndef CLIENT_DLL
-	if ( weaponstay.GetInt() > 0 )
+	if (weaponstay.GetInt() > 0)
 	{
 		// make sure it's only certain weapons
-		if ( !(pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD) )
+		if (!(pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD))
 			return 0;		// weapon respawns almost instantly
 	}
 
@@ -1639,16 +1638,16 @@ float CSDKGameRules::FlWeaponRespawnTime( CBaseCombatWeapon *pWeapon )
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
-float CSDKGameRules::FlWeaponTryRespawn( CBaseCombatWeapon *pWeapon )
+float CSDKGameRules::FlWeaponTryRespawn(CBaseCombatWeapon *pWeapon)
 {
 #ifndef CLIENT_DLL
-	if ( pWeapon && (pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD) )
+	if (pWeapon && (pWeapon->GetWeaponFlags() & ITEM_FLAG_LIMITINWORLD))
 	{
-		if ( gEntList.NumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE) )
+		if (gEntList.NumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
 			return 0;
 
 		// we're past the entity tolerance level,  so delay the respawn
-		return FlWeaponRespawnTime( pWeapon );
+		return FlWeaponRespawnTime(pWeapon);
 	}
 #endif
 	return 0;
@@ -1658,14 +1657,14 @@ float CSDKGameRules::FlWeaponTryRespawn( CBaseCombatWeapon *pWeapon )
 // VecWeaponRespawnSpot - where should this weapon spawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CSDKGameRules::VecWeaponRespawnSpot( CBaseCombatWeapon *pWeapon )
+Vector CSDKGameRules::VecWeaponRespawnSpot(CBaseCombatWeapon *pWeapon)
 {
 #ifndef CLIENT_DLL
-	CWeaponSDKBase *pSDKWeapon = dynamic_cast< CWeaponSDKBase*>( pWeapon );
-	if ( pSDKWeapon )
+	CWeaponSDKBase *pSDKWeapon = dynamic_cast< CWeaponSDKBase*>(pWeapon);
+	if (pSDKWeapon)
 		return pSDKWeapon->GetOriginalSpawnOrigin();
 #endif
-	
+
 	return pWeapon->GetAbsOrigin();
 }
 
@@ -1673,62 +1672,62 @@ Vector CSDKGameRules::VecWeaponRespawnSpot( CBaseCombatWeapon *pWeapon )
 // WeaponShouldRespawn - any conditions inhibiting the
 // respawning of this weapon?
 //=========================================================
-int CSDKGameRules::WeaponShouldRespawn( CBaseCombatWeapon *pWeapon )
+int CSDKGameRules::WeaponShouldRespawn(CBaseCombatWeapon *pWeapon)
 {
 #ifndef CLIENT_DLL
-	if ( pWeapon->HasSpawnFlags( SF_NORESPAWN ) )
+	if (pWeapon->HasSpawnFlags(SF_NORESPAWN))
 		return GR_WEAPON_RESPAWN_NO;
 #endif
 
 	return GR_WEAPON_RESPAWN_YES;
 }
 
-bool CSDKGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
+bool CSDKGameRules::ShouldCollide(int collisionGroup0, int collisionGroup1)
 {
-	if ( collisionGroup0 > collisionGroup1 )
+	if (collisionGroup0 > collisionGroup1)
 	{
 		// V_swap so that lowest is always first
-		V_swap(collisionGroup0,collisionGroup1);
+		V_swap(collisionGroup0, collisionGroup1);
 	}
 
 	//Don't stand on COLLISION_GROUP_WEAPON
-	if( collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT && collisionGroup1 == COLLISION_GROUP_WEAPON )
+	if (collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT && collisionGroup1 == COLLISION_GROUP_WEAPON)
 		return false;
 
 	//If collisionGroup0 is not a player then NPC_ACTOR behaves just like an NPC.
-	if ( collisionGroup1 == COLLISION_GROUP_NPC_ACTOR && collisionGroup0 != COLLISION_GROUP_PLAYER )
+	if (collisionGroup1 == COLLISION_GROUP_NPC_ACTOR && collisionGroup0 != COLLISION_GROUP_PLAYER)
 		collisionGroup1 = COLLISION_GROUP_NPC;
 
 	//players don't collide against NPC Actors.
 	//I could've done this up where I check if collisionGroup0 is NOT a player but I decided to just
 	//do what the other checks are doing in this function for consistency sake.
-	if ( collisionGroup1 == COLLISION_GROUP_NPC_ACTOR && collisionGroup0 == COLLISION_GROUP_PLAYER )
+	if (collisionGroup1 == COLLISION_GROUP_NPC_ACTOR && collisionGroup0 == COLLISION_GROUP_PLAYER)
 		return false;
-		
+
 	// In cases where NPCs are playing a script which causes them to interpenetrate while riding on another entity,
 	// such as a train or elevator, you need to disable collisions between the actors so the mover can move them.
-	if ( collisionGroup0 == COLLISION_GROUP_NPC_SCRIPTED && collisionGroup1 == COLLISION_GROUP_NPC_SCRIPTED )
+	if (collisionGroup0 == COLLISION_GROUP_NPC_SCRIPTED && collisionGroup1 == COLLISION_GROUP_NPC_SCRIPTED)
 		return false;
 
-	return BaseClass::ShouldCollide( collisionGroup0, collisionGroup1 ); 
+	return BaseClass::ShouldCollide(collisionGroup0, collisionGroup1);
 }
 
-const char *CSDKGameRules::GetPlayerClassName( int cls, int team )
+const char *CSDKGameRules::GetPlayerClassName(int cls, int team)
 {
-	CSDKTeam *pTeam = GetGlobalSDKTeam( team );
+	CSDKTeam *pTeam = GetGlobalSDKTeam(team);
 
-	if( cls == PLAYERCLASS_RANDOM )
+	if (cls == PLAYERCLASS_RANDOM)
 	{
 		return "#class_random";
 	}
 
-	if( cls < 0 || cls >= pTeam->GetNumPlayerClasses() )
+	if (cls < 0 || cls >= pTeam->GetNumPlayerClasses())
 	{
-		Assert( false );
+		Assert(false);
 		return NULL;
 	}
 
-	const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( cls );
+	const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo(cls);
 
 	return pClassInfo.m_szPrintName;
 }
@@ -1754,7 +1753,7 @@ CAmmoDef* GetAmmoDef()
 	static CAmmoDef def;
 	static bool bInitted = false;
 
-	if ( !bInitted )
+	if (!bInitted)
 	{
 		bInitted = true;
 
@@ -1791,29 +1790,27 @@ CAmmoDef* GetAmmoDef()
 		/*KeyValuesAD pAmmo( "AmmoDefs" );
 		if ( pAmmo->LoadFromFile( filesystem, "scripts/ammo_defs.txt", "MOD" ) )
 		{
-			FOR_EACH_TRUE_SUBKEY( pAmmo, ammo )
-			{
-				const char* name = ammo->GetName();
+		FOR_EACH_TRUE_SUBKEY( pAmmo, ammo )
+		{
+		const char* name = ammo->GetName();
+		int dmgBits = ammo->GetInt( "dmgType" );
+		int tracer = ammo->GetInt( "tracer" );
+		int plr = ammo->GetInt( "plrDmg" );
+		int npc = ammo->GetInt( "npcDmg" );
+		int max = ammo->GetInt( "maxAmmo" );
+		float impulse;
+		KeyValues *imp = ammo->FindKey( "BulletImpulse" );
+		if ( imp )
+		impulse = BULLET_IMPULSE( imp->GetFloat( "grains" ), imp->GetFloat( "ftps" ) );
+		else
+		impulse = ammo->GetFloat( "impulse" );
 
-				int dmgBits = ammo->GetInt( "dmgType" );
-				int tracer = ammo->GetInt( "tracer" );
-				int plr = ammo->GetInt( "plrDmg" );
-				int npc = ammo->GetInt( "npcDmg" );
-				int max = ammo->GetInt( "maxAmmo" );
+		int flags = ammo->GetInt( "flags" );
+		int minSplash = ammo->GetInt( "minSplash", 4 );
+		int maxSplash = ammo->GetInt( "maxSplash", 8 );
 
-				float impulse;
-				KeyValues *imp = ammo->FindKey( "BulletImpulse" );
-				if ( imp )
-					impulse = BULLET_IMPULSE( imp->GetFloat( "grains" ), imp->GetFloat( "ftps" ) );
-				else
-					impulse = ammo->GetFloat( "impulse" );
-			
-				int flags = ammo->GetInt( "flags" );
-				int minSplash = ammo->GetInt( "minSplash", 4 );
-				int maxSplash = ammo->GetInt( "maxSplash", 8 );
-				
-				def.AddAmmoType( name, dmgBits, tracer, plr, npc, max, impulse, flags, minSplash, maxSplash );
-			}
+		def.AddAmmoType( name, dmgBits, tracer, plr, npc, max, impulse, flags, minSplash, maxSplash );
+		}
 		}*/
 	}
 
@@ -1823,47 +1820,47 @@ CAmmoDef* GetAmmoDef()
 
 #ifndef CLIENT_DLL
 
-const char *CSDKGameRules::GetChatPrefix( bool bTeamOnly, CBasePlayer *pPlayer )
+const char *CSDKGameRules::GetChatPrefix(bool bTeamOnly, CBasePlayer *pPlayer)
 {
 	//Tony; no prefix for now, it isn't needed.
 	return "";
 }
 
-const char *CSDKGameRules::GetChatLocation( bool bTeamOnly, CBasePlayer* pPlayer )
+const char *CSDKGameRules::GetChatLocation(bool bTeamOnly, CBasePlayer* pPlayer)
 {
-	if ( !pPlayer )  // dedicated server output
+	if (!pPlayer)  // dedicated server output
 		return NULL;
 
 	// only teammates see locations
-	if ( !bTeamOnly )
+	if (!bTeamOnly)
 		return NULL;
 
 	// only living players have locations
-	if ( pPlayer->GetTeamNumber() < FIRST_GAME_TEAM )
+	if (pPlayer->GetTeamNumber() < FIRST_GAME_TEAM)
 		return NULL;
 
-	if ( !pPlayer->IsAlive() )
+	if (!pPlayer->IsAlive())
 		return NULL;
 
 	return pPlayer->GetLastKnownPlaceName();
 }
 
-const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
+const char *CSDKGameRules::GetChatFormat(bool bTeamOnly, CBasePlayer *pPlayer)
 {
-	if ( !pPlayer )  // dedicated server output
+	if (!pPlayer)  // dedicated server output
 		return NULL;
 
 
-	CSDKPlayer* pSDKPlayer = ToSDKPlayer( pPlayer );
+	CSDKPlayer* pSDKPlayer = ToSDKPlayer(pPlayer);
 	const char *pszFormat = NULL;
 
-	if ( bTeamOnly )
+	if (bTeamOnly)
 	{
-		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		if (pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR)
 			pszFormat = "SDK_Chat_Spec";
 		else
 		{
-			if ( pSDKPlayer->m_lifeState != LIFE_ALIVE )
+			if (pSDKPlayer->m_lifeState != LIFE_ALIVE)
 				pszFormat = "SDK_Chat_Team_Dead";
 			else
 				pszFormat = "SDK_Chat_Team";
@@ -1871,11 +1868,11 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 	}
 	else
 	{
-		if ( pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		if (pSDKPlayer->GetTeamNumber() == TEAM_SPECTATOR)
 			pszFormat = "SDK_Chat_All_Spec";
 		else
 		{
-			if ( pSDKPlayer->m_lifeState != LIFE_ALIVE )
+			if (pSDKPlayer->m_lifeState != LIFE_ALIVE)
 				pszFormat = "SDK_Chat_All_Dead";
 			else
 				pszFormat = "SDK_Chat_All";
@@ -1885,7 +1882,7 @@ const char *CSDKGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 	return pszFormat;
 }
 
-void CSDKGameRules::InitDefaultAIRelationships( void )
+void CSDKGameRules::InitDefaultAIRelationships(void)
 {
 	int i, j;
 
@@ -1895,29 +1892,29 @@ void CSDKGameRules::InitDefaultAIRelationships( void )
 	// --------------------------------------------------------------
 	// First initialize table so we can report missing relationships
 	// --------------------------------------------------------------
-	for (i=0; i<NUM_AI_CLASSES; i++ )
+	for (i = 0; i<NUM_AI_CLASSES; i++)
 	{
-		for ( j=0; j<NUM_AI_CLASSES; j++ )
+		for (j = 0; j<NUM_AI_CLASSES; j++)
 		{
 			// By default all relationships are neutral of priority zero
-			CBaseCombatCharacter::SetDefaultRelationship( (Class_T)i, (Class_T)j, D_NU, 0 );
+			CBaseCombatCharacter::SetDefaultRelationship((Class_T)i, (Class_T)j, D_NU, 0);
 		}
 	}
 
 	// ------------------------------------------------------------
 	//	> CLASS_PLAYER
 	// ------------------------------------------------------------
-	CBaseCombatCharacter::SetDefaultRelationship( CLASS_PLAYER,			CLASS_NONE,				D_NU, 0 );			
-	CBaseCombatCharacter::SetDefaultRelationship( CLASS_PLAYER,			CLASS_PLAYER,			D_NU, 0 );			
+	CBaseCombatCharacter::SetDefaultRelationship(CLASS_PLAYER, CLASS_NONE, D_NU, 0);
+	CBaseCombatCharacter::SetDefaultRelationship(CLASS_PLAYER, CLASS_PLAYER, D_NU, 0);
 }
 
 const char* CSDKGameRules::AIClassText(int classType)
 {
-	switch ( classType )
+	switch (classType)
 	{
-		case CLASS_NONE:			return "CLASS_NONE";
-		case CLASS_PLAYER:			return "CLASS_PLAYER";
-		default:					return "MISSING CLASS in ClassifyText()";
+	case CLASS_NONE:			return "CLASS_NONE";
+	case CLASS_PLAYER:			return "CLASS_PLAYER";
+	default:					return "MISSING CLASS in ClassifyText()";
 	}
 }
 #endif
@@ -1925,15 +1922,15 @@ const char* CSDKGameRules::AIClassText(int classType)
 //-----------------------------------------------------------------------------
 // Purpose: Find the relationship between players (teamplay vs. deathmatch)
 //-----------------------------------------------------------------------------
-int CSDKGameRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget )
+int CSDKGameRules::PlayerRelationship(CBaseEntity *pPlayer, CBaseEntity *pTarget)
 {
 #ifndef CLIENT_DLL
 	// half life multiplay has a simple concept of Player Relationships.
 	// you are either on another player's team, or you are not.
-	if ( !pPlayer || !pTarget || !pTarget->IsPlayer() || IsTeamplay() == false )
+	if (!pPlayer || !pTarget || !pTarget->IsPlayer() || IsTeamplay() == false)
 		return GR_NOTTEAMMATE;
 
-	if ( (*GetTeamID(pPlayer) != '\0') && (*GetTeamID(pTarget) != '\0') && !stricmp( GetTeamID(pPlayer), GetTeamID(pTarget) ) )
+	if ((*GetTeamID(pPlayer) != '\0') && (*GetTeamID(pTarget) != '\0') && !stricmp(GetTeamID(pPlayer), GetTeamID(pTarget)))
 		return GR_TEAMMATE;
 
 #endif
@@ -1944,27 +1941,27 @@ int CSDKGameRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarge
 float CSDKGameRules::GetMapRemainingTime()
 {
 #ifdef GAME_DLL
-	if ( nextlevel.GetString() && *nextlevel.GetString() && engine->IsMapValid( nextlevel.GetString() ) )
+	if (nextlevel.GetString() && *nextlevel.GetString() && engine->IsMapValid(nextlevel.GetString()))
 	{
 		return 0;
 	}
 #endif
 
 	// if timelimit is disabled, return -1
-	if ( mp_timelimit.GetInt() <= 0 )
+	if (mp_timelimit.GetInt() <= 0)
 		return -1;
 
 	// timelimit is in minutes
-	float flTimeLeft =  ( m_flGameStartTime + mp_timelimit.GetInt() * 60 ) - gpGlobals->curtime;
+	float flTimeLeft = (m_flGameStartTime + mp_timelimit.GetInt() * 60) - gpGlobals->curtime;
 
 	// never return a negative value
-	if ( flTimeLeft < 0 )
+	if (flTimeLeft < 0)
 		flTimeLeft = 0;
 
 	return flTimeLeft;
 }
 
-float CSDKGameRules::GetMapElapsedTime( void )
+float CSDKGameRules::GetMapElapsedTime(void)
 {
 	return gpGlobals->curtime;
 }
