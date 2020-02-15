@@ -16,7 +16,9 @@ FilePlayerClassInfo_t* CreatePlayerClassInfo() { return new CSDKPlayerClassInfo;
 
 CSDKPlayerClassInfo::CSDKPlayerClassInfo()
 {
+	m_szArmsModel[0] = '\0';
 	m_szLimitCvar[0]	= '\0';
+
 	m_flMaxSpeed = SDK_DEFAULT_PLAYER_RUNSPEED;
 
 	m_iNumGrensType1	= 0;
@@ -28,6 +30,9 @@ CSDKPlayerClassInfo::CSDKPlayerClassInfo()
 void CSDKPlayerClassInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 {
 	BaseClass::Parse( pKeyValuesData, szWeaponName );
+
+	Q_strncpy( m_szArmsModel, pKeyValuesData->GetString( "armsmodel", "!! Missing armsmodel on Player Class" ), MAX_PLAYERCLASS_NAME_LENGTH );
+	Assert( Q_strlen( m_szArmsModel ) > 0 && "Every class must specify a armsmodel" );
 
 	Q_strncpy( m_szLimitCvar, pKeyValuesData->GetString( "limitcvar", "!! Missing limit cvar on Player Class" ), sizeof(m_szLimitCvar) );
 	Assert( Q_strlen( m_szLimitCvar ) > 0 && "Every class must specify a limitcvar" );

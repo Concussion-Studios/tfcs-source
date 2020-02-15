@@ -22,7 +22,8 @@ public:
 	
 	virtual void Parse( ::KeyValues *pKeyValuesData, const char *szWeaponName );
 
-	char m_szLimitCvar[64];	//which cvar controls the class limit for this class
+	char m_szArmsModel[MAX_PLAYERCLASS_NAME_LENGTH];
+	char m_szLimitCvar[MAX_PLAYERCLASS_NAME_LENGTH];	//which cvar controls the class limit for this class
 
 	float m_flMaxSpeed;
 	int m_iMaxArmor;

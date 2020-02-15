@@ -348,6 +348,8 @@ void CSDKPlayer::Precache()
 		g++;
 	}
 
+	PrecacheModel( "models/weapons/v_arm_hl2.mdl" );
+
 	BaseClass::Precache();
 }
 
@@ -412,6 +414,8 @@ void CSDKPlayer::Spawn()
 
 	//Tony; do the spawn animevent
 	DoAnimationEvent(PLAYERANIMEVENT_SPAWN);
+	
+	CreateHandModel();
 
 	BaseClass::Spawn();
 
@@ -1574,6 +1578,25 @@ void CSDKPlayer::CreateViewModel(int index /*=0*/)
 		return;
 
 	CPredictedViewModel *vm = (CPredictedViewModel *)CreateEntityByName("predicted_viewmodel");
+	if ( vm )
+	{
+		vm->SetAbsOrigin(GetAbsOrigin());
+		vm->SetOwner(this);
+		vm->SetIndex(index);
+		DispatchSpawn(vm);
+		vm->FollowEntity(this, false);
+		m_hViewModel.Set(index, vm);
+	}
+}
+
+void CSDKPlayer::CreateHandModel(int index, int iOtherVm)
+{
+	Assert(index >= 0 && index < MAX_VIEWMODELS && iOtherVm >= 0 && iOtherVm < MAX_VIEWMODELS );
+
+	if (GetViewModel(index))
+		return;
+
+	CPredictedViewModel *vm = (CPredictedViewModel *)CreateEntityByName("hand_viewmodel");
 	if (vm)
 	{
 		switch (GetTeamNumber())
@@ -1594,15 +1617,13 @@ void CSDKPlayer::CreateViewModel(int index /*=0*/)
 			vm->m_nSkin = 3;
 			break;
 		}
+
 		vm->SetAbsOrigin(GetAbsOrigin());
 		vm->SetOwner(this);
 		vm->SetIndex(index);
 		DispatchSpawn(vm);
-		vm->FollowEntity(this, false);
+		vm->FollowEntity(GetViewModel(iOtherVm), true);
 		m_hViewModel.Set(index, vm);
-
-
-
 	}
 }
 

@@ -105,6 +105,7 @@ public:
 	CWeaponSDKBase* GetWeaponOwnerID( int iID );
 
 	virtual void	CreateViewModel( int viewmodelindex = 0 );
+	virtual void	CreateHandModel( int viewmodelindex = 1, int iOtherVm = 0 );
 
 	virtual bool BumpWeapon( CBaseCombatWeapon *pWeapon );
 

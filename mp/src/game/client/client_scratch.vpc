@@ -64,12 +64,6 @@ $Project "Client (TFCSOURCE)"
 			{	
 				$Folder	"GameUI"
 				{
-					//$Folder	"Panels"
-					//{
-					//	$File	"gameui\menu_loandingscreen.cpp"
-					//	$File	"gameui\menu_loandingscreen.h"
-					//}
-
 					$Folder	"Dialogs"
 					{
 						$File	"sdk\vgui\DialogNews.cpp"
@@ -124,6 +118,8 @@ $Project "Client (TFCSOURCE)"
 				$File	"sdk\c_sdk_player.h"
 				$File	"sdk\c_sdk_player_resource.cpp"
 				$File	"sdk\c_sdk_player_resource.h"
+				$File	"$SRCDIR\game\shared\sdk\handviewmodel_shared.cpp"
+				$File	"$SRCDIR\game\shared\sdk\handviewmodel_shared.h"
 				$File	"$SRCDIR\game\shared\sdk\sdk_gamemovement.cpp"
 				$File	"$SRCDIR\game\shared\sdk\sdk_player_shared.cpp"
 				$File	"$SRCDIR\game\shared\sdk\sdk_playeranimstate.cpp"

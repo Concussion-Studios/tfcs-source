@@ -810,6 +810,7 @@ void CSDKGameRules::PlayerSpawn(CBasePlayer *p)
 			const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo(playerclass);
 
 			pPlayer->SetModel(pClassInfo.m_szPlayerModel);
+			pPlayer->GetViewModel(1)->SetModel(pClassInfo.m_szArmsModel);
 			pPlayer->SetHitboxSet(0);
 
 			char buf[64];
