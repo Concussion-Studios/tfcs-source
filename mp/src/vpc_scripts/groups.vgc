@@ -17,10 +17,6 @@ $Group "game"
 	"tier1"
 	"vgui_controls"
 	"gameui"
-}
-
-$Group "shaders"
-{
 	"game_shader_dx9"
 }
 

@@ -10,4 +10,26 @@ $Include "$SRCDIR\materialsystem\stdshaders\game_shader_dx9_base.vpc"
 
 $Project "Shaders (SDK)"
 {
+	$Folder	"Header Files"
+	{
+		$File	"common_vertexlitgeneric_dx9.h"
+		$File	"common_lightmappedgeneric_fxc.h"
+		$File	"common_flashlight_fxc.h"
+	}
+	
+	$Folder "Shader Source"
+	{
+		$Folder "fxc"
+		{
+			$File	"pbr_ps30.fxc"
+			$File	"pbr_vs30.fxc"
+		}
+
+		$File	"stdshader_dx9_30.txt"
+	}
+
+	$Folder "Source Files"
+	{
+		$File	"pbr_dx9.cpp"
+	}
 }
