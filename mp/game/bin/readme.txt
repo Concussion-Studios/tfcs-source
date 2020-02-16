@@ -1,0 +1,1 @@
+Copy everything from "steamapps\common\Source SDK Base 2013 Multiplayer\bin" over here.
