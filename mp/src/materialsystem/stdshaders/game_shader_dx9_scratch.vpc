@@ -5,10 +5,10 @@
 //-----------------------------------------------------------------------------
 
 $Macro SRCDIR		"..\.."
-$Macro GAMENAME "mod_sdk"
+$Macro GAMENAME "tfcsource"
 $Include "$SRCDIR\materialsystem\stdshaders\game_shader_dx9_base.vpc"
 
-$Project "Shaders (SDK)"
+$Project "Shaders (TFCSOURCE)"
 {
 	$Folder	"Header Files"
 	{
