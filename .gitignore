@@ -97,8 +97,21 @@ voice_ban.dt
 mp/game/bin/*
 
 # shader files
+mp/src/materialsystem/stdshaders/fxctmp9_tmp/*
+makefile.stdshader_dx9_20b
+makefile.stdshader_dx9_20b.copy
+makefile.stdshader_dx9_30
+makefile.stdshader_dx9_30.copy
+filelist.txt
+filelistgen.txt
+filestocopy.txt
+inclist.txt
+uniquefilestocopy.txt
+vcslist.txt
 *.tmp
 
 # map compile products
 *.prt
 *.vmx
+
+
