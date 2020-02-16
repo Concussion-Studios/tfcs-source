@@ -87,6 +87,7 @@ sound.cache
 stats.txt
 voice_ban.dt
 *.ain
+mp/game/bin/*
 
 # shader files
 *.tmp
