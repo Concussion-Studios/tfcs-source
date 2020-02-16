@@ -46,6 +46,11 @@ obj*/
 *.project
 .DS_Store
 
+mathlib.lib
+raytrace.lib
+tier1.lib
+vgui_controls.lib
+
 # Specific Source build products
 client.pdb
 client.dll
@@ -53,19 +58,19 @@ client.lib
 gameui.pdb
 gameui.dll
 gameui.lib
+game_shader_dx9.pdb
+game_shader_dx9.dll
+game_shader_dx9.lib
 server.pdb
 server.dll
 server.lib
-
-mathlib.lib
-raytrace.lib
-tier1.lib
-vgui_controls.lib
 
 client.so
 client.so.dbg
 gameui.so
 gameui.so.dbg
+game_shader_dx9.so
+game_shader_dx9.so.dbg
 server.so
 server.so.dbg
 server_srv.so
@@ -75,6 +80,8 @@ client.dylib
 client.dylib.dSYM/
 gameui.dylib
 gameui.dylib.dSYM/
+game_shader_dx9.dylib
+game_shader_dx9.dylib.dSYM/
 server.dylib
 server.dylib.dSYM/
 
