@@ -651,40 +651,40 @@ void CSDKGameRules::Think()
 {
 	BaseClass::Think();
 
-	if (g_fGameOver)   // someone else quit the game already
-	{
-		// Check to see if the intermission time is over
-		if (m_flIntermissionEndTime >= gpGlobals->curtime)
-			return;
-
-		// Check to see if there is still a vote running
-		if (g_voteController->IsVoteActive())
-			return;
-
-		// Did we already change the level?
-		if (m_bChangelevelDone)
-			return;
-
-		ChangeLevel(); // intermission is over
-		m_bChangelevelDone = true;
-
-		return;
-	}
-
-	/*if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
-	{
-	DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
-	m_bNextMapVoteDone = true;
-	char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
-	szEmptyDetails[0] = '\0';
-	g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
-	}*/
-
-	if (GetMapRemainingTime() < 0)
-	{
-		GoToIntermission();
-		return;
-	}
+//	if (g_fGameOver)   // someone else quit the game already
+//	{
+//		// Check to see if the intermission time is over
+//		if (m_flIntermissionEndTime >= gpGlobals->curtime)
+//			return;
+//
+//		// Check to see if there is still a vote running
+////		if (g_voteController->IsVoteActive())
+////			return;
+//
+//		// Did we already change the level?
+//		if (m_bChangelevelDone)
+//			return;
+//
+//		ChangeLevel(); // intermission is over
+//		m_bChangelevelDone = true;
+//
+//		return;
+//	}
+//
+//	/*if ( !m_bNextMapVoteDone && GetMapRemainingTime() && GetMapRemainingTime() < 2 * 60 )
+//	{
+//	DevMsg( "VoteController: Timeleft is less than 60 seconds, begin nextlevel voting... \n" );
+//	m_bNextMapVoteDone = true;
+//	char szEmptyDetails[MAX_VOTE_DETAILS_LENGTH];
+//	szEmptyDetails[0] = '\0';
+//	g_voteController->CreateVote( DEDICATED_SERVER, "nextlevel", szEmptyDetails );
+//	}*/
+//
+//	if (GetMapRemainingTime() < 0)
+//	{
+//		GoToIntermission();
+//		return;
+//	}
 }
 
 Vector DropToGround(
