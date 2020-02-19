@@ -3853,7 +3853,7 @@ void CBaseEntity::OnEntityEvent( EntityEvent_t event, void *pEventData )
 
 	if ( m_nSlimeTouch > 0 )
 	{
- 		nNewContents |= CONTENTS_SLIME;
+		nNewContents |= CONTENTS_SLIME;
 	}
 
 	if (( nNewContents & MASK_WATER ) == 0)
@@ -5206,7 +5206,7 @@ void CC_Find_Ent( const CCommand& args )
 	}
 
 	int iCount = 0;
- 	const char *pszSubString = args[1];
+	const char *pszSubString = args[1];
 	Msg("Searching for entities with class/target name containing substring: '%s'\n", pszSubString );
 
 	CBaseEntity *ent = NULL;
@@ -5234,7 +5234,7 @@ void CC_Find_Ent( const CCommand& args )
 
 		if ( bMatches )
 		{
- 			iCount++;
+			iCount++;
 			Msg("   '%s' : '%s' (entindex %d) \n", ent->GetClassname(), ent->GetEntityName().ToCStr(), ent->entindex() );
 		}
 	}
@@ -7246,7 +7246,7 @@ void CBaseEntity::SUB_FadeOut( void  )
 		SetRenderColorA( 255 );
 		return;
 	}
-    
+	
 	SUB_PerformFadeOut();
 
 	if ( m_clrRender->a == 0 )
