@@ -75,8 +75,8 @@ $Project "Client (TFCSOURCE)"
 					}
 				}
 
-				$File	"sdk\sdk_backgroundpanel.cpp"
-				$File	"sdk\sdk_backgroundpanel.h"
+				$File	"sdk\vgui\sdk_backgroundpanel.cpp"
+				$File	"sdk\vgui\sdk_backgroundpanel.h"
 				$File	"sdk\vgui\sdk_classmenu.cpp"
 				$File	"sdk\vgui\sdk_classmenu.h"
 				$File	"sdk\vgui\sdk_scoreboard.cpp"

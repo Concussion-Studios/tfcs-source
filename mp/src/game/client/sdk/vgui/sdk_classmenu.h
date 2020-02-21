@@ -35,25 +35,33 @@ private:
 	DECLARE_CLASS_SIMPLE( CSDKClassMenu, CClassMenu );
 
 public:
-	CSDKClassMenu(IViewPort *pViewPort);
-	CSDKClassMenu(IViewPort *pViewPort, const char *panelName);
+	CSDKClassMenu( IViewPort *pViewPort );
+	CSDKClassMenu( IViewPort *pViewPort, const char *panelName );
 	virtual ~CSDKClassMenu();
 
 	virtual void Update( void );
-	void MoveToCenterOfScreen();
 	virtual Panel *CreateControlByName( const char *controlName );
 	virtual void OnTick( void );
 	virtual void OnKeyCodePressed(KeyCode code);
 	virtual void SetVisible( bool state );
+
 	// helper functions
-	void SetVisibleButton(const char *textEntryName, bool state);
-	virtual void ShowPanel(bool bShow);
+	void SetVisibleButton( const char *textEntryName, bool state );
+	virtual void ShowPanel( bool bShow );
 
 	MESSAGE_FUNC_CHARPTR( OnShowPage, "ShowPage", page );
 
-	void UpdateNumClassLabel( void );
-
 	virtual int GetTeamNumber( void ) = 0;
+
+	// Background panel -------------------------------------------------------
+
+public:
+	virtual void PaintBackground( void ) { /* Draw nothing */ }
+	virtual void PerformLayout();
+	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	bool m_backgroundLayoutFinished;
+
+	// End background panel ---------------------------------------------------
 
 private:
 	CSDKClassInfoPanel *m_pClassInfoPanel;
@@ -64,20 +72,6 @@ private:
 	int	m_iLastClassLimit;
 
 	ButtonCode_t m_iClassMenuKey;
-
-	vgui::Label *m_pClassNumLabel[SDK_NUM_PLAYERCLASSES];
-	vgui::Label *m_pClassFullLabel[SDK_NUM_PLAYERCLASSES];
-
-protected:
-	// vgui overrides for rounded corner background
-	virtual void PaintBackground();
-	virtual void PaintBorder();
-	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
-
-private:
-	// rounded corners
-	Color m_bgColor;
-	Color m_borderColor;
 };
 
 class CSDKClassMenu_Blue : public CSDKClassMenu

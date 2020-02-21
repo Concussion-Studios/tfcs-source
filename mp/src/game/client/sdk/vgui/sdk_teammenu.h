@@ -15,31 +15,29 @@ class CSDKTeamMenu : public CTeamMenu
 private:
 	DECLARE_CLASS_SIMPLE( CSDKTeamMenu, CTeamMenu );
 
-	// VGUI2 override
-	void OnCommand( const char *command);
-
-	// helper functions
-	void SetVisibleButton(const char *textEntryName, bool state);
-
-public:
-	CSDKTeamMenu(IViewPort *pViewPort);
+	CSDKTeamMenu( IViewPort *pViewPort );
 	virtual ~CSDKTeamMenu();
 
 	void Update();
-	virtual void SetVisible(bool state);
-	void MoveToCenterOfScreen();
+	virtual void SetVisible( bool state );
 
-protected:
-	// vgui overrides for rounded corner background
-	virtual void PaintBackground();
-	virtual void PaintBorder();
+public:
+
+	// VGUI2 override
+	void OnCommand( const char* command );
+
+	// helper functions
+	void SetVisibleButton( const char* textEntryName, bool state );
+
+	// Background panel -------------------------------------------------------
+
+public:
+	virtual void PaintBackground( void ) { /* Draw nothing */ }
+	virtual void PerformLayout();
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	bool m_backgroundLayoutFinished;
 
-private:
-	// rounded corners
-	Color					 m_bgColor;
-	Color					 m_borderColor;
-
+	// End background panel ---------------------------------------------------
 };
 
 #endif //SDK_CLASSMENU_H

@@ -9,95 +9,68 @@
 #include "sdk_textwindow.h"
 #include <cdll_client_int.h>
 #include <KeyValues.h>
-
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
 #include <vgui/IVgui.h>
-
-#include <FileSystem.h>
-#include <convar.h>
-
 #include "sdk_backgroundpanel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 using namespace vgui;
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
 CSDKTextWindow::CSDKTextWindow(IViewPort *pViewPort) : CTextWindow( pViewPort )
 {
-	// load the new scheme early!!
-	SetScheme("SourceScheme");
+	SetProportional( true );
+	CreateBackground( this );
+
+	m_backgroundLayoutFinished = false;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKTextWindow::ApplySchemeSettings( IScheme *pScheme )
-{
-	BaseClass::ApplySchemeSettings( pScheme );
-
-	LoadControlSettings("Resource/UI/TextWindow.res");
-
-	m_bgColor = GetSchemeColor("BgColor", GetBgColor(), pScheme);
-	m_borderColor = pScheme->GetColor( "FgColor", Color( 0, 0, 0, 0 ) );
-
-	SetBgColor( Color(0, 0, 0, 0) );
-	SetBorder( pScheme->GetBorder( "BaseBorder" ) );
-
-	DisableFadeEffect(); //Tony; shut off the fade effect because we're using sourcesceheme.
-
-	Reset();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Destructor
-//-----------------------------------------------------------------------------
-CSDKTextWindow::~CSDKTextWindow()
-{
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Center the dialog on the screen.  (vgui has this method on
-//			Frame, but we're an EditablePanel, need to roll our own.)
-//-----------------------------------------------------------------------------
-void CSDKTextWindow::MoveToCenterOfScreen()
-{
-	int wx, wy, ww, wt;
-	surface()->GetWorkspaceBounds(wx, wy, ww, wt);
-	SetPos((ww - GetWide()) / 2, (wt - GetTall()) / 2);
-}
-
-void CSDKTextWindow::Update( void )
+void CSDKTextWindow::Update()
 {
 	BaseClass::Update();
-	MoveToCenterOfScreen();
+
+	m_pOK->RequestFocus();
 }
 
-
 //-----------------------------------------------------------------------------
-// Purpose: Paint background with rounded corners
+// Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKTextWindow::PaintBackground()
+void CSDKTextWindow::SetVisible( bool state )
 {
-	int wide, tall;
-	GetSize( wide, tall );
+	BaseClass::SetVisible( state );
 
-	DrawRoundedBackground( m_bgColor, wide, tall );
+	if ( state )
+		m_pOK->RequestFocus();
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Paint border with rounded corners
+// Purpose: Scale / center the window
 //-----------------------------------------------------------------------------
-void CSDKTextWindow::PaintBorder()
+void CSDKTextWindow::PerformLayout()
 {
-	int wide, tall;
-	GetSize( wide, tall );
+	BaseClass::PerformLayout();
 
-	DrawRoundedBorder( m_borderColor, wide, tall );
+	// stretch the window to fullscreen
+	if ( !m_backgroundLayoutFinished )
+		LayoutBackgroundPanel( this );
+
+	m_backgroundLayoutFinished = true;
 }
 
-
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CSDKTextWindow::ApplySchemeSettings( vgui::IScheme *pScheme )
+{
+	BaseClass::ApplySchemeSettings( pScheme );
+	ApplyBackgroundSchemeSettings( this, pScheme );
+}
