@@ -78,7 +78,16 @@ void CSDKTeamMenu::Update( void )
 	else
 		SetVisibleButton("CancelButton", true); 
 
-	MoveToCenterOfScreen();
+	if( SDKGameRules() && SDKGameRules()->IsTDMGamemode() ) // we don't had 4teams on
+	{
+		SetVisibleButton("yellowbutton", false);
+		SetVisibleButton("greenbutton", false);
+	}
+	else
+	{
+		SetVisibleButton("yellowbutton", true);
+		SetVisibleButton("greenbutton", true);
+	}
 }
 
 //-----------------------------------------------------------------------------
