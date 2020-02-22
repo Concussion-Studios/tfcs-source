@@ -348,7 +348,7 @@ void CSDKPlayer::Precache()
 		g++;
 	}
 
-	PrecacheModel( "models/weapons/v_arm_hl2.mdl" );
+	PrecacheModel( "models/weapons/c_arms_hev.mdl" );
 
 	BaseClass::Precache();
 }
