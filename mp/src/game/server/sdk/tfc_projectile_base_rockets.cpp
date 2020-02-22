@@ -9,7 +9,6 @@
 #include "sdk_gamerules.h"
 
 ConVar mp_rocketdamage( "mp_rocketdamage", "150", FCVAR_GAMEDLL | FCVAR_CHEAT );
-ConVar mp_rocketradius( "mp_rocketradius", "200", FCVAR_GAMEDLL | FCVAR_CHEAT );
 
 BEGIN_DATADESC( CTFCProjectileBaseRockets )
 	// Function Pointers
@@ -58,17 +57,20 @@ void CTFCProjectileBaseRockets::Spawn( void )
 
 	UTIL_SetSize( this, -Vector(2,2,2), Vector(2,2,2) );
 
+	//SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
+	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE );
 	SetTouch( &CTFCProjectileBaseRockets::RocketTouch );
-
-	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	
 	m_takedamage = DAMAGE_NO;
-	SetGravity( 0.1 );
-	SetDamage( mp_rocketdamage.GetFloat() );	
+
+	//SetGravity( 0.1 );
+	SetGravity( UTIL_ScaleForGravity( 400 ) );	// use a lower gravity for rockets
+	SetDamage( mp_rocketdamage.GetFloat() );
+	SetDamageRadius( GetDamage() * 2.5 );
 
 	AddFlag( FL_OBJECT );
 
-	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
+	//SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
 
 	EmitSound( "Weapon_RPG.Fly" );
 
@@ -82,10 +84,10 @@ void CTFCProjectileBaseRockets::Spawn( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-unsigned int CTFCProjectileBaseRockets::PhysicsSolidMaskForEntity( void ) const
+/*unsigned int CTFCProjectileBaseRockets::PhysicsSolidMaskForEntity( void ) const
 { 
 	return BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX;
-}
+}*/
 
 //-----------------------------------------------------------------------------
 // Purpose: Stops any kind of tracking and shoots dumb
@@ -95,7 +97,8 @@ void CTFCProjectileBaseRockets::Fire( void )
 	SetThink( NULL );
 	SetMoveType( MOVETYPE_FLY );
 
-	SetModel("models/weapons/w_missile.mdl");
+	SetModel( "models/weapons/w_missile.mdl" );
+
 	UTIL_SetSize( this, vec3_origin, vec3_origin );
 
 	EmitSound( "Weapon_RPG.Fly" );
@@ -115,7 +118,7 @@ void CTFCProjectileBaseRockets::DoExplosion( void )
 		GetAbsAngles(),
 		GetOwnerEntity(),
 		GetDamage(),		//magnitude
-		mp_rocketradius.GetFloat(),				//radius
+		GetDamageRadius(),				//radius
 		SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE,
 		0.0f,				//explosion force
 		this);				//inflictor
@@ -163,8 +166,8 @@ void CTFCProjectileBaseRockets::RocketTouch( CBaseEntity *pOther )
 	if ( !pOther->IsSolid() || pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS) )
 		return;
 
-	if ( pOther->GetCollisionGroup() == COLLISION_GROUP_WEAPON )
-		return;
+	//if ( pOther->GetCollisionGroup() == COLLISION_GROUP_WEAPON )
+	//	return;
 
 	// if we hit the skybox, just disappear
 	const trace_t &tr = CBaseEntity::GetTouchTrace();
@@ -187,7 +190,7 @@ void CTFCProjectileBaseRockets::RocketTouch( CBaseEntity *pOther )
 		info.SetDamage( 50 );
 		info.SetDamageForce( vec3_origin );	// don't worry about this not having a damage force.
 											// It will explode on touch and impart its own forces
-		info.SetDamageType( DMG_CLUB );
+		info.SetDamageType( DMG_BLAST );
 
 		Vector dir;
 		AngleVectors( GetAbsAngles(), &dir );

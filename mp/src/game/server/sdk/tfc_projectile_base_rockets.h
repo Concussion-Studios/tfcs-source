@@ -33,11 +33,13 @@ public:
 	virtual void Explode( void );
 	virtual void Fire( void );
 	virtual float GetGravity(void) { return 0.001f; }
-	
-	virtual float GetDamage() { return m_flDamage; }
-	virtual void SetDamage(float flDamage) { m_flDamage = flDamage; }
 
-	unsigned int PhysicsSolidMaskForEntity( void ) const;
+	virtual float GetDamage() { return m_flDamage; }
+	virtual void SetDamage( float flDamage ) { m_flDamage = flDamage; }
+	virtual float GetDamageRadius()	{ return m_DmgRadius; }
+	virtual void SetDamageRadius( float flDamageRadius ) { m_DmgRadius = flDamageRadius; }
+
+	//unsigned int PhysicsSolidMaskForEntity( void ) const;
 
 	static CTFCProjectileBaseRockets *Create( const char *szClassname, const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner );	
 
@@ -55,9 +57,11 @@ protected:
 	virtual void FlyThink( void );
 
 	CHandle<SmokeTrail>	m_hRocketTrail;
-	float m_flDamage;
 
 	CNetworkVector( m_vInitialVelocity );
+
+	float m_flDamage;		// Damage to inflict.
+	float m_DmgRadius;		// How far do I do damage?
 
 private:
 	DECLARE_DATADESC();
