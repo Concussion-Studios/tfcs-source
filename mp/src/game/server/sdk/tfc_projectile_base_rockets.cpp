@@ -63,8 +63,7 @@ void CTFCProjectileBaseRockets::Spawn( void )
 	
 	m_takedamage = DAMAGE_NO;
 
-	//SetGravity( 0.1 );
-	SetGravity( UTIL_ScaleForGravity( 400 ) );	// use a lower gravity for rockets
+	SetGravity( 0.1 );
 	SetDamage( mp_rocketdamage.GetFloat() );
 	SetDamageRadius( GetDamage() * 2.5 );
 
