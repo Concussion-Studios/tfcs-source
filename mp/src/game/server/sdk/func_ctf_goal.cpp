@@ -52,8 +52,8 @@ void CFuncCTFGoal::GoalTouch( CBaseEntity* pOther )
 	auto* pBall = dynamic_cast<CPropPassBall*>( pOther );
 	if ( pBall )
 	{
-		if ( pBall->GetOwnerEntity() == pSDK )
-			GetGlobalSDKTeam( pSDK->GetTeamNumber() )->AddScore( 1 ); // Reward the player's team for bringing up the ball
+		//if ( pBall->GetOwnerEntity() == pSDK )
+		//	GetGlobalSDKTeam( pSDK->GetTeamNumber() )->AddScore( 1 ); // Reward the player's team for bringing up the ball
 
 		//pBall->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
 	}
