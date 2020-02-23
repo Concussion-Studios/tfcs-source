@@ -10,15 +10,15 @@
 #pragma once
 #endif
 
-#include "predicted_viewmodel.h"
+#include "baseviewmodel_shared.h"
 
 #if defined( CLIENT_DLL )
 	#define CHandViewModel C_HandViewModel
 #endif
 
-class CHandViewModel : public CPredictedViewModel
+class CHandViewModel : public CBaseViewModel
 {
-	DECLARE_CLASS( CHandViewModel, CPredictedViewModel );
+	DECLARE_CLASS( CHandViewModel, CBaseViewModel );
 
 public:
 	DECLARE_NETWORKCLASS();

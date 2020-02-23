@@ -416,6 +416,7 @@ void CSDKPlayer::Spawn()
 	DoAnimationEvent(PLAYERANIMEVENT_SPAWN);
 	
 	CreateHandModel();
+	GetViewModel( 1 )->SetModel( "models/weapons/c_arms_hev.mdl" );
 
 	BaseClass::Spawn();
 
@@ -1596,7 +1597,7 @@ void CSDKPlayer::CreateHandModel(int index, int iOtherVm)
 	if (GetViewModel(index))
 		return;
 
-	CPredictedViewModel *vm = (CPredictedViewModel *)CreateEntityByName("hand_viewmodel");
+	CBaseViewModel *vm = (CBaseViewModel *)CreateEntityByName("hand_viewmodel");
 	if (vm)
 	{
 		switch (GetTeamNumber())
