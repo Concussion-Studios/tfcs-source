@@ -40,9 +40,13 @@
 
 #define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
 
-ConVar sv_weapon_respawn_time("sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY);
-ConVar sv_item_respawn_time("sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY);
+ConVar sv_weapon_respawn_time( "sv_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+ConVar sv_item_respawn_time( "sv_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+
 #endif
+
+ConVar mp_hitmarkers( "mp_hitmarkers", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Allow clients to use hit markers." );
+ConVar mp_damagepopup( "mp_damagepopup", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Allow clients to use damage popups." );
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

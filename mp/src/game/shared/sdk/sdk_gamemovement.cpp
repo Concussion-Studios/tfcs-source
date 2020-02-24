@@ -630,10 +630,13 @@ bool CSDKGameMovement::CheckJumpButton( void )
 	m_pSDKPlayer->PlayStepSound( (Vector &)mv->GetAbsOrigin(), player->GetSurfaceData(), 1.0, true );
 	m_pSDKPlayer->DoAnimationEvent( PLAYERANIMEVENT_JUMP );
 
-	// make the jump sound
-	CPASFilter filter( m_pSDKPlayer->GetAbsOrigin() );
-	filter.UsePredictionRules();
-	m_pSDKPlayer->EmitSound( filter, m_pSDKPlayer->entindex(), "Player.Jump" );
+	// make the jump sound unless we aren't the spy
+	if ( !( m_pSDKPlayer->m_Shared.DesiredPlayerClass() == PLAYERCLASS_HEAVY ) )
+	{
+		CPASFilter filter( m_pSDKPlayer->GetAbsOrigin() );
+		filter.UsePredictionRules();
+		m_pSDKPlayer->EmitSound( filter, m_pSDKPlayer->entindex(), "Player.Jump" );	
+	}
 
 	float flGroundFactor = 1.0f;
 	if ( player->GetSurfaceData() )
