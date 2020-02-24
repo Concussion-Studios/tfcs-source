@@ -9,7 +9,6 @@
 #include "sdk_hud_hitmarker.h"
 #include "iclientmode.h"
 #include "c_baseplayer.h"
-#include "engine/ienginesound.h"
 #include "gamevars_shared.h"
 
 // VGUI panel includes
@@ -51,11 +50,7 @@ void CHudHitmarker::Init()
 {
 	SetAlpha( 0 );
 
-	enginesound->PrecacheSound( "ui/hitsounds/hitsound_quake3.wav" );
-	enginesound->PrecacheSound( "ui/hitsounds/killsound_quake3.wav" );
-
 	ListenForGameEvent("player_hurt");
-	ListenForGameEvent("player_death");
 }
 
 //-----------------------------------------------------------------------------
@@ -119,36 +114,10 @@ void CHudHitmarker::FireGameEvent(IGameEvent *event)
 		C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 		int iVictim = event->GetInt( "userid" );
 		int iAttacker = event->GetInt( "attacker" );
-		//bool bHeadshot = event->GetBool( "headshot" );
 
 		if ( ( iAttacker != pPlayer->GetUserID() ) || ( iAttacker == iVictim ) )
 			return;
-
-		CLocalPlayerFilter filter;
-
-		/*if ( bHeadshot )
-		{
-			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "HitMarkerShowHeadshot" );
-			enginesound->EmitSound( filter, -1, CHAN_AUTO, "ui/hitsounds/ag2_hithead.wav", 1.0, SNDLVL_NORM, 0 );
-		}
-		else*/
-		{
-			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "HitMarkerShow" );
-			enginesound->EmitSound( filter, -1, CHAN_AUTO, "ui/hitsounds/hitsound_quake3.wav", 1.0, SNDLVL_NORM, 0 );
-		}
-	}
-	else if ( Q_strcmp( type, "player_death" ) == 0 )
-	{
-		C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-		int iVictim = event->GetInt( "userid" );
-		int iAttacker = event->GetInt( "attacker" );
-
-		if ( ( iAttacker != pPlayer->GetUserID() ) || ( iAttacker == iVictim ) )
-			return;
-
-		CLocalPlayerFilter filter;
 
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "HitMarkerShow" );
-		enginesound->EmitSound( filter, -1, CHAN_AUTO, "ui/hitsounds/killsound_quake3.wav", 1.0, SNDLVL_NORM, 0 );
 	}
 }
