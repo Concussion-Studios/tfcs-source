@@ -45,9 +45,6 @@ ConVar sv_item_respawn_time( "sv_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR
 
 #endif
 
-ConVar mp_hitmarkers( "mp_hitmarkers", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Allow clients to use hit markers." );
-ConVar mp_damagepopup( "mp_damagepopup", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Allow clients to use damage popups." );
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
