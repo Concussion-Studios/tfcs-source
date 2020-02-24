@@ -393,8 +393,9 @@ void CSDKPlayer::Spawn()
 		EquipSuit(false);
 
 		//Player spawn sound.
-		CPASFilter filter(GetAbsOrigin());
+		CSingleUserRecipientFilter filter(this);
 		filter.UsePredictionRules();
+		filter.MakeReliable();
 		EmitSound(filter, this->entindex(), "Player.Spawn");
 
 		if (IsInCommentaryMode() && !IsFakeClient())
