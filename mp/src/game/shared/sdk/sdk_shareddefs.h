@@ -62,6 +62,11 @@ extern const char *pszPossibleGibModels[];
 
 #define SDK_PLAYER_INDEX_NONE			( MAX_PLAYERS + 1 )
 
+// m_hViewModel
+#define VMHANDS_FALLBACKMODEL   "models/weapons/c_arms_hev.mdl"
+#define VMINDEX_WEP         0
+#define VMINDEX_HANDS       1
+
 // For the game rules to determine which type of game we're playing
 enum TFCGameModes
 {

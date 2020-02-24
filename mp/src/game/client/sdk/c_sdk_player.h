@@ -67,6 +67,7 @@ public:
 
 	virtual void TeamChange( int iNewTeam ) OVERRIDE;
 	static void TeamChangeStatic( int iNewTeam );
+	virtual void OnSpawn( void );
 
 	float ViewBob;
 	double BobTime;

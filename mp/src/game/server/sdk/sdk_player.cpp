@@ -11,6 +11,7 @@
 #include "sdk_gamerules.h"
 #include "weapon_sdkbase.h"
 #include "predicted_viewmodel.h"
+#include "tfc_viewmodel.h"
 #include "iservervehicle.h"
 #include "viewport_panel_names.h"
 #include "info_camera_link.h"
@@ -348,7 +349,7 @@ void CSDKPlayer::Precache()
 		g++;
 	}
 
-	PrecacheModel( "models/weapons/c_arms_hev.mdl" );
+	PrecacheModel( VMHANDS_FALLBACKMODEL );
 
 	BaseClass::Precache();
 }
@@ -414,9 +415,6 @@ void CSDKPlayer::Spawn()
 
 	//Tony; do the spawn animevent
 	DoAnimationEvent(PLAYERANIMEVENT_SPAWN);
-	
-	CreateHandModel();
-	GetViewModel( 1 )->SetModel( "models/weapons/c_arms_hev.mdl" );
 
 	BaseClass::Spawn();
 
@@ -1257,81 +1255,6 @@ void CSDKPlayer::AddDamagerToHistory(EHANDLE hDamager)
 	m_DamagerHistory[0].flTimeDamage = gpGlobals->curtime;
 }
 
-//void CSDKPlayer::ThrowActiveWeapon( void )
-//{
-//	CWeaponSDKBase *pWeapon = (CWeaponSDKBase *)GetActiveWeapon();
-//
-//	if( pWeapon && pWeapon->CanWeaponBeDropped() )
-//	{
-//		QAngle gunAngles;
-//		VectorAngles( BodyDirection2D(), gunAngles );
-//
-//		Vector vecForward;
-//		AngleVectors( gunAngles, &vecForward, NULL, NULL );
-//
-//		float flDiameter = sqrt( CollisionProp()->OBBSize().x * CollisionProp()->OBBSize().x + CollisionProp()->OBBSize().y * CollisionProp()->OBBSize().y );
-//
-//		pWeapon->Holster(NULL);
-//		SwitchToNextBestWeapon( pWeapon );
-//		SDKThrowWeapon( pWeapon, vecForward, gunAngles, flDiameter );
-//	}
-//}
-void CSDKPlayer::Weapon_Equip(CBaseCombatWeapon *pWeapon)
-{
-	BaseClass::Weapon_Equip(pWeapon);
-	dynamic_cast<CWeaponSDKBase*>(pWeapon)->SetDieThink(false);	//Make sure the context think for removing is gone!!
-
-}
-//void CSDKPlayer::SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  )
-//{
-//	Vector vecOrigin;
-//	CollisionProp()->RandomPointInBounds( Vector( 0.5f, 0.5f, 0.5f ), Vector( 0.5f, 0.5f, 1.0f ), &vecOrigin );
-//
-//	// Nowhere in particular; just drop it.
-//	Vector vecThrow;
-//	SDKThrowWeaponDir( pWeapon, vecForward, &vecThrow );
-//
-//	Vector vecOffsetOrigin;
-//	VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
-//
-//	trace_t	tr;
-//	UTIL_TraceLine( vecOrigin, vecOffsetOrigin, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
-//		
-//	if ( tr.startsolid || tr.allsolid || ( tr.fraction < 1.0f && tr.m_pEnt != pWeapon ) )
-//	{
-//		//FIXME: Throw towards a known safe spot?
-//		vecThrow.Negate();
-//		VectorMA( vecOrigin, flDiameter, vecThrow, vecOffsetOrigin );
-//	}
-//
-//	vecThrow *= random->RandomFloat( 150.0f, 240.0f );
-//
-//	pWeapon->SetAbsOrigin( vecOrigin );
-//	pWeapon->SetAbsAngles( vecAngles );
-//	pWeapon->Drop( vecThrow );
-//	pWeapon->SetRemoveable( false );
-//	Weapon_Detach( pWeapon );
-//
-//	pWeapon->SetDieThink( true );
-//}
-
-//void CSDKPlayer::SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir )
-//{
-//	VMatrix zRot;
-//	MatrixBuildRotateZ( zRot, random->RandomFloat( -60.0f, 60.0f ) );
-//
-//	Vector vecThrow;
-//	Vector3DMultiply( zRot, vecForward, *pVecThrowDir );
-//
-//	pVecThrowDir->z = random->RandomFloat( -0.5f, 0.5f );
-//	VectorNormalize( *pVecThrowDir );
-//}
-
-void CSDKPlayer::PlayerDeathThink()
-{
-	//overridden, do nothing - our states handle this now
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Makes a splash when the player transitions between water states
 //-----------------------------------------------------------------------------
@@ -1571,61 +1494,55 @@ CWeaponSDKBase* CSDKPlayer::GetActiveSDKWeapon() const
 	return dynamic_cast< CWeaponSDKBase* >(GetActiveWeapon());
 }
 
-void CSDKPlayer::CreateViewModel(int index /*=0*/)
+void CSDKPlayer::SetHandsModel( const char* model )
 {
-	Assert(index >= 0 && index < MAX_VIEWMODELS);
-
-	if (GetViewModel(index))
+	if ( !model || !(*model) ) 
 		return;
 
-	CPredictedViewModel *vm = (CPredictedViewModel *)CreateEntityByName("predicted_viewmodel");
-	if ( vm )
-	{
-		vm->SetAbsOrigin(GetAbsOrigin());
-		vm->SetOwner(this);
-		vm->SetIndex(index);
-		DispatchSpawn(vm);
-		vm->FollowEntity(this, false);
-		m_hViewModel.Set(index, vm);
-	}
+	CBaseViewModel* pVM = GetViewModel( VMINDEX_HANDS );
+	if ( !pVM ) 
+		return;
+
+	pVM->SetModel( model );
 }
 
-void CSDKPlayer::CreateHandModel(int index, int iOtherVm)
+void CSDKPlayer::CreateViewModel( int index /*=0*/ )
 {
-	Assert(index >= 0 && index < MAX_VIEWMODELS && iOtherVm >= 0 && iOtherVm < MAX_VIEWMODELS );
+	// We should never create more than the first index.
+	Assert( index == 0 );
 
-	if (GetViewModel(index))
-		return;
-
-	CBaseViewModel *vm = (CBaseViewModel *)CreateEntityByName("hand_viewmodel");
-	if (vm)
+	if ( GetViewModel( VMINDEX_WEP ) != nullptr )
 	{
-		switch (GetTeamNumber())
-		{
-		case SDK_TEAM_RED:
-			vm->m_nSkin = 0;
-			break;
-
-		case SDK_TEAM_BLUE:
-			vm->m_nSkin = 1;
-			break;
-
-		case SDK_TEAM_GREEN:
-			vm->m_nSkin = 2;
-			break;
-
-		case SDK_TEAM_YELLOW:
-			vm->m_nSkin = 3;
-			break;
-		}
-
-		vm->SetAbsOrigin(GetAbsOrigin());
-		vm->SetOwner(this);
-		vm->SetIndex(index);
-		DispatchSpawn(vm);
-		vm->FollowEntity(GetViewModel(iOtherVm), true);
-		m_hViewModel.Set(index, vm);
+		if ( GetViewModel( VMINDEX_HANDS ) == nullptr )
+			Warning( "Weapon viewmodel exists but hands don't!!\n" );
+ 
+		return;
 	}
+
+	CTFCViewModel* vm = static_cast< CTFCViewModel* >( CreateEntityByName( "tfc_viewmodel" ) );   
+	if ( vm )
+	{
+		vm->SetAbsOrigin( GetAbsOrigin() );
+		vm->SetOwner( this );
+		vm->SetIndex( VMINDEX_WEP );
+		DispatchSpawn( vm );
+		vm->FollowEntity( this, false );
+		m_hViewModel.Set( VMINDEX_WEP, vm );
+
+
+		CTFCViewModel* vmhands = static_cast< CTFCViewModel* >( CreateEntityByName( "tfc_viewmodel" ) );
+		if ( vmhands )
+		{
+			vmhands->SetAbsOrigin( GetAbsOrigin() );
+			vmhands->SetOwner( this );
+			vmhands->SetIndex( VMINDEX_HANDS );
+			DispatchSpawn( vmhands );
+			vmhands->FollowEntity( vm, true ); // Sets moveparent.
+			m_hViewModel.Set( VMINDEX_HANDS, vmhands );
+		}
+	}
+
+	//SetHandsModel( VMHANDS_FALLBACKMODEL );
 }
 
 void CSDKPlayer::FlashlightTurnOn(void)

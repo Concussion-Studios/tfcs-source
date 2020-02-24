@@ -33,6 +33,7 @@
 #include "iviewrender_beams.h"			// flashlight beam
 #include "input.h"
 #include "c_team.h"
+#include "tfc_viewmodel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -760,6 +761,21 @@ void C_SDKPlayer::ThirdPersonSwitch( bool bThirdPerson )
 
 	if ( GetViewModel() )
 		GetViewModel()->UpdateVisibility();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void C_SDKPlayer::OnSpawn()
+{
+	if ( IsLocalPlayer() )
+	{
+		// By default display hands.
+		// This hack has to be here because SetWeaponVisible isn't called on client when the player spawns.
+		C_TFCViewModel* pHands = static_cast< C_TFCViewModel* >( GetViewModel( VMINDEX_HANDS, false ) );
+		if ( pHands )
+			pHands->SetDrawVM( true );
+	}
 }
 
 //-----------------------------------------------------------------------------

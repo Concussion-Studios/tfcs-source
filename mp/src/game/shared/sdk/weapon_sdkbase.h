@@ -130,8 +130,6 @@ public:
 	virtual float GetAmmoToRemove( void ) { return GetSDKWpnData().m_iAmmoToRemove; };
 
 #ifdef GAME_DLL
-	virtual void SetDieThink( bool bDie );
-	virtual void Die( void );
 	virtual void SetWeaponModelIndex( const char *pName ) { m_iWorldModelIndex = modelinfo->GetModelIndex( pName ); }
 	virtual	void Materialize( void );
 	virtual	int	ObjectCaps( void );

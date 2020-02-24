@@ -12,6 +12,7 @@
 #include "datacache/imdlcache.h"
 #include "sdk_fx_shared.h"
 #include "sdk_gamerules.h"
+#include "tfc_viewmodel.h"
 
 #if defined( CLIENT_DLL )
 	#include "c_sdk_player.h"
@@ -317,11 +318,19 @@ float CWeaponSDKBase::GetAccuracyModifier()
 
 void CWeaponSDKBase::SetWeaponVisible( bool visible )
 {
-	CBaseViewModel *vm = NULL;
+	CBaseViewModel *vm = nullptr;
+	CTFCViewModel *vmhands = nullptr;
 
 	CSDKPlayer *pOwner = ToSDKPlayer( GetOwner() );
 	if ( pOwner )
-		vm = pOwner->GetViewModel( m_nViewModelIndex );
+	{
+		vm = pOwner->GetViewModel( VMINDEX_WEP );
+		vmhands = static_cast< CTFCViewModel* >( pOwner->GetViewModel( VMINDEX_HANDS ) );
+
+#ifndef CLIENT_DLL
+		Assert( vm == pOwner->GetViewModel( m_nViewModelIndex ) );
+#endif
+	}
 
 	if ( visible )
 	{
@@ -333,6 +342,15 @@ void CWeaponSDKBase::SetWeaponVisible( bool visible )
 #endif
 		if ( vm )
 			vm->RemoveEffects( EF_NODRAW );
+
+		if ( vmhands )
+		{
+			vmhands->RemoveEffects( EF_NODRAW );
+#ifdef CLIENT_DLL 
+			// Let client override this if they are using a custom viewmodel that doesn't use the new hands system.
+			vmhands->SetDrawVM( true );
+#endif
+		}
 	}
 	else
 	{
@@ -344,6 +362,9 @@ void CWeaponSDKBase::SetWeaponVisible( bool visible )
 #endif
 		if ( vm )
 			vm->AddEffects( EF_NODRAW );
+
+		if ( vmhands ) 
+			vmhands->AddEffects( EF_NODRAW );
 	}
 }
 
@@ -856,20 +877,6 @@ void CWeaponSDKBase::FallInit( void )
 	SetNextThink( gpGlobals->curtime + 0.1f );
 #endif	// !CLIENT_DLL
 }
-
-#ifdef GAME_DLL
-void CWeaponSDKBase::SetDieThink( bool bDie )
-{
-	if( bDie )
-		SetContextThink( &CWeaponSDKBase::Die, gpGlobals->curtime + 45.0f, "DieContext" );
-	else
-		SetContextThink( NULL, gpGlobals->curtime, "DieContext" );
-}
-void CWeaponSDKBase::Die( void )
-{
-	UTIL_Remove( this );
-}
-#endif
 
 #ifdef CLIENT_DLL
 ConVar cl_bobcycle( "cl_bobcycle", "0.45", 0 , "How fast the bob cycles", true, 0.01f, false, 0.0f );

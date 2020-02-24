@@ -7,7 +7,9 @@
 
 #ifndef SDK_PLAYER_H
 #define SDK_PLAYER_H
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include "basemultiplayerplayer.h"
 #include "server_class.h"
@@ -105,7 +107,7 @@ public:
 	CWeaponSDKBase* GetWeaponOwnerID( int iID );
 
 	virtual void	CreateViewModel( int viewmodelindex = 0 );
-	virtual void	CreateHandModel( int viewmodelindex = 1, int iOtherVm = 0 );
+	virtual void	SetHandsModel( const char* model );
 
 	virtual bool BumpWeapon( CBaseCombatWeapon *pWeapon );
 
@@ -171,7 +173,7 @@ public:
 		float y );
 
 	CNetworkVarEmbedded( CSDKPlayerShared, m_Shared );
-	virtual void PlayerDeathThink( void );
+	virtual void PlayerDeathThink( void ) {	/* overridden, do nothing - our states handle this now */ }
 	virtual bool ClientCommand( const CCommand &args );
 
 	Vector GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget = NULL );
@@ -264,11 +266,6 @@ private:
 	int m_iLastWeaponFireUsercmd;
 
 	float m_flHealthRegenDelay;
-
-	virtual void	Weapon_Equip( CBaseCombatWeapon *pWeapon );		//Tony; override so diethink can be cleared
-	/*virtual void	ThrowActiveWeapon( void );
-	virtual void	SDKThrowWeapon( CWeaponSDKBase *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter  );
-	virtual void	SDKThrowWeaponDir( CWeaponSDKBase *pWeapon, const Vector &vecForward, Vector *pVecThrowDir );*/
 
 	// When the player joins, it cycles their view between trigger_camera entities.
 	// This is the current camera, and the time that we'll switch to the next one.
