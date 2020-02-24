@@ -57,16 +57,17 @@ void CSDKClassInfoPanel::ApplySchemeSettings( IScheme *pScheme )
 
 CSDKClassMenu::CSDKClassMenu(IViewPort *pViewPort) : CClassMenu( pViewPort )
 {
-	// load the new scheme early!!
-	SetScheme( "SourceScheme" );
-
 	Panel *pClassInfo = dynamic_cast<Panel*>( FindChildByName( "classInfo" ) );
 	if ( pClassInfo )
 		pClassInfo->MarkForDeletion();
 
 	m_mouseoverButtons.RemoveAll();
+
 	m_iClassMenuKey = BUTTON_CODE_INVALID;
 	m_pInitialButton = NULL;
+
+	CreateBackground( this );
+	m_backgroundLayoutFinished = false;
 
 	m_pClassInfoPanel = new CSDKClassInfoPanel( this, "ClassInfoPanel" );
 	
@@ -74,14 +75,6 @@ CSDKClassMenu::CSDKClassMenu(IViewPort *pViewPort) : CClassMenu( pViewPort )
 
 	m_iActivePlayerClass = -1;
 	m_iLastPlayerClassCount = -1;
-
-	int i = 0;
-	int j = SDK_NUM_PLAYERCLASSES;
-	for (i = 0;i<j;i++)
-	{
-		m_pClassNumLabel[i] = new Label( this, VarArgs("class_%d_num", i+1), "" );
-		m_pClassFullLabel[i] = new Label( this, VarArgs("class_%d_full", i+1), "" );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -89,16 +82,17 @@ CSDKClassMenu::CSDKClassMenu(IViewPort *pViewPort) : CClassMenu( pViewPort )
 //-----------------------------------------------------------------------------
 CSDKClassMenu::CSDKClassMenu( IViewPort *pViewPort, const char *panelName ) : CClassMenu( pViewPort, panelName )
 {
-	// load the new scheme early!!
-	SetScheme("SourceScheme");
-
 	Panel *pClassInfo = dynamic_cast<Panel*>( FindChildByName( "classInfo" ) );
 	if ( pClassInfo )
 		pClassInfo->MarkForDeletion();
 
 	m_mouseoverButtons.RemoveAll();
+
 	m_iClassMenuKey = BUTTON_CODE_INVALID;
 	m_pInitialButton = NULL;
+
+	CreateBackground( this );
+	m_backgroundLayoutFinished = false;
 
 	m_pClassInfoPanel = new CSDKClassInfoPanel( this, "ClassInfoPanel" );
 	
@@ -106,21 +100,18 @@ CSDKClassMenu::CSDKClassMenu( IViewPort *pViewPort, const char *panelName ) : CC
 
 	m_iActivePlayerClass = -1;
 	m_iLastPlayerClassCount = -1;
-
-	int i = 0;
-	int j = SDK_NUM_PLAYERCLASSES;
-	for (i = 0;i<j;i++)
-	{
-		m_pClassNumLabel[i] = new Label( this, VarArgs("class_%d_num", i+1), "" );
-		m_pClassFullLabel[i] = new Label( this, VarArgs("class_%d_full", i+1), "" );
-	}
 }
 
-//Destructor
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
 CSDKClassMenu::~CSDKClassMenu()
 {
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CSDKClassMenu::ShowPanel( bool bShow )
 {
 	if ( bShow )
@@ -149,6 +140,9 @@ void CSDKClassMenu::ShowPanel( bool bShow )
 	BaseClass::ShowPanel( bShow );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CSDKClassMenu::OnKeyCodePressed( KeyCode code )
 {
 	if ( m_iClassMenuKey != BUTTON_CODE_INVALID && m_iClassMenuKey == code )
@@ -157,25 +151,17 @@ void CSDKClassMenu::OnKeyCodePressed( KeyCode code )
 		BaseClass::OnKeyCodePressed( code );
 }
 
-void CSDKClassMenu::MoveToCenterOfScreen()
-{
-	int wx, wy, ww, wt;
-	surface()->GetWorkspaceBounds(wx, wy, ww, wt);
-	SetPos((ww - GetWide()) / 2, (wt - GetTall()) / 2);
-}
-
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CSDKClassMenu::Update()
 {
 	C_SDKPlayer *pPlayer = C_SDKPlayer::GetLocalSDKPlayer();
 
 	if ( pPlayer && pPlayer->m_Shared.DesiredPlayerClass() == PLAYERCLASS_UNDEFINED )
-	{
 		SetVisibleButton( "CancelButton", false );
-	}
 	else
-	{
 		SetVisibleButton( "CancelButton", true ); 
-	}
 
 	if ( mp_allowspecialclass.GetBool() )
 	{
@@ -214,16 +200,12 @@ Panel *CSDKClassMenu::CreateControlByName( const char *controlName )
 		MouseOverButton<CSDKClassInfoPanel> *newButton = new MouseOverButton<CSDKClassInfoPanel>( this, NULL, m_pClassInfoPanel );
 
 		if( !m_pInitialButton )
-		{
 			m_pInitialButton = newButton;
-		}
 
 		return newButton;
 	}
 	else
-	{
 		return BaseClass::CreateControlByName( controlName );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -244,8 +226,6 @@ void CSDKClassMenu::OnShowPage( const char *pagename )
 	// Pull the index of this class via IsClassOnTeam
 	if ( !pTeam->IsClassOnTeam( buf, m_iActivePlayerClass ) )
 		Assert( !"bad class name on class button" );
-
-	UpdateNumClassLabel();
 }
 
 //-----------------------------------------------------------------------------
@@ -265,61 +245,12 @@ void CSDKClassMenu::OnTick( void )
 	if( pPlayer && pPlayer->m_Shared.PlayerClass() == PLAYERCLASS_UNDEFINED )
 		SetVisibleButton("CancelButton", false);
 
-	UpdateNumClassLabel();
-
 	BaseClass::OnTick();
 }
 
-void CSDKClassMenu::UpdateNumClassLabel( void )
-{
-	int iClassCount[SDK_NUM_PLAYERCLASSES];
-	int iClassLimit[SDK_NUM_PLAYERCLASSES];
-
-	// count how many of this class there are
-	C_SDKTeam *pTeam = dynamic_cast<C_SDKTeam *>( GetGlobalTeam(GetTeamNumber()) );
-
-	if ( !pTeam )
-		return;
-
-	char buf[16];
-
-	for( int i=0;i<SDK_NUM_PLAYERCLASSES;i++ )
-	{
-		iClassCount[i] = pTeam->CountPlayersOfThisClass( i );
-
-		if ( !m_pClassNumLabel[i] || !m_pClassFullLabel[i] )
-			continue;
-
-		if ( pTeam->IsClassOnTeam( i ) )
-		{
-			// FIXME - store pointers to these cvars
-			const CSDKPlayerClassInfo &pClassInfo = pTeam->GetPlayerClassInfo( i );
-			ConVar *pLimitCvar = ( ConVar * )cvar->FindVar( pClassInfo.m_szLimitCvar );
-
-			if ( pLimitCvar )
-				iClassLimit[i] = min( 32, pLimitCvar->GetInt() );
-		}	
-
-		if ( iClassLimit[i] < 0 || iClassCount[i] < iClassLimit[i] )
-			m_pClassFullLabel[i]->SetVisible( false );
-		else
-			m_pClassFullLabel[i]->SetVisible( true );
-
-		if ( iClassLimit[i] > -1 )
-		{
-			// draw "3 / 4"
-			Q_snprintf( buf, sizeof(buf), "%d / %d", iClassCount[i], iClassLimit[i] );
-		}
-		else
-		{
-			// just "3"
-			Q_snprintf( buf, sizeof(buf), "x %d", iClassCount[i] );
-		}
-
-		m_pClassNumLabel[i]->SetText( buf );
-	}
-}
-
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CSDKClassMenu::SetVisible( bool state )
 {
 	BaseClass::SetVisible( state );
@@ -339,7 +270,7 @@ void CSDKClassMenu::SetVisible( bool state )
 //-----------------------------------------------------------------------------
 // Purpose: Sets the visibility of a button by name
 //-----------------------------------------------------------------------------
-void CSDKClassMenu::SetVisibleButton(const char *textEntryName, bool state)
+void CSDKClassMenu::SetVisibleButton( const char *textEntryName, bool state )
 {
 	Button *entry = dynamic_cast<Button *>( FindChildByName( textEntryName ) );
 	if ( entry )
@@ -347,39 +278,24 @@ void CSDKClassMenu::SetVisibleButton(const char *textEntryName, bool state)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Paint background with rounded corners
+// Purpose: Scale / center the window
 //-----------------------------------------------------------------------------
-void CSDKClassMenu::PaintBackground()
+void CSDKClassMenu::PerformLayout()
 {
-	int wide, tall;
-	GetSize( wide, tall );
+	BaseClass::PerformLayout();
 
-	DrawRoundedBackground( m_bgColor, wide, tall );
+	// stretch the window to fullscreen
+	if ( !m_backgroundLayoutFinished )
+		LayoutBackgroundPanel( this );
+
+	m_backgroundLayoutFinished = true;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Paint border with rounded corners
-//-----------------------------------------------------------------------------
-void CSDKClassMenu::PaintBorder()
-{
-	int wide, tall;
-	GetSize( wide, tall );
-
-	DrawRoundedBorder( m_borderColor, wide, tall );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Apply scheme settings
+// Purpose: 
 //-----------------------------------------------------------------------------
 void CSDKClassMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
-
-	m_bgColor = GetSchemeColor("BgColor", GetBgColor(), pScheme);
-	m_borderColor = pScheme->GetColor( "FgColor", Color( 0, 0, 0, 0 ) );
-
-	SetBgColor( Color(0, 0, 0, 0) );
-	SetBorder( pScheme->GetBorder( "BaseBorder" ) );
-
-	DisableFadeEffect(); //Tony; shut off the fade effect because we're using sourcesceheme.
+	ApplyBackgroundSchemeSettings( this, pScheme );
 }

@@ -1456,7 +1456,7 @@ void CBaseCombatCharacter::FixupBurningServerRagdoll( CBaseEntity *pRagdoll )
 		pFireChild->SetAbsOrigin( pRagdoll->GetAbsOrigin() );
 		pFireChild->AttachToEntity( pRagdoll );
 		pFireChild->AddEFlags( EFL_FORCE_CHECK_TRANSMIT );
- 		pRagdoll->SetEffectEntity( pFireChild );
+		pRagdoll->SetEffectEntity( pFireChild );
 
 		color32 color = GetRenderColor();
 		pRagdoll->SetRenderColor( color.r, color.g, color.b );
@@ -1826,7 +1826,7 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 			if (!pWeapon)
 				continue;
 
- 			Weapon_Drop( pWeapon );
+			Weapon_Drop( pWeapon );
 		}
 		return;
 	}

@@ -29,10 +29,13 @@
 
 using namespace vgui;
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 CSDKTeamMenu::CSDKTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 {
-	// load the new scheme early!!
-	SetScheme("SourceScheme");
+	CreateBackground( this );
+	m_backgroundLayoutFinished = false;
 
 	if ( SDKGameRules() && SDKGameRules()->IsTDMGamemode() )
 		LoadControlSettings( "Resource/UI/4TeamsMenu.res" );
@@ -40,16 +43,11 @@ CSDKTeamMenu::CSDKTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 		LoadControlSettings( "Resource/UI/TeamMenu.res" );
 }
 
-//Destructor
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
 CSDKTeamMenu::~CSDKTeamMenu()
 {
-}
-
-void CSDKTeamMenu::MoveToCenterOfScreen()
-{
-	int wx, wy, ww, wt;
-	surface()->GetWorkspaceBounds(wx, wy, ww, wt);
-	SetPos((ww - GetWide()) / 2, (wt - GetTall()) / 2);
 }
 
 //-----------------------------------------------------------------------------
@@ -80,13 +78,22 @@ void CSDKTeamMenu::Update( void )
 	else
 		SetVisibleButton("CancelButton", true); 
 
-	MoveToCenterOfScreen();
+	if( SDKGameRules() && SDKGameRules()->IsTDMGamemode() ) // we don't had 4teams on
+	{
+		SetVisibleButton("yellowbutton", false);
+		SetVisibleButton("greenbutton", false);
+	}
+	else
+	{
+		SetVisibleButton("yellowbutton", true);
+		SetVisibleButton("greenbutton", true);
+	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CSDKTeamMenu::SetVisible(bool state)
+void CSDKTeamMenu::SetVisible( bool state )
 {
 	BaseClass::SetVisible(state);
 
@@ -107,7 +114,7 @@ void CSDKTeamMenu::OnCommand( const char *command )
 	if ( Q_stricmp( command, "vguicancel" ) )
 		engine->ClientCmd( command );
 	
-	BaseClass::OnCommand(command);
+	BaseClass::OnCommand( command );
 
 	gViewPortInterface->ShowBackGround( false );
 	OnClose();
@@ -116,7 +123,7 @@ void CSDKTeamMenu::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 // Purpose: Sets the visibility of a button by name
 //-----------------------------------------------------------------------------
-void CSDKTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
+void CSDKTeamMenu::SetVisibleButton( const char *textEntryName, bool state )
 {
 	Button *entry = dynamic_cast<Button *>( FindChildByName( textEntryName ) );
 	if ( entry )
@@ -124,40 +131,23 @@ void CSDKTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Paint background with rounded corners
+// Purpose: Scale / center the window
 //-----------------------------------------------------------------------------
-void CSDKTeamMenu::PaintBackground()
+void CSDKTeamMenu::PerformLayout()
 {
-	int wide, tall;
-	GetSize( wide, tall );
+	BaseClass::PerformLayout();
 
-	DrawRoundedBackground( m_bgColor, wide, tall );
+	// stretch the window to fullscreen
+	if ( !m_backgroundLayoutFinished )
+		LayoutBackgroundPanel( this );
+	m_backgroundLayoutFinished = true;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Paint border with rounded corners
-//-----------------------------------------------------------------------------
-void CSDKTeamMenu::PaintBorder()
-{
-	int wide, tall;
-	GetSize( wide, tall );
-
-	DrawRoundedBorder( m_borderColor, wide, tall );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Apply scheme settings
+// Purpose: 
 //-----------------------------------------------------------------------------
 void CSDKTeamMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
-
-	m_bgColor = GetSchemeColor("BgColor", GetBgColor(), pScheme);
-	m_borderColor = pScheme->GetColor( "FgColor", Color( 0, 0, 0, 0 ) );
-
-	SetBgColor( Color(0, 0, 0, 0) );
-	SetBorder( pScheme->GetBorder( "BaseBorder" ) );
-
-	DisableFadeEffect(); //Tony; shut off the fade effect because we're using sourcesceheme.
-
+	ApplyBackgroundSchemeSettings( this, pScheme );
 }

@@ -22,22 +22,20 @@ private:
 	DECLARE_CLASS_SIMPLE(CSDKTextWindow, CTextWindow);
 	
 public:
-	CSDKTextWindow(IViewPort *pViewPort);
-	~CSDKTextWindow();
+	CSDKTextWindow( IViewPort *pViewPort );
 
-	virtual void MoveToCenterOfScreen();
 	virtual void Update();
+	virtual void SetVisible( bool state );
 
-protected:
-	// vgui overrides for rounded corner background
-	virtual void PaintBackground();
-	virtual void PaintBorder();
+	// Background panel -------------------------------------------------------
+
+public:
+	virtual void PaintBackground() {}
+	virtual void PerformLayout();
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	bool m_backgroundLayoutFinished;
 
-private:
-	// rounded corners
-	Color					 m_bgColor;
-	Color					 m_borderColor;
+	// End background panel ---------------------------------------------------
 };
 
 
