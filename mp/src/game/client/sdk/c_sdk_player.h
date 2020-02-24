@@ -110,6 +110,8 @@ public:
 
 	Vector GetAttackSpread( CWeaponSDKBase *pWeapon, CBaseEntity *pTarget = NULL );
 
+	virtual void PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force );
+
 	void FireBullet( 
 		Vector vecSrc, 
 		const QAngle &shootAngles, 

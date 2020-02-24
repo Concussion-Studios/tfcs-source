@@ -17,6 +17,7 @@
 #include "props_shared.h"
 #include "decals.h"
 #include "util_shared.h"
+#include "in_buttons.h"
 
 #ifdef CLIENT_DLL
 	#include "c_sdk_player.h"
@@ -30,6 +31,8 @@
 	#include "sdk_player.h"
 	#include "sdk_team.h"
 #endif
+
+extern ConVar sv_footsteps;
 
 ConVar sv_showimpacts("sv_showimpacts", "0", FCVAR_REPLICATED, "Shows client (red) and server (blue) bullet impact point" );
 
@@ -501,4 +504,28 @@ bool CSDKPlayer::ShouldCollide( int collisionGroup, int contentsMask ) const
 		}
 	}
 	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CSDKPlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force )
+{
+	if ( gpGlobals->maxClients > 1 && !sv_footsteps.GetFloat() )
+		return;
+
+#if defined( CLIENT_DLL )
+	// during prediction play footstep sounds only once
+	if ( !prediction->IsFirstTimePredicted() )
+		return;
+#endif
+
+	if ( GetFlags() & FL_DUCKING )
+		return;
+
+	// Prevent footsteps from playing when the player is walking
+	if ( m_nButtons & IN_WALK )
+		return;
+
+	CBasePlayer::PlayStepSound( vecOrigin, psurface, fvol, force );
 }
