@@ -53,12 +53,14 @@ void CTFCProjectileNail::Spawn()
 void CTFCProjectileNail::ProjectileStickTo( CBaseEntity *pOther, trace_t &tr )
 {
 	SetMoveType( MOVETYPE_NONE );
+	SetSolid(SOLID_NONE);
+	SetSolidFlags(FSOLID_NOT_SOLID);
 	
 	if ( !pOther->IsWorld() )
 	{
 		SetParent( pOther );
-		SetSolid( SOLID_NONE );
-		SetSolidFlags( FSOLID_NOT_SOLID );
+		//SetSolid( SOLID_NONE );
+		//SetSolidFlags( FSOLID_NOT_SOLID );
 	}
 	
 	Vector vecVelocity = GetAbsVelocity();
