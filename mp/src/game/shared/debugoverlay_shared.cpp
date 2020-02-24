@@ -115,8 +115,8 @@ void NDebugOverlay::Line( const Vector &origin, const Vector &target, int r, int
 
 	Vector toOrigin		= origin - player->GetAbsOrigin();
 	Vector toTarget		= target - player->GetAbsOrigin();
- 	float  dotOrigin	= DotProduct(clientForward,toOrigin);
- 	float  dotTarget	= DotProduct(clientForward,toTarget);
+	float  dotOrigin	= DotProduct(clientForward,toOrigin);
+	float  dotTarget	= DotProduct(clientForward,toTarget);
 	
 	if (dotOrigin < 0 && dotTarget < 0) 
 		return;
@@ -153,9 +153,9 @@ void NDebugOverlay::Triangle( const Vector &p1, const Vector &p2, const Vector &
 	Vector clientForward;
 	player->EyeVectors( &clientForward );
 	
- 	float  dot1 = DotProduct(clientForward, to1);
- 	float  dot2 = DotProduct(clientForward, to2);
- 	float  dot3 = DotProduct(clientForward, to3);
+	float  dot1 = DotProduct(clientForward, to1);
+	float  dot2 = DotProduct(clientForward, to2);
+	float  dot3 = DotProduct(clientForward, to3);
 
 	if (dot1 < 0 && dot2 < 0 && dot3 < 0) 
 		return;
@@ -173,7 +173,7 @@ void NDebugOverlay::EntityText( int entityID, int text_offset, const char *text,
 {
 	if ( debugoverlay )
 	{
-        debugoverlay->AddEntityTextOverlay( entityID, text_offset, duration, r, g, b, a, "%s", text );
+		debugoverlay->AddEntityTextOverlay( entityID, text_offset, duration, r, g, b, a, "%s", text );
 	}
 }
 
@@ -218,7 +218,7 @@ void NDebugOverlay::Text( const Vector &origin, const char *text, bool bViewChec
 	player->EyeVectors( &clientForward );
 
 	Vector toText	= origin - player->GetAbsOrigin();
- 	float  dotPr	= DotProduct(clientForward,toText);
+	float  dotPr	= DotProduct(clientForward,toText);
 	
 	if (dotPr < 0) 
 		return;
@@ -637,8 +637,11 @@ void NDebugOverlay::Circle( const Vector &position, const Vector &xAxis, const V
 
 		// If we have an alpha value, then draw the fan
 		if ( a && i > 1 )
-		{		
-			debugoverlay->AddTriangleOverlay( vecStart, vecLastPosition, vecPosition, r, g, b, a, bNoDepthTest, flDuration );
+		{	
+			if ( debugoverlay )
+			{
+				debugoverlay->AddTriangleOverlay( vecStart, vecLastPosition, vecPosition, r, g, b, a, bNoDepthTest, flDuration );
+			}
 		}
 	}
 }
