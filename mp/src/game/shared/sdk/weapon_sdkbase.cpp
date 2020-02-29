@@ -414,9 +414,9 @@ void CWeaponSDKBase::PrimaryAttack( void )
  
 	pPlayer->IncreaseShotsFired();
  
-	float flSpread = GetWeaponSpread();
+	//float flSpread = GetWeaponSpread();
  
-	FX_FireBullets(
+	/*FX_FireBullets( //commented out so derived classes like the nailgun dont shoot bullets, copy paste this into your weapon if you want it to shoot bullets after BaseClass::PrimaryAttack
 		pPlayer->entindex(),
 		pPlayer->Weapon_ShootPosition(),
 		pPlayer->EyeAngles() + pPlayer->GetPunchAngle(),
@@ -424,7 +424,7 @@ void CWeaponSDKBase::PrimaryAttack( void )
 		0, //Tony; fire mode - this is unused at the moment, left over from CSS when SDK* was created in the first place.
 		CBaseEntity::GetPredictionRandomSeed() & 255,
 		flSpread
-		);
+		);*/
  
  
 	//Add our view kick in
